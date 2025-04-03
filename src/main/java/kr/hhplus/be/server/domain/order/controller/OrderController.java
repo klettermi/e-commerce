@@ -1,17 +1,31 @@
 package kr.hhplus.be.server.domain.order.controller;
 
-import kr.hhplus.be.server.domain.order.dto.OrderResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    @GetMapping("/{id}")
-    public OrderResponse getOrder(@PathVariable Long id) {
-        return new OrderResponse(id, "ORD20250403", 105000, "PENDING");
+    @PostMapping
+    public Map<String, Object> createOrder(@RequestBody Map<String, Object> request) {
+        return Map.of("orderId", 101, "totalAmount", 74000, "status", "PENDING");
+    }
+
+    @PostMapping("/{orderId}/pay")
+    public Map<String, Object> pay(@PathVariable Long orderId, @RequestBody Map<String, Object> request) {
+        return Map.of(
+                "orderId", orderId,
+                "status", "PAID",
+                "paidAmount", 64000,
+                "discount", 10000,
+                "remainingBalance", 36000
+        );
+    }
+
+    @GetMapping("/{orderId}")
+    public Map<String, Object> getOrder(@PathVariable Long orderId) {
+        return Map.of("orderId", orderId, "status", "PAID");
     }
 }

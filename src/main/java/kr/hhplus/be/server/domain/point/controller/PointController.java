@@ -1,17 +1,20 @@
 package kr.hhplus.be.server.domain.point.controller;
 
-import kr.hhplus.be.server.domain.point.dto.PointResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/points")
 public class PointController {
 
     @GetMapping("/{userId}")
-    public PointResponse getPoint(@PathVariable Long userId) {
-        return new PointResponse(userId, 100000);
+    public Map<String, Object> getPoint(@PathVariable Long userId) {
+        return Map.of("userId", userId, "balance", 50000);
+    }
+
+    @PostMapping("/charge")
+    public Map<String, Object> charge(@RequestBody Map<String, Object> body) {
+        return Map.of("userId", body.get("userId"), "newBalance", 60000);
     }
 }
