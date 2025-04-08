@@ -3,7 +3,7 @@ package kr.hhplus.be.server.domain.option;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import kr.hhplus.be.server.api.option.dto.OptionDto;
+import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

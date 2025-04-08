@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.item;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.api.item.dto.ItemDto;
+import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import lombok.Getter;

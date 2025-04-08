@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.domain.product;
 
-import kr.hhplus.be.server.api.item.dto.ItemDto;
-import kr.hhplus.be.server.api.option.dto.OptionDto;
-import kr.hhplus.be.server.api.product.dto.ProductDto;
+import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
+import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
+import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.item.SaleStatus;

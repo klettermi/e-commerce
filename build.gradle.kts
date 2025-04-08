@@ -55,12 +55,15 @@ dependencies {
 	// Swagger
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 
-	// ✅ RestAssured E2E 테스트
+	// RestAssured E2E 테스트
 	testImplementation("io.rest-assured:rest-assured:5.4.0")
 	testImplementation("io.rest-assured:json-path:5.4.0")
 
-	// ✅ Optional: Jackson 직접 사용이 필요한 경우에만 추가
+	// Optional: Jackson 직접 사용이 필요한 경우에만 추가
 	testImplementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+
+	// JPA
+
 }
 
 tasks.withType<Test> {
