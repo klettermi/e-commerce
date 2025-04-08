@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.4.1"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("io.freefair.lombok") version "8.3" // Lombok 플러그인 추가
 }
 
 fun getGitHash(): String {
@@ -37,6 +38,12 @@ dependencies {
 
 	// DB
 	runtimeOnly("com.mysql:mysql-connector-j")
+
+	// Lombok (플러그인과 함께 사용 가능)
+	compileOnly("org.projectlombok:lombok:1.18.26")
+	annotationProcessor("org.projectlombok:lombok:1.18.26")
+	testCompileOnly("org.projectlombok:lombok:1.18.26")
+	testAnnotationProcessor("org.projectlombok:lombok:1.18.26")
 
 	// Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
