@@ -1,13 +1,60 @@
-## 프로젝트
+# 전자상거래 프로젝트
 
-## Getting Started
+이 프로젝트는 전자상거래 플랫폼의 기본적인 구조와 기능을 설계하기 위한 다양한 분석 및 설계 다이어그램을 포함하고 있습니다. 아래의 다이어그램들을 참고하여 전체 시스템의 도메인 분석, 사용자 시나리오, 상태 및 시퀀스 다이어그램, 이벤트스토밍, 클래스 다이어그램 등의 전반적인 구조를 확인할 수 있습니다.
 
-### Prerequisites
+---
 
-#### Running Docker Containers
+## 프로젝트 개요
 
-`local` profile 로 실행하기 위하여 인프라가 설정되어 있는 Docker 컨테이너를 실행해주셔야 합니다.
+본 프로젝트는 온라인 상점을 구축하기 위한 전반적인 요구사항 분석과 설계를 진행하였습니다. 프로젝트의 주요 목표는 다음과 같습니다:
 
-```bash
-docker-compose up -d
-```
+- **도메인 분석:** 시스템 내 주요 도메인과 관계를 파악
+- **사용자 시나리오:** 사용자의 상호작용과 요구사항 도출
+- **상태 및 시퀀스 다이어그램:** 시스템 동작 흐름 및 상태 변화 설계
+- **이벤트스토밍:** 도메인 이벤트를 중심으로 시스템 동작 파악
+- **클래스 다이어그램:** 객체 지향 설계 관점에서 클래스 간 관계를 정의
+
+---
+
+## 다이어그램
+
+### 1. 개요 이미지
+
+
+### 2. 도메인 분석
+시스템 내의 주요 도메인과 그 관계를 분석한 다이어그램입니다.
+![e-commerce-도메인분석 drawio](https://github.com/user-attachments/assets/253dcaf0-ea53-4856-93b0-f83f3be6f2a8)
+
+### 3. 사용자 시나리오
+사용자들이 시스템과 상호작용하는 과정을 설명한 시나리오 다이어그램입니다.
+![e-commerce-사용자시나리오 drawio](https://github.com/user-attachments/assets/87800c19-b914-4f89-a2f7-3599c818b4ad)
+
+
+### 4. 상태 다이어그램
+시스템의 주요 상태 전환을 표현한 다이어그램입니다.
+![e-commerce-상태 다이어그램 drawio](https://github.com/user-attachments/assets/eddaf1ac-c122-4d15-af39-b411d651f53a)
+
+
+### 5. 시퀀스 다이어그램
+시스템 내에서 발생하는 동작의 순서를 설명하는 시퀀스 다이어그램입니다.
+![e-commerce-시퀀스 다이어그램 drawio](https://github.com/user-attachments/assets/2a5490e1-bd62-4c79-86f0-ef5f9206542a)
+
+
+### 6. 이벤트스토밍
+비즈니스 도메인의 이벤트 흐름을 도출한 이벤트스토밍 다이어그램입니다.
+![e-commerce-이벤트스토밍 drawio](https://github.com/user-attachments/assets/21453dcd-e509-4af9-b38b-790e07afba73)
+
+
+### 7. 클래스 다이어그램
+객체 지향적 설계 관점에서 시스템 내 클래스 및 관계를 표현한 다이어그램입니다.
+![e-commerce-클래스 다이어그램 drawio](https://github.com/user-attachments/assets/11019913-8801-4e9e-8e78-511ba7d41b7a)
+
+
+---
+
+## 사용 방법
+
+1. **리포지토리 클론**
+
+   ```bash
+   git clone https://github.com/klettermi/e-commerce.git
