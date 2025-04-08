@@ -25,7 +25,8 @@ public class ApiE2ETests {
     void 상품_조회_API() {
         given()
                 .when().get("/api/products")
-                .then().statusCode(200)
+                .then()
+                .statusCode(200)
                 .body("size()", greaterThan(0));
     }
 

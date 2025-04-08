@@ -1,5 +1,9 @@
-package kr.hhplus.be.server.api.product.controller;
+package kr.hhplus.be.server.interfaces.api.product.controller;
 
+import kr.hhplus.be.server.application.product.ProductFacade;
+import kr.hhplus.be.server.application.product.ProductService;
+import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,15 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/products")
 public class ProductController {
 
+    private final ProductFacade productFacade;
+
     @GetMapping
-    public List<Map<String, Object>> getProducts() {
-        return List.of(
-                Map.of("id", 10, "name", "키보드", "price", 50000, "stock", 20),
-                Map.of("id", 12, "name", "마우스", "price", 30000, "stock", 50)
-        );
+    public List<ProductDto> lookupProducts() {
+        return productFacade.getProductList();
     }
 
     @GetMapping("/popular")
