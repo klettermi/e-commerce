@@ -57,7 +57,7 @@ class ProductServiceTest {
                 5000                   // additionalCost
         );
         item1 = Item.fromDto(itemDto1, category);
-        option1 = Option.fromOption(optionDto1);
+        option1 = Option.fromDto(optionDto1);
         product1 = new Product(item1, option1);  // 기본 최종 가격: 100000 + 5000 = 105000
 
         // 두 번째 상품: 10% 정률 할인 적용
@@ -73,7 +73,7 @@ class ProductServiceTest {
                 10000
         );
         item2 = Item.fromDto(itemDto2, category);
-        option2 = Option.fromOption(optionDto2);
+        option2 = Option.fromDto(optionDto2);
         product2 = new Product(item2, option2).applyPercentDiscount(0.10);
         // 계산: (150000 + 10000) * 0.9 = 160000 * 0.9 = 144000
     }

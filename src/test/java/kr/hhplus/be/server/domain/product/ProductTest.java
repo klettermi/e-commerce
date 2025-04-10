@@ -32,7 +32,7 @@ class ProductTest {
         );
 
         Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromOption(optionDto);
+        Option option = Option.fromDto(optionDto);
         Product product = new Product(item, option);
 
         // when
@@ -59,7 +59,7 @@ class ProductTest {
         );
 
         Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromOption(optionDto);
+        Option option = Option.fromDto(optionDto);
         Product product = new Product(item, option);
         Product discountedProduct = product.applyFixedDiscount(5000.0);
 
@@ -87,7 +87,7 @@ class ProductTest {
         );
 
         Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromOption(optionDto);
+        Option option = Option.fromDto(optionDto);
         Product product = new Product(item, option);
         Product discountedProduct = product.applyPercentDiscount(0.10);
 
@@ -115,7 +115,7 @@ class ProductTest {
         );
 
         Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromOption(optionDto);
+        Option option = Option.fromDto(optionDto);
         Product product = new Product(item, option);
 
         // when

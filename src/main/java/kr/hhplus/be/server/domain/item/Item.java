@@ -16,6 +16,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Item extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
+
     @Column(nullable = false)
     private String name;
 
@@ -27,7 +31,7 @@ public class Item extends BaseEntity {
     private SaleStatus saleStatus;
 
     @Column(name = "base_price", nullable = false)
-    private Integer basePrice;
+    private int basePrice;
 
     @Column(name = "sale_start_date", columnDefinition = "DATETIME")
     private LocalDateTime saleStartDate;

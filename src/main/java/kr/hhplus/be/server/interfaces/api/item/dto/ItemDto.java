@@ -8,7 +8,7 @@ public record ItemDto (
         String name,
         String description,
         SaleStatus saleStatus,
-        Integer basePrice,
+        int basePrice,
         LocalDateTime saleStartDate
 ){
 }

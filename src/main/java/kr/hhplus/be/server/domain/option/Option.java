@@ -1,8 +1,6 @@
 package kr.hhplus.be.server.domain.option;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import lombok.Getter;
@@ -13,13 +11,18 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Option extends BaseEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
+
     @Column
     private String name;
 
     @Column
-    private Integer additionalCost;
+    private int additionalCost;
 
-    public static Option fromOption(OptionDto dto) {
+    public static Option fromDto(OptionDto dto) {
         Option option = new Option();
         option.name = dto.name();
         option.additionalCost = dto.additionalCost();

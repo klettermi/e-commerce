@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Product extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
@@ -73,6 +77,6 @@ public class Product extends BaseEntity {
 
     public ProductDto toDto() {
         double finalPrice = calculateFinalPrice();
-        return new ProductDto(getId(), item.getName(), option.getName(), finalPrice);
+        return new ProductDto(item.getId(), item.getName(), option.getName(), finalPrice);
     }
 }
