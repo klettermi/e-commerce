@@ -5,11 +5,13 @@ import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.option.Option;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "products")
 @NoArgsConstructor
+@Getter
 public class Product extends BaseEntity {
 
     @Id

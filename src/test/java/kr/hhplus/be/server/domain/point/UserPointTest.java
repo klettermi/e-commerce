@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.point;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -44,10 +45,10 @@ class UserPointTest {
 
         // when & then: 0 또는 음수 금액 충전 시 예외 발생
         IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> userPoint.chargePoints(0));
-        assertEquals("충전 금액은 0원 이상이여야 합니다.", ex1.getMessage());
+        Assertions.assertEquals("충전 금액은 0원 이상이어야 합니다.", ex1.getMessage());
 
         IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> userPoint.chargePoints(-100));
-        assertEquals("충전 금액은 0원 이상이여야 합니다.", ex2.getMessage());
+        Assertions.assertEquals("충전 금액은 0원 이상이어야 합니다.", ex2.getMessage());
     }
 
     @Test

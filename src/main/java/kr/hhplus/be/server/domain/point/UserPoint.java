@@ -9,22 +9,23 @@ import lombok.Setter;
 @Entity
 @Table(name = "user_points")
 @Getter
+@Setter
 public class UserPoint extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @Column(nullable = false)
     private int pointBalance = 0;
 
     @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
     public void chargePoints(int amount) {
         if (amount <= 0) {
-            throw new IllegalArgumentException("충전 금액은 0원 이상이여야 합니다.");
+            throw new IllegalArgumentException("충전 금액은 0원 이상이어야 합니다.");
         }
         pointBalance += amount;
     }
