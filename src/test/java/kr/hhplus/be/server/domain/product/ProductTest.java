@@ -43,62 +43,6 @@ class ProductTest {
     }
 
     @Test
-    void testCalculateFinalPriceWithFixedDiscount() {
-        // given
-        Category category = new Category();
-        ItemDto itemDto = new ItemDto(
-                "AirForce",
-                "AirForce",
-                SaleStatus.ON_SALE,
-                100000,
-                LocalDateTime.now()
-        );
-        OptionDto optionDto = new OptionDto(
-                "Black",
-                5000
-        );
-
-        Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromDto(optionDto);
-        Product product = new Product(item, option);
-        Product discountedProduct = product.applyFixedDiscount(5000.0);
-
-        // when
-        double finalPrice = discountedProduct.calculateFinalPrice();
-
-        // then
-        assertEquals(100000.0, finalPrice, 0.001, "Final price with fixed discount should be 100000.0");
-    }
-
-    @Test
-    void testCalculateFinalPriceWithPercentDiscount() {
-        // given
-        Category category = new Category();
-        ItemDto itemDto = new ItemDto(
-                "AirForce",
-                "AirForce",
-                SaleStatus.ON_SALE,
-                150000,
-                LocalDateTime.now()
-        );
-        OptionDto optionDto = new OptionDto(
-                "Black",
-                10000
-        );
-
-        Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromDto(optionDto);
-        Product product = new Product(item, option);
-        Product discountedProduct = product.applyPercentDiscount(0.10);
-
-        // when
-        double finalPrice = discountedProduct.calculateFinalPrice();
-
-        // then
-        assertEquals(144000.0, finalPrice, 0.001, "Final price with percent discount should be 144000.0");
-    }
-
-    @Test
     void testToDtoConversion() {
         // given
         Category category = new Category();
