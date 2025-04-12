@@ -1,10 +1,9 @@
 package kr.hhplus.be.server.domain.inventory;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
+import java.util.Optional;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
-    Collection<InventoryRepository> findByProductId(Long id);
+    Optional<Inventory> findByProductId(Long id);
 }

@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.point;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.user.User;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,14 +26,14 @@ public class UserPoint extends BaseEntity {
 
     public void chargePoints(int amount) {
         if (amount <= 0) {
-            throw new IllegalArgumentException("충전 금액은 0원 이상이어야 합니다.");
+            throw new DomainExceptions.InvalidStateException("충전 금액은 0원 이상이어야 합니다.");
         }
         pointBalance += amount;
     }
 
     public void usePoints(int amount) {
         if (amount > pointBalance) {
-            throw new IllegalArgumentException("사용 포인트가 부족합니다.");
+            throw new DomainExceptions.InvalidStateException("사용 포인트가 부족합니다.");
         }
         pointBalance -= amount;
     }

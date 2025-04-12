@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.category;
 
 import jakarta.persistence.*;
+import jdk.jfr.Description;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.interfaces.api.category.dto.CategoryDto;
@@ -20,7 +21,7 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column()
+    @Column
     private String description;
 
     @OneToMany(mappedBy = "category")
