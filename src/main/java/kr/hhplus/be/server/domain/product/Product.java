@@ -33,12 +33,6 @@ public class Product extends BaseEntity {
         this.option = option;
     }
 
-    // 제품 자체 할인(정액 또는 정률) 포함 생성자
-    public Product(Item item, Option option, DiscountType discountType, double discountValue) {
-        this.item = item;
-        this.option = option;
-    }
-
 
     // 최종 가격 계산: Item 기본가격 + Option 추가금액
     // 그리고 제품 자체 할인(정액 또는 정률)을 적용
