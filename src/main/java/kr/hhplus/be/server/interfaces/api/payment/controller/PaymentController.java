@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.api.payment.controller;
 
 
+import kr.hhplus.be.server.application.common.dto.ApiResponse;
 import kr.hhplus.be.server.application.order.OrderService;
 import kr.hhplus.be.server.application.payment.PaymentService;
 import kr.hhplus.be.server.domain.order.Order;
@@ -19,15 +20,11 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/{orderId}/pay")
-    public ResponseEntity<?> payOrder(
+    public ResponseEntity<ApiResponse<OrderResponse>> payOrder(
             @PathVariable Long orderId,
             @RequestParam Long userId,
             @RequestParam(required = false) Long couponId) {
-        try {
-            Order order = paymentService.processPayment(orderId, userId, couponId);
-            return ResponseEntity.ok(OrderResponse.from(order));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        Order order = paymentService.processPayment(orderId, userId, couponId);
+        return ResponseEntity.ok(ApiResponse.success(OrderResponse.from(order)));
     }
 }
