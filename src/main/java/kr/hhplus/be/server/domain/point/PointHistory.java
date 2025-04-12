@@ -22,14 +22,13 @@ public class PointHistory extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column
+    private Long userId;
 
     public PointHistoryResponseDto toDto() {
         return new PointHistoryResponseDto(
                 id,
-                user.id,
+                userId,
                 amount,
                 type.toString()
         );
@@ -47,7 +46,7 @@ public class PointHistory extends BaseEntity {
         history.amount = amount;
         history.type = TransactionType.CHARGE;
         history.setUpdatedAt(LocalDateTime.now());
-        history.user = user;
+        history.userId = user.id;
         return history;
     }
 
@@ -63,7 +62,7 @@ public class PointHistory extends BaseEntity {
         history.amount = amount;
         history.type = TransactionType.USE;
         history.setUpdatedAt(LocalDateTime.now());
-        history.user = user;
+        history.userId = user.id;
         return history;
     }
 

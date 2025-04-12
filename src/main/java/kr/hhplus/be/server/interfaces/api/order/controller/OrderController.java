@@ -1,10 +1,8 @@
 package kr.hhplus.be.server.interfaces.api.order.controller;
 
 
-import kr.hhplus.be.server.application.order.OrderService;
-import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.application.common.dto.ApiResponse;
+import kr.hhplus.be.server.application.order.OrderFacade;
 import kr.hhplus.be.server.interfaces.api.order.dto.OrderProductRequest;
 import kr.hhplus.be.server.interfaces.api.order.dto.OrderResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,37 +18,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderService orderService;
-    private final UserRepository userRepository;
+    private final OrderFacade orderFacade;
 
     @PostMapping
-    public ResponseEntity<?> createOrder(
+    public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @RequestParam Long userId,
             @RequestBody List<OrderProductRequest> orderProductRequests) {
-        try {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
-            String orderNumber = generateOrderNumber();
-            Order order = orderService.placeOrder(user, orderNumber, orderProductRequests);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(OrderResponse.from(order));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    private String generateOrderNumber() {
-        return "ORD-" + System.currentTimeMillis();
+        OrderResponse orderResponse = orderFacade.createOrder(userId, orderProductRequests);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(orderResponse));
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<?> getOrder(@PathVariable Long orderId) {
-        try {
-            Order order = orderService.getOrderById(orderId);
-            return ResponseEntity.ok(OrderResponse.from(order));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<OrderResponse>> getOrder(@PathVariable Long orderId) {
+        OrderResponse orderResponse = orderFacade.getOrder(orderId);
+        return ResponseEntity.ok(ApiResponse.success(orderResponse));
     }
 }

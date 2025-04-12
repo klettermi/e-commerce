@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.coupon;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import lombok.*;
 
 @Entity
@@ -16,15 +17,12 @@ public class Coupon extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 쿠폰 코드 혹은 이름
     @Column(nullable = false, unique = true)
     private String couponCode;
 
-    // 총 발급 가능한 수량
     @Column(name = "total_quantity", nullable = false)
     private int totalQuantity;
 
-    // 남은 발급 수량
     @Column(name = "remaining_quantity", nullable = false)
     private int remainingQuantity;
 
@@ -33,7 +31,7 @@ public class Coupon extends BaseEntity {
      */
     public void issueCoupon() {
         if (remainingQuantity <= 0) {
-            throw new IllegalStateException("쿠폰 발급이 완료되었습니다.");
+            throw new DomainExceptions.InvalidStateException("모든 쿠폰 발급이 완료되었습니다.");
         }
         remainingQuantity--;
     }

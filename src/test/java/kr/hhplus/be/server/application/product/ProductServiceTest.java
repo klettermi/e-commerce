@@ -74,8 +74,6 @@ class ProductServiceTest {
         );
         item2 = Item.fromDto(itemDto2, category);
         option2 = Option.fromDto(optionDto2);
-        product2 = new Product(item2, option2).applyPercentDiscount(0.10);
-        // 계산: (150000 + 10000) * 0.9 = 160000 * 0.9 = 144000
     }
 
     @Test

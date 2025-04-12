@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.inventory;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,17 +27,17 @@ public class Inventory extends BaseEntity {
 
     public void decreaseStock(int amount) {
         if (amount < 0) {
-            throw new IllegalArgumentException("감소 수량은 음수가 될 수 없습니다.");
+            throw new DomainExceptions.InvalidStateException("감소 수량은 음수가 될 수 없습니다.");
         }
         if (this.quantity < amount) {
-            throw new IllegalStateException("재고 부족: productId=" + productId);
+            throw new DomainExceptions.InvalidStateException("재고 부족: productId=" + productId);
         }
         this.quantity -= amount;
     }
 
     public void increaseStock(int amount) {
         if (amount < 0) {
-            throw new IllegalArgumentException("증가 수량은 음수가 될 수 없습니다.");
+            throw new DomainExceptions.InvalidStateException("증가 수량은 음수가 될 수 없습니다.");
         }
         this.quantity += amount;
     }

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.api.product.controller;
 
+import kr.hhplus.be.server.application.common.dto.ApiResponse;
 import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductService;
 import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
@@ -19,8 +20,8 @@ public class ProductController {
     private final ProductFacade productFacade;
 
     @GetMapping
-    public List<ProductDto> lookupProducts() {
-        return productFacade.getProductList();
+    public ApiResponse<List<ProductDto>> lookupProducts() {
+        return ApiResponse.success(productFacade.getProductList());
     }
 
     @GetMapping("/popular")
