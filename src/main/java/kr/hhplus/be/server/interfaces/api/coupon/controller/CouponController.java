@@ -18,7 +18,7 @@ public class CouponController {
 
     @PostMapping("/issue")
     public Map<String, Object> issueCoupon(@RequestBody Map<String, Object> body) {
-        Long couponId = Long.valueOf(String.valueOf(body.get("couponId")));
+        long couponId = Long.parseLong(String.valueOf(body.get("couponId")));
         if (couponId == 3) {
             return Map.of("message", "쿠폰 발급 성공", "issuedCouponId", 1005);
         } else {

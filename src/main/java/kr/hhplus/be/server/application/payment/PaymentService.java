@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-    private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final UserPointRepository userPointRepository;
 
@@ -34,7 +33,6 @@ public class PaymentService {
         userPointRepository.save(userPoint);
 
         order.markAsPaid();
-        order.getOrderProducts().size();
         return orderRepository.save(order);
     }
 }

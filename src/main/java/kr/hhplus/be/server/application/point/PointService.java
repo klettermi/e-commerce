@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.point.*;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
@@ -12,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
+
 @Service
 @RequiredArgsConstructor
 public class PointService {
@@ -23,7 +26,7 @@ public class PointService {
     @Transactional(readOnly = true)
     public PointResponseDto getPoint(long userId) {
         UserPoint userPoint = userPointRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("UserPoint not found for id: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
         return new PointResponseDto(userPoint.getId(), userPoint.getPointBalance());
     }
 
@@ -45,7 +48,7 @@ public class PointService {
         // 유효성 검사
         validationService.validate(amount, TransactionType.CHARGE);
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
         // 충전 전 현재 포인트 조회
         UserPoint userPoint = userPointRepository.findById(userId)
@@ -71,10 +74,10 @@ public class PointService {
     public PointResponseDto usePoint(Long userId, int amount) {
         validationService.validate(amount, TransactionType.USE);
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
         UserPoint userPoint = userPointRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("UserPoint not found for id: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
         if (amount > userPoint.getPointBalance()) {
             throw new IllegalArgumentException("사용 포인트가 부족합니다.");
