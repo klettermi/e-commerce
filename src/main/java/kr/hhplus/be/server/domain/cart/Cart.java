@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "cart")
 @Getter
-@NoArgsConstructor // JPA용 기본 생성자
+@NoArgsConstructor
 public class Cart extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

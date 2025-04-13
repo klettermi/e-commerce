@@ -2,16 +2,16 @@ package kr.hhplus.be.server.domain.cart;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "cart_item")
+@Table(name = "cart_items")
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CartItem extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
