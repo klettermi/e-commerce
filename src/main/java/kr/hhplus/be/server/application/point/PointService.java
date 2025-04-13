@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.point;
 
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.point.*;
+import kr.hhplus.be.server.domain.point.PointValidationService;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.interfaces.api.point.dto.PointHistoryResponseDto;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +46,7 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto chargePoint(long userId, int amount) {
+    public PointResponseDto chargePoint(long userId, BigDecimal amount) {
         // 유효성 검사
         validationService.validate(amount, TransactionType.CHARGE);
 
@@ -71,7 +73,7 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto usePoint(Long userId, int amount) {
+    public PointResponseDto usePoint(Long userId, BigDecimal amount) {
         validationService.validate(amount, TransactionType.USE);
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
@@ -79,7 +81,7 @@ public class PointService {
         UserPoint userPoint = userPointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
-        if (amount > userPoint.getPointBalance()) {
+        if (amount.compareTo(userPoint.getPointBalance()) > 0) {
             throw new IllegalArgumentException("사용 포인트가 부족합니다.");
         }
 

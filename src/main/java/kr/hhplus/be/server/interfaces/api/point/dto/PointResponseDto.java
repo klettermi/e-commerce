@@ -1,3 +1,5 @@
 package kr.hhplus.be.server.interfaces.api.point.dto;
 
-public record PointResponseDto(Long userId, int point) {}
+import java.math.BigDecimal;
+
+public record PointResponseDto(Long userId, BigDecimal point) {}

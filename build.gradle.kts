@@ -31,12 +31,12 @@ dependencyManagement {
 }
 
 dependencies {
-	// Spring
+	// Spring Boot 관련 의존성
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 
-	// DB
+	// DB 연결용 MySQL 드라이버
 	runtimeOnly("com.mysql:mysql-connector-j")
 
 	// Lombok (플러그인과 함께 사용 가능)
@@ -45,25 +45,22 @@ dependencies {
 	testCompileOnly("org.projectlombok:lombok:1.18.26")
 	testAnnotationProcessor("org.projectlombok:lombok:1.18.26")
 
-	// Test
+	// Test 관련 의존성 (통합 테스트용 Testcontainers 포함)
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-	// Swagger
+	// Swagger UI
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 
-	// RestAssured E2E 테스트
+	// RestAssured E2E 테스트용
 	testImplementation("io.rest-assured:rest-assured:5.4.0")
 	testImplementation("io.rest-assured:json-path:5.4.0")
 
-	// Optional: Jackson 직접 사용이 필요한 경우에만 추가
+	// Optional: Jackson Databind (직접 사용해야 하는 경우)
 	testImplementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-
-	// JPA
-
 }
 
 tasks.withType<Test> {

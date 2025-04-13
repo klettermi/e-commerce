@@ -3,6 +3,7 @@ package kr.hhplus.be.server.domain.order;
 import static org.junit.jupiter.api.Assertions.*;
 
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class OrderTest {
         orderProduct = OrderProduct.builder()
                 .productId(1L)
                 .quantity(2)
-                .unitPoint(500)
+                .unitPoint(BigDecimal.valueOf(500))
                 .build();
     }
 
@@ -52,8 +53,7 @@ class OrderTest {
     void markAsPaid_잘못된상태_예외발생() {
         // 상태가 CREATED인 상태에서 한 번 결제 진행
         order.markAsPaid();
-        // 이후 다시 결제 호출 시 IllegalStateException이 발생해야 함
-        Exception exception = assertThrows(IllegalStateException.class, () -> order.markAsPaid());
+        Exception exception = assertThrows(DomainExceptions.InvalidStateException.class, () -> order.markAsPaid());
         assertEquals("결제 가능한 상태가 아닙니다.", exception.getMessage());
     }
 

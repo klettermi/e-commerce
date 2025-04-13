@@ -1,7 +1,9 @@
 package kr.hhplus.be.server.domain.inventory;
 
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import org.junit.jupiter.api.Test;
 
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -31,7 +33,7 @@ public class InventoryTest {
                 .build();
 
         // when, then: 5개 차감 시 재고 부족 예외 발생
-        Exception exception = assertThrows(IllegalStateException.class, () -> {
+        Exception exception = assertThrows(InvalidStateException.class, () -> {
             inventory.decreaseStock(5);
         });
         assertTrue(exception.getMessage().contains("재고 부족"), "재고 부족 메시지가 포함되어야 합니다.");
@@ -46,7 +48,7 @@ public class InventoryTest {
                 .build();
 
         // when, then: 음수 값 입력 시 IllegalArgumentException 발생
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = assertThrows(InvalidStateException.class, () -> {
             inventory.decreaseStock(-1);
         });
         assertTrue(exception.getMessage().contains("감소 수량은 음수가 될 수 없습니다"),
@@ -76,8 +78,7 @@ public class InventoryTest {
                 .quantity(10)
                 .build();
 
-        // when, then: 음수 값 입력 시 IllegalArgumentException 발생
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = assertThrows(InvalidStateException.class, () -> {
             inventory.increaseStock(-3);
         });
         assertTrue(exception.getMessage().contains("증가 수량은 음수가 될 수 없습니다"),

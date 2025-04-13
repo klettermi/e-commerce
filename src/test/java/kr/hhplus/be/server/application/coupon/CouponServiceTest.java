@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.coupon;
 
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +9,7 @@ import org.mockito.ArgumentMatchers;
 
 import java.util.Optional;
 
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,8 +50,7 @@ class CouponServiceTest {
         // given: 쿠폰 코드에 해당하는 쿠폰이 없는 경우
         when(couponRepository.findByCouponCode("NOCOUPON")).thenReturn(Optional.empty());
 
-        // when, then: IllegalArgumentException 발생
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = assertThrows(InvalidStateException.class, () -> {
             couponService.issueCoupon("NOCOUPON");
         });
         assertTrue(exception.getMessage().contains("Coupon not found"));
@@ -67,8 +68,7 @@ class CouponServiceTest {
 
         when(couponRepository.findByCouponCode("FIRST100")).thenReturn(Optional.of(coupon));
 
-        // when, then: IllegalStateException 발생 (쿠폰 발급 불가능)
-        Exception exception = assertThrows(IllegalStateException.class, () -> {
+        Exception exception = assertThrows(InvalidStateException.class, () -> {
             couponService.issueCoupon("FIRST100");
         });
         assertTrue(exception.getMessage().contains("쿠폰 발급이 완료되었습니다"));

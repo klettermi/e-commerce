@@ -6,6 +6,8 @@ import kr.hhplus.be.server.domain.common.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "options")
 @Getter
@@ -20,7 +22,7 @@ public class Option extends BaseEntity{
     private String name;
 
     @Column
-    private int additionalCost;
+    private BigDecimal additionalCost;
 
     public static Option fromDto(OptionDto dto) {
         Option option = new Option();

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "order_products")
 @Builder
@@ -27,5 +29,5 @@ public class OrderProduct extends BaseEntity {
     private int quantity;
 
     @Column(name = "unit_point", nullable = false)
-    private int unitPoint;
+    private BigDecimal unitPoint;
 }

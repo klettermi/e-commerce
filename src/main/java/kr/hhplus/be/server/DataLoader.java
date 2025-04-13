@@ -58,7 +58,7 @@ public class DataLoader {
                 // UserPoint 생성 시 반드시 관리되는 사용자와 연관관계를 설정합니다.
                 UserPoint userPoint = new UserPoint();
                 userPoint.setUser(managedUser);  // 여기서 연관관계 설정
-                userPoint.chargePoints(100000);    // 초기 포인트 충전 (메서드를 통해 설정)
+                userPoint.chargePoints(BigDecimal.valueOf(100000));    // 초기 포인트 충전 (메서드를 통해 설정)
                 userPointRepository.save(userPoint);
             } else {
                 managedUser = userRepository.findAll().get(0);
@@ -75,12 +75,12 @@ public class DataLoader {
                         "AirForce",
                         "AirForce Description",
                         SaleStatus.ON_SALE,
-                        100000,
+                        BigDecimal.valueOf(100000),
                         LocalDateTime.now()
                 );
                 OptionDto optionDto = new OptionDto(
                         "White240",
-                        5000
+                        BigDecimal.valueOf(1000)
                 );
                 Item item = Item.fromDto(itemDto, category);
                 itemRepository.save(item);
@@ -95,7 +95,6 @@ public class DataLoader {
             // 재고 시딩: 모든 상품에 대해 Inventory 생성
             List<Product> products = productRepository.findAll();
             for (Product prod : products) {
-                // 기존에 Inventory가 없으면 생성
                 if (inventoryRepository.findByProductId(prod.getId()).isEmpty()) {
                     Inventory inventory = Inventory.builder()
                             .productId(prod.getId())
@@ -111,15 +110,15 @@ public class DataLoader {
                         .orElseThrow(() -> new IllegalStateException("Item not found for product id: " + product.getId()));
 
                 int quantity = 2;
-                int unitPoint = item.getBasePrice();
+                BigDecimal unitPoint = item.getBasePrice();
                 OrderProduct orderProduct = OrderProduct.builder()
                         .productId(product.getId())
                         .quantity(quantity)
                         .unitPoint(unitPoint)
                         .build();
 
-                int total = unitPoint * quantity;
-                Money totalPoint = new Money(BigDecimal.valueOf(total));
+                BigDecimal total = unitPoint.multiply(BigDecimal.valueOf(quantity));
+                Money totalPoint = new Money(total);
                 String orderNumber = "ORD-" + System.currentTimeMillis();
                 Order order = new Order(managedUser, orderNumber, totalPoint, OrderStatus.CREATED);
                 order.addOrderProduct(orderProduct);

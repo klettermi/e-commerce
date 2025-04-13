@@ -1,10 +1,13 @@
 package kr.hhplus.be.server.application.coupon;
 
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +22,7 @@ public class CouponService {
     @Transactional
     public Coupon issueCoupon(String couponCode) {
         Coupon coupon = couponRepository.findByCouponCode(couponCode)
-                .orElseThrow(() -> new IllegalArgumentException("Coupon not found: " + couponCode));
+                .orElseThrow(() -> new InvalidStateException("Coupon not found: " + couponCode));
         coupon.issueCoupon();
         return couponRepository.save(coupon);
     }

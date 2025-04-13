@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,7 +32,7 @@ public class Item extends BaseEntity {
     private SaleStatus saleStatus;
 
     @Column(name = "base_price", nullable = false)
-    private int basePrice;
+    private BigDecimal basePrice;
 
     @Column(name = "sale_start_date", columnDefinition = "DATETIME")
     private LocalDateTime saleStartDate;

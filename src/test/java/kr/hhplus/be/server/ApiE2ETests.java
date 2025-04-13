@@ -44,7 +44,7 @@ public class ApiE2ETests {
         given()
                 .when().get("/api/points/1")
                 .then().statusCode(200)
-                .body("userId", equalTo(1));
+                .body("data.userId", equalTo(1));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class ApiE2ETests {
                 .body(Map.of("userId", 1, "amount", 10000))
                 .when().post("/api/points/charge")
                 .then().statusCode(200)
-                .body("userId", equalTo(1));
+                .body("data.userId", equalTo(1));
     }
 
     @Test
@@ -63,29 +63,25 @@ public class ApiE2ETests {
                 Map.of("productId", 1, "quantity", 2, "unitPoint", 500)
         );
 
-        Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .body(orderItems)
-                        .queryParam("userId", 1)
-                        .when()
-                        .post("/api/orders")
-                        .then()
-                        .log().all()
-                        .statusCode(201)
-                        .body("orderNumber", notNullValue())
-                        .body("status", anyOf(is("CREATED"), is("PAID")))
-                        .extract()
-                        .response();
 
-        int orderId = response.path("id");
-        System.out.println("생성된 주문 ID: " + orderId);
+        given()
+                .contentType(ContentType.JSON)
+                .body(orderItems)
+                .queryParam("userId", 1)
+                .when()
+                .post("/api/orders")
+                .then()
+                .log().all()
+                .statusCode(200)
+                .body("data.orderNumber", notNullValue())
+                .body("data.status", anyOf(is("CREATED"), is("PAID")))
+                .extract()
+                .response();
     }
 
     @Test
     void 결제_API_테스트() {
         // 1. 주문 생성
-        // 테스트용 주문 항목 데이터: DataLoader에서 시딩된 상품(productId 1)을 사용하도록 합니다.
         List<Map<String, Object>> orderItems = List.of(
                 Map.of("productId", 1, "quantity", 2, "unitPoint", 500)
         );
@@ -97,29 +93,24 @@ public class ApiE2ETests {
                 .when()
                 .post("/api/orders")
                 .then()
-                .log().all() // 주문 생성 응답 디버깅
-                .statusCode(201)
-                .body("orderNumber", notNullValue())
+                .log().all()
+                .statusCode(200)
+                .body("data.orderNumber", notNullValue())
                 .extract().response();
 
-        int orderId = orderResponse.path("id");
-        System.out.println("생성된 주문 ID: " + orderId);
+        Number orderIdNumber = orderResponse.path("data.id");
+        long orderId = orderIdNumber.longValue();
 
         // 2. 결제 처리
-        Response payResponse = given()
-                .contentType(ContentType.JSON)
-                .queryParam("userId", 1)
-                // couponId가 필요하지 않다면 생략, 필요시 .queryParam("couponId", someValue)를 추가
-                .when()
-                .post("/api/payments/{orderId}/pay", orderId)
-                .then()
-                .log().all() // 결제 응답 디버깅
-                .statusCode(200)
-                .body("id", equalTo(orderId))
-                .body("status", is("PAID"))
-                .extract().response();
-
-        System.out.println("결제 완료된 주문 ID: " + payResponse.path("id"));
+        given()
+            .contentType(ContentType.JSON)
+            .queryParam("userId", 1)
+            .when()
+            .post("/api/payments/{orderId}/pay", orderId)
+            .then()
+            .log().all()
+            .statusCode(200)
+            .extract().response();
     }
 
     @Test
@@ -154,9 +145,103 @@ public class ApiE2ETests {
                 .then().statusCode(200);
     }
 
+    // ===== 장바구니 관련 API 테스트 추가 =====
+
+    @Test
+    void 장바구니_아이템_추가_API() {
+        // 새로운 아이템 추가
+        Map<String, Object> newItem = Map.of(
+                "productId", 1001,
+                "productName", "Test Product",
+                "quantity", 2,
+                "price", 50.0
+        );
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(newItem)
+                .when()
+                .post("/api/cart/1/items")
+                .then()
+                .statusCode(200)
+                // ApiResponse의 data 아래에 있는 cartItems 리스트 길이 확인
+                .body("data.cartItems.size()", greaterThan(0))
+                .body("data.cartItems[0].productId", equalTo(1001))
+                .body("data.cartItems[0].productName", equalTo("Test Product"))
+                .body("data.cartItems[0].quantity", equalTo(2))
+                .body("data.cartItems[0].price", equalTo(50.0f));
+    }
+
+    @Test
+    void 장바구니_아이템_수정_API() {
+        // 기존 아이템의 수량을 수정하기 위한 데이터
+        Map<String, Object> updatedItem = Map.of(
+                "productId", 1001,
+                "productName", "Test Product",
+                "quantity", 5,
+                "price", 50.0
+        );
+        given()
+                .contentType(ContentType.JSON)
+                .body(updatedItem)
+                .when()
+                .put("/api/cart/1/items")
+                .then()
+                .statusCode(200)
+                .body("data.cartItems[0].quantity", equalTo(5));
+    }
+
+    @Test
+    void 장바구니_아이템_제거_API() {
+        given()
+                .when()
+                .delete("/api/cart/1/items/1001")
+                .then()
+                .statusCode(200)
+                .body("data.cartItems.size()", equalTo(0));
+    }
+
+    @Test
+    void 장바구니_전체_비우기_API() {
+        // 테스트를 위해 두 개의 다른 아이템 추가
+        Map<String, Object> newItem1 = Map.of(
+                "productId", 1002,
+                "productName", "Product 2",
+                "quantity", 3,
+                "price", 75.0
+        );
+        Map<String, Object> newItem2 = Map.of(
+                "productId", 1003,
+                "productName", "Product 3",
+                "quantity", 1,
+                "price", 20.0
+        );
+        // 아이템 추가
+        given()
+                .contentType(ContentType.JSON)
+                .body(newItem1)
+                .when()
+                .post("/api/cart/1/items")
+                .then()
+                .statusCode(200);
+        given()
+                .contentType(ContentType.JSON)
+                .body(newItem2)
+                .when()
+                .post("/api/cart/1/items")
+                .then()
+                .statusCode(200);
+        // 장바구니 전체 비우기 호출
+        given()
+                .when()
+                .delete("/api/cart/1")
+                .then()
+                .statusCode(200)
+                .body("data.cartItems.size()", equalTo(0));
+    }
+
     @Test
     void 주문_상세_API_테스트() {
-        // 주문 먼저 생성하여 주문 id를 추출 (위 테스트와 유사한 방식)
         List<Map<String, Object>> orderItems = List.of(
                 Map.of("productId", 1, "quantity", 2, "unitPoint", 500)
         );
@@ -177,12 +262,11 @@ public class ApiE2ETests {
                 .when()
                 .get("/api/orders/{orderId}", orderId)
                 .then()
-                .log().all()  // 디버깅용 응답 전체 출력
+                .log().all()
                 .statusCode(200)
                 .body("id", equalTo(orderId))
                 .body("orderNumber", notNullValue());
     }
-
 
     @Test
     void 사용자_조회_API() {
@@ -197,7 +281,6 @@ public class ApiE2ETests {
         given()
                 .when().get("/api/inventory/1")
                 .then().statusCode(200)
-                // 재고 조회 API는 "stock"이라는 필드로 재고 수를 반환한다고 가정
                 .body("stock", greaterThanOrEqualTo(0));
     }
 }

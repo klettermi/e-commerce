@@ -8,6 +8,8 @@ import kr.hhplus.be.server.domain.option.Option;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "products")
 @NoArgsConstructor
@@ -34,15 +36,19 @@ public class Product extends BaseEntity {
     }
 
 
-    // 최종 가격 계산: Item 기본가격 + Option 추가금액
-    // 그리고 제품 자체 할인(정액 또는 정률)을 적용
-    public double calculateFinalPrice() {
-        double total = item.getBasePrice() + option.getAdditionalCost();
-        return Math.max(total, 0);
+    public BigDecimal calculateFinalPrice() {
+        return item.getBasePrice().add(option.getAdditionalCost());
     }
 
     public ProductDto toDto() {
-        double finalPrice = calculateFinalPrice();
+        if (item == null) {
+            System.err.println("Error: item is null in Product.toDto()");
+        }
+        if (option == null) {
+            System.err.println("Error: option is null in Product.toDto()");
+        }
+        BigDecimal finalPrice = calculateFinalPrice();
         return new ProductDto(item.getId(), item.getName(), option.getName(), finalPrice);
     }
+
 }

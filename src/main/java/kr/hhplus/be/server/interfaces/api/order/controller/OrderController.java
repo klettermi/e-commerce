@@ -21,18 +21,17 @@ public class OrderController {
     private final OrderFacade orderFacade;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
+    public ApiResponse<OrderResponse> createOrder(
             @RequestParam Long userId,
             @RequestBody List<OrderProductRequest> orderProductRequests) {
 
         OrderResponse orderResponse = orderFacade.createOrder(userId, orderProductRequests);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(orderResponse));
+        return ApiResponse.success(orderResponse);
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<ApiResponse<OrderResponse>> getOrder(@PathVariable Long orderId) {
+    public ApiResponse<OrderResponse> getOrder(@PathVariable Long orderId) {
         OrderResponse orderResponse = orderFacade.getOrder(orderId);
-        return ResponseEntity.ok(ApiResponse.success(orderResponse));
+        return ApiResponse.success(orderResponse);
     }
 }

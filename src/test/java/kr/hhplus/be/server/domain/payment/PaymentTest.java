@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import kr.hhplus.be.server.domain.order.Order;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 public class PaymentTest {
 
     @Test
@@ -26,11 +28,11 @@ public class PaymentTest {
             // "paymentAmount" 필드에 값 할당
             java.lang.reflect.Field amountField = Payment.class.getDeclaredField("paymentAmount");
             amountField.setAccessible(true);
-            amountField.setInt(payment, 1500);
+            amountField.set(payment, BigDecimal.valueOf(1500));
 
             // 검증: 할당된 값이 올바르게 설정되었는지 reflection으로 읽어 확인
             Order actualOrder = (Order) orderField.get(payment);
-            int actualAmount = amountField.getInt(payment);
+            BigDecimal actualAmount = (BigDecimal) amountField.get(payment);
 
             assertNotNull(actualOrder, "Payment 객체의 order 필드는 null이 아니어야 합니다.");
             assertEquals(1500, actualAmount, "Payment 객체의 paymentAmount 필드 값이 1500이어야 합니다.");
