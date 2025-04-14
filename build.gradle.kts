@@ -59,8 +59,10 @@ dependencies {
 	testImplementation("io.rest-assured:rest-assured:5.4.0")
 	testImplementation("io.rest-assured:json-path:5.4.0")
 
-	// Optional: Jackson Databind (직접 사용해야 하는 경우)
 	testImplementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+
+	// Flyway
+	implementation("org.flywaydb:flyway-mysql")
 }
 
 tasks.withType<Test> {
