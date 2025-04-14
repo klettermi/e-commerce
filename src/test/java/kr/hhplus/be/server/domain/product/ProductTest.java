@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.product;
 
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
 import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
 import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
@@ -23,12 +24,12 @@ class ProductTest {
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
-                BigDecimal.valueOf(10000),
+                new Money(BigDecimal.valueOf(10000)),
                 LocalDateTime.now()
         );
         OptionDto optionDto = new OptionDto(
                 "Black",
-                BigDecimal.valueOf(5000)
+                new Money(BigDecimal.valueOf(500))
         );
 
         Item item = Item.fromDto(itemDto, category);
@@ -36,10 +37,10 @@ class ProductTest {
         Product product = new Product(item, option);
 
         // when
-        BigDecimal finalPrice = product.calculateFinalPrice();
+        Money finalPrice = product.calculateFinalPrice();
 
         // then
-        assertEquals(0, BigDecimal.valueOf(10500).compareTo(finalPrice), "상품의 가격은 10500 이어야 합니다.");
+        assertEquals(0, new Money(BigDecimal.valueOf(10500)).compareTo(finalPrice), "상품의 가격은 10500 이어야 합니다.");
     }
 
     @Test
@@ -50,12 +51,12 @@ class ProductTest {
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
-                BigDecimal.valueOf(10000),
+                new Money(BigDecimal.valueOf(10000)),
                 LocalDateTime.now()
         );
         OptionDto optionDto = new OptionDto(
                 "White240",
-                BigDecimal.valueOf(5000)
+                new Money(BigDecimal.valueOf(500))
         );
 
         Item item = Item.fromDto(itemDto, category);
@@ -69,6 +70,6 @@ class ProductTest {
         assertNull(dto.id(), "Not persisted, so id should be null.");
         assertEquals("AirForce", dto.itemName(), "Item name should match.");
         assertEquals("White240", dto.optionName(), "Option name should match.");
-        assertEquals(0, BigDecimal.valueOf(10500).compareTo(dto.finalPrice()), "두 번째 상품의 최종 가격은 144000이어야 합니다.");
+        assertEquals(0, new Money(BigDecimal.valueOf(10500)).compareTo(dto.finalPrice()), "상품의 최종 가격은 10500이어야 합니다.");
     }
 }

@@ -5,6 +5,7 @@ import kr.hhplus.be.server.application.cart.CartService;
 import kr.hhplus.be.server.application.common.dto.ApiResponse;
 import kr.hhplus.be.server.domain.cart.CartItem;
 import kr.hhplus.be.server.interfaces.api.cart.dto.CartDto;
+import kr.hhplus.be.server.interfaces.api.cart.dto.CartItemDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class CartController {
     // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트)
     @PostMapping("/{userId}/items")
     public ApiResponse<CartDto> addItem(@PathVariable Long userId,
-                                           @RequestBody CartItem newItem) {
+                                           @RequestBody CartItemDto newItem) {
         CartDto cartDto = cartService.addItem(userId, newItem);
         return ApiResponse.success(cartDto);
     }
@@ -33,7 +34,7 @@ public class CartController {
     // 장바구니 내 아이템 업데이트 (수량 수정)
     @PutMapping("/{userId}/items")
     public ApiResponse<CartDto> updateItem(@PathVariable Long userId,
-                                              @RequestBody CartItem updatedItem) {
+                                              @RequestBody CartItemDto updatedItem) {
         CartDto cartDto = cartService.updateItem(userId, updatedItem);
         return ApiResponse.success(cartDto);
     }

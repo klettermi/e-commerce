@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.point.*;
 import kr.hhplus.be.server.domain.point.PointValidationService;
@@ -46,7 +47,7 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto chargePoint(long userId, BigDecimal amount) {
+    public PointResponseDto chargePoint(long userId, Money amount) {
         // 유효성 검사
         validationService.validate(amount, TransactionType.CHARGE);
 
@@ -54,9 +55,8 @@ public class PointService {
 
         // 충전 전 현재 포인트 조회
         UserPoint userPoint = userPointRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("UserPoint not found for id: " + userId));
+                .orElseThrow(() -> new DomainExceptions.InvalidStateException("UserPoint not found for id: " + userId));
 
-        // 포인트 갱신: (실제 도메인 로직은 UserPoint 내의 chargePoints 메서드로 위임할 수 있습니다.)
         userPoint.chargePoints(amount);
         userPointRepository.save(userPoint);
 
@@ -73,7 +73,7 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto usePoint(Long userId, BigDecimal amount) {
+    public PointResponseDto usePoint(Long userId, Money amount) {
         validationService.validate(amount, TransactionType.USE);
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));

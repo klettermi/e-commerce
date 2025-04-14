@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.product;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.item.Item;
@@ -36,7 +37,7 @@ public class Product extends BaseEntity {
     }
 
 
-    public BigDecimal calculateFinalPrice() {
+    public Money calculateFinalPrice() {
         return item.getBasePrice().add(option.getAdditionalCost());
     }
 
@@ -47,7 +48,7 @@ public class Product extends BaseEntity {
         if (option == null) {
             System.err.println("Error: option is null in Product.toDto()");
         }
-        BigDecimal finalPrice = calculateFinalPrice();
+        Money finalPrice = calculateFinalPrice();
         return new ProductDto(item.getId(), item.getName(), option.getName(), finalPrice);
     }
 

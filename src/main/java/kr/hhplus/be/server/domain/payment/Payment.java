@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.payment;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.interfaces.api.payment.dto.PaymentDto;
 import lombok.Getter;
@@ -24,9 +25,10 @@ public class Payment extends BaseEntity {
     private Order order;
 
     @Column(name = "payment_amount", nullable = false)
-    private BigDecimal paymentAmount;
+    @Embedded
+    private Money paymentAmount;
 
-    public Payment(Order order, BigDecimal paymentAmount) {
+    public Payment(Order order, Money paymentAmount) {
         this.order = order;
         this.paymentAmount = paymentAmount;
     }

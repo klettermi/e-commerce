@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 
@@ -31,19 +30,17 @@ public class OrderService {
                 .map(req -> OrderProduct.builder()
                         .productId(req.productId())
                         .quantity(req.quantity())
-                        .unitPoint(BigDecimal.valueOf(req.unitPoiont()))
+                        .unitPoint(req.unitPoint())
                         .build())
                 .toList();
 
         // 총 결제 포인트 계산
-        BigDecimal totalPointValue = orderProducts.stream()
-                .map(op -> op.getUnitPoint().multiply(BigDecimal.valueOf(op.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        Money totalPoint = new Money(totalPointValue);
+        Money totalPointValue = orderProducts.stream()
+                .map(op -> op.getUnitPoint().multiply(op.getQuantity()))
+                .reduce(Money.ZERO, Money::add);
 
         // 주문 생성
-        Order order = new Order(user, orderNumber, totalPoint, OrderStatus.CREATED);
+        Order order = new Order(user, orderNumber, totalPointValue, OrderStatus.CREATED);
 
         // 주문 항목 추가
         orderProducts.forEach(order::addOrderProduct);
@@ -71,6 +68,6 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+                .orElseThrow(() -> new DomainExceptions.EntityNotFoundException("Order not found with id: " + orderId));
     }
 }

@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.point;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.api.point.dto.PointHistoryResponseDto;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,8 @@ public class PointHistory extends BaseEntity {
     public Long id;
 
     @Column
-    private BigDecimal amount;
+    @Embedded
+    private Money amount;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -44,7 +46,7 @@ public class PointHistory extends BaseEntity {
      * @param amount 충전된 포인트 금액
      * @return 생성된 PointHistory 인스턴스
      */
-    public static PointHistory createChargeHistory(User user, BigDecimal amount) {
+    public static PointHistory createChargeHistory(User user, Money amount) {
         PointHistory history = new PointHistory();
         history.amount = amount;
         history.type = TransactionType.CHARGE;
@@ -60,7 +62,7 @@ public class PointHistory extends BaseEntity {
      * @param amount 사용된 포인트 금액
      * @return 생성된 PointHistory 인스턴스
      */
-    public static PointHistory createUseHistory(User user, BigDecimal amount) {
+    public static PointHistory createUseHistory(User user, Money amount) {
         PointHistory history = new PointHistory();
         history.amount = amount;
         history.type = TransactionType.USE;

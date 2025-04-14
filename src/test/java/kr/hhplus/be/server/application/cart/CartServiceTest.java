@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.cart;
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
 import kr.hhplus.be.server.domain.cart.CartRepository;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.cart.dto.CartDto;
 import kr.hhplus.be.server.interfaces.api.cart.dto.CartItemDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,11 +68,11 @@ class CartServiceTest {
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
-        CartItem newItem = CartItem.builder()
+        CartItemDto newItem = CartItemDto.builder()
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new BigDecimal("50.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
 
         CartDto result = cartService.addItem(userId, newItem);
@@ -81,7 +82,7 @@ class CartServiceTest {
         assertEquals(1001L, addedItem.productId(), "상품 ID가 동일해야 합니다.");
         assertEquals("Product 1", addedItem.productName(), "상품명이 동일해야 합니다.");
         assertEquals(2, addedItem.quantity(), "수량이 2여야 합니다.");
-        assertEquals(new BigDecimal("50.0"), addedItem.price(), "가격이 50.0이어야 합니다.");
+        assertEquals(new Money(BigDecimal.valueOf(10000)), addedItem.price(), "가격이 50.0이어야 합니다.");
         verify(cartRepository).save(cart);
     }
 
@@ -94,7 +95,7 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new BigDecimal("50.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
         cart.addItemInCart(existingItem);
 
@@ -102,11 +103,11 @@ class CartServiceTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
         // 새 아이템으로 수량 3을 추가 (기존 2 + 3 = 5가 되어야 함)
-        CartItem newItem = CartItem.builder()
+        CartItemDto newItem = CartItemDto.builder()
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(3)
-                .price(new BigDecimal("50.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
 
         CartDto result = cartService.addItem(userId, newItem);
@@ -125,7 +126,7 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new BigDecimal("50.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
         cart.addItemInCart(item);
 
@@ -133,11 +134,11 @@ class CartServiceTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
         // 수량을 5로 업데이트
-        CartItem updatedItem = CartItem.builder()
+        CartItemDto updatedItem = CartItemDto.builder()
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(5)
-                .price(new BigDecimal("50.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
 
         CartDto result = cartService.updateItem(userId, updatedItem);
@@ -155,13 +156,13 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new BigDecimal("50.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
         CartItem item2 = CartItem.builder()
                 .productId(1002L)
                 .productName("Product 2")
                 .quantity(3)
-                .price(new BigDecimal("75.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
         cart.addItemInCart(item1);
         cart.addItemInCart(item2);
@@ -184,13 +185,13 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new BigDecimal("50.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
         CartItem item2 = CartItem.builder()
                 .productId(1002L)
                 .productName("Product 2")
                 .quantity(3)
-                .price(new BigDecimal("75.0"))
+                .price(new Money(BigDecimal.valueOf(10000)))
                 .build();
         cart.addItemInCart(item1);
         cart.addItemInCart(item2);

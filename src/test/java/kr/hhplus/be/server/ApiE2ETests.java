@@ -3,10 +3,13 @@ package kr.hhplus.be.server;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import kr.hhplus.be.server.domain.common.Money;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +17,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(properties = "spring.profiles.active=test")
+@Transactional
 public class ApiE2ETests {
 
     @BeforeAll
@@ -51,7 +55,7 @@ public class ApiE2ETests {
     void 잔액_충전_API() {
         given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("userId", 1, "amount", 10000))
+                .body(Map.of("userId", 1, "amount", new Money(BigDecimal.valueOf(1500))))
                 .when().post("/api/points/charge")
                 .then().statusCode(200)
                 .body("data.userId", equalTo(1));
@@ -60,7 +64,7 @@ public class ApiE2ETests {
     @Test
     void 주문_생성_API_테스트() {
         List<Map<String, Object>> orderItems = List.of(
-                Map.of("productId", 1, "quantity", 2, "unitPoint", 500)
+                Map.of("productId", 1, "quantity", 2, "unitPoint", new Money(BigDecimal.valueOf(1500)))
         );
 
 
@@ -83,7 +87,7 @@ public class ApiE2ETests {
     void 결제_API_테스트() {
         // 1. 주문 생성
         List<Map<String, Object>> orderItems = List.of(
-                Map.of("productId", 1, "quantity", 2, "unitPoint", 500)
+                Map.of("productId", 1, "quantity", 2, "unitPoint", new Money(BigDecimal.valueOf(500)))
         );
 
         Response orderResponse = given()
@@ -145,17 +149,22 @@ public class ApiE2ETests {
                 .then().statusCode(200);
     }
 
-    // ===== 장바구니 관련 API 테스트 추가 =====
 
     @Test
     void 장바구니_아이템_추가_API() {
-        // 새로운 아이템 추가
         Map<String, Object> newItem = Map.of(
                 "productId", 1001,
                 "productName", "Test Product",
                 "quantity", 2,
-                "price", 50.0
+                "price", new Money(BigDecimal.valueOf(50000))
         );
+
+        given()
+                .when()
+                .delete("/api/cart/1")
+                .then()
+                .statusCode(200)
+                .body("data.cartItems.size()", equalTo(0));
 
         given()
                 .contentType(ContentType.JSON)
@@ -164,32 +173,57 @@ public class ApiE2ETests {
                 .post("/api/cart/1/items")
                 .then()
                 .statusCode(200)
-                // ApiResponse의 data 아래에 있는 cartItems 리스트 길이 확인
                 .body("data.cartItems.size()", greaterThan(0))
                 .body("data.cartItems[0].productId", equalTo(1001))
                 .body("data.cartItems[0].productName", equalTo("Test Product"))
                 .body("data.cartItems[0].quantity", equalTo(2))
-                .body("data.cartItems[0].price", equalTo(50.0f));
+                .body("data.cartItems[0].price.amount", equalTo(50000));
+
     }
 
     @Test
     void 장바구니_아이템_수정_API() {
-        // 기존 아이템의 수량을 수정하기 위한 데이터
-        Map<String, Object> updatedItem = Map.of(
-                "productId", 1001,
+        Long userId = 1L;
+
+        // 1. 장바구니 비우기 (테스트 환경 초기화)
+        given()
+                .when()
+                .delete("/api/cart/{userId}", userId)
+                .then()
+                .statusCode(200)
+                .body("data.cartItems.size()", equalTo(0));
+
+        // 2. 장바구니에 아이템 추가 (예: 수량 2)
+        Map<String, Object> newItem = Map.of(
+                "productId", 1,
                 "productName", "Test Product",
-                "quantity", 5,
-                "price", 50.0
+                "quantity", 2,
+                "price", new Money(BigDecimal.valueOf(50000))
+        );
+        given()
+                .contentType(ContentType.JSON)
+                .body(newItem)
+                .when()
+                .post("/api/cart/{userId}/items", userId)
+                .then()
+                .statusCode(200)
+                .body("data.cartItems.size()", greaterThan(0));
+
+        // 3. 아이템의 수량을 5로 업데이트
+        Map<String, Object> updatedItem = Map.of(
+                "productId", 1,
+                "quantity", 5
         );
         given()
                 .contentType(ContentType.JSON)
                 .body(updatedItem)
                 .when()
-                .put("/api/cart/1/items")
+                .put("/api/cart/{userId}/items", userId)
                 .then()
                 .statusCode(200)
                 .body("data.cartItems[0].quantity", equalTo(5));
     }
+
 
     @Test
     void 장바구니_아이템_제거_API() {
@@ -208,13 +242,13 @@ public class ApiE2ETests {
                 "productId", 1002,
                 "productName", "Product 2",
                 "quantity", 3,
-                "price", 75.0
+                "price", new Money(BigDecimal.valueOf(750000))
         );
         Map<String, Object> newItem2 = Map.of(
                 "productId", 1003,
                 "productName", "Product 3",
                 "quantity", 1,
-                "price", 20.0
+                "price", new Money(BigDecimal.valueOf(200000))
         );
         // 아이템 추가
         given()
@@ -243,7 +277,7 @@ public class ApiE2ETests {
     @Test
     void 주문_상세_API_테스트() {
         List<Map<String, Object>> orderItems = List.of(
-                Map.of("productId", 1, "quantity", 2, "unitPoint", 500)
+                Map.of("productId", 1, "quantity", 2, "unitPoint", new Money(BigDecimal.valueOf(500)))
         );
 
         Response createResponse = given()
@@ -253,10 +287,15 @@ public class ApiE2ETests {
                 .when()
                 .post("/api/orders")
                 .then()
-                .statusCode(201)
+                .log().all()
+                .statusCode(200)
+                .body("data.orderNumber", notNullValue())
+                .body("data.status", anyOf(is("CREATED"), is("PAID")))
                 .extract().response();
 
-        int orderId = createResponse.path("id");
+        // 응답의 id 값을 int로 읽음
+        int orderIdInt = createResponse.path("data.id");
+        Long orderId = Long.valueOf(orderIdInt);
 
         given()
                 .when()
@@ -264,9 +303,12 @@ public class ApiE2ETests {
                 .then()
                 .log().all()
                 .statusCode(200)
-                .body("id", equalTo(orderId))
-                .body("orderNumber", notNullValue());
+                // 비교 시에 응답값은 int로 비교하거나, orderId을 intValue()로 변환하여 비교
+                .body("data.id", equalTo(orderId.intValue()))
+                .body("data.orderNumber", notNullValue());
     }
+
+
 
     @Test
     void 사용자_조회_API() {

@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.item;
 
 import kr.hhplus.be.server.domain.category.Category;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
 import kr.hhplus.be.server.domain.item.SaleStatus;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class ItemTest {
         String name = "Test Item";
         String description = "This is a test item description";
         SaleStatus saleStatus = SaleStatus.ON_SALE;
-        BigDecimal basePrice = BigDecimal.valueOf(1000);
+        Money basePrice = new Money(BigDecimal.valueOf(1000));
         LocalDateTime saleStartDate = LocalDateTime.now();
 
         ItemDto dto = new ItemDto(name, description, saleStatus, basePrice, saleStartDate);

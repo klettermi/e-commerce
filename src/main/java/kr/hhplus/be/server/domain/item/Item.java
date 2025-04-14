@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.item;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.common.BaseEntity;
@@ -32,7 +33,8 @@ public class Item extends BaseEntity {
     private SaleStatus saleStatus;
 
     @Column(name = "base_price", nullable = false)
-    private BigDecimal basePrice;
+    @Embedded
+    private Money basePrice;
 
     @Column(name = "sale_start_date", columnDefinition = "DATETIME")
     private LocalDateTime saleStartDate;

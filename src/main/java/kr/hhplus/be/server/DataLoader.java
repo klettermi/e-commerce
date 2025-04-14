@@ -1,5 +1,8 @@
 package kr.hhplus.be.server;
 
+import kr.hhplus.be.server.domain.cart.Cart;
+import kr.hhplus.be.server.domain.cart.CartItem;
+import kr.hhplus.be.server.domain.cart.CartRepository;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.category.CategoryRepository;
 import kr.hhplus.be.server.domain.common.Money;
@@ -46,7 +49,8 @@ public class DataLoader {
                                       OptionRepository optionRepository,
                                       CategoryRepository categoryRepository,
                                       OrderRepository orderRepository,
-                                      InventoryRepository inventoryRepository) {
+                                      InventoryRepository inventoryRepository,
+                                      CartRepository cartRepository) {  // 장바구니 Repository 추가
         return args -> {
 
             // 사용자 및 UserPoint 시딩
@@ -57,8 +61,8 @@ public class DataLoader {
 
                 // UserPoint 생성 시 반드시 관리되는 사용자와 연관관계를 설정합니다.
                 UserPoint userPoint = new UserPoint();
-                userPoint.setUser(managedUser);  // 여기서 연관관계 설정
-                userPoint.chargePoints(BigDecimal.valueOf(100000));    // 초기 포인트 충전 (메서드를 통해 설정)
+                userPoint.setUser(managedUser);  // 연관관계 설정
+                userPoint.chargePoints(new Money(BigDecimal.valueOf(100000)));    // 초기 포인트 충전 (메서드를 통해 설정)
                 userPointRepository.save(userPoint);
             } else {
                 managedUser = userRepository.findAll().get(0);
@@ -75,12 +79,12 @@ public class DataLoader {
                         "AirForce",
                         "AirForce Description",
                         SaleStatus.ON_SALE,
-                        BigDecimal.valueOf(100000),
+                        new Money(BigDecimal.valueOf(100000)),
                         LocalDateTime.now()
                 );
                 OptionDto optionDto = new OptionDto(
                         "White240",
-                        BigDecimal.valueOf(1000)
+                        new Money(BigDecimal.valueOf(1000))
                 );
                 Item item = Item.fromDto(itemDto, category);
                 itemRepository.save(item);
@@ -98,7 +102,7 @@ public class DataLoader {
                 if (inventoryRepository.findByProductId(prod.getId()).isEmpty()) {
                     Inventory inventory = Inventory.builder()
                             .productId(prod.getId())
-                            .quantity(10)
+                            .quantity(10000)
                             .build();
                     inventoryRepository.save(inventory);
                 }
@@ -110,19 +114,28 @@ public class DataLoader {
                         .orElseThrow(() -> new IllegalStateException("Item not found for product id: " + product.getId()));
 
                 int quantity = 2;
-                BigDecimal unitPoint = item.getBasePrice();
+                Money unitPoint = item.getBasePrice();
                 OrderProduct orderProduct = OrderProduct.builder()
                         .productId(product.getId())
                         .quantity(quantity)
                         .unitPoint(unitPoint)
                         .build();
 
-                BigDecimal total = unitPoint.multiply(BigDecimal.valueOf(quantity));
-                Money totalPoint = new Money(total);
+                Money totalPoint = unitPoint.multiply(quantity);
                 String orderNumber = "ORD-" + System.currentTimeMillis();
                 Order order = new Order(managedUser, orderNumber, totalPoint, OrderStatus.CREATED);
                 order.addOrderProduct(orderProduct);
                 orderRepository.save(order);
+            }
+
+            // 장바구니(카트) 시딩: 만약 Cart 데이터가 없다면 생성합니다.
+            if (cartRepository.count() == 0) {
+                // Cart 생성 (예: 사용자를 소유한 카트)
+                Cart cart = new Cart(managedUser.getId());
+                // CartItem 생성: 예를 들어 product를 담고 수량은 3으로 설정
+                CartItem cartItem = new CartItem(product, 3);
+                cart.addItemInCart(cartItem);
+                cartRepository.save(cart);
             }
         };
     }

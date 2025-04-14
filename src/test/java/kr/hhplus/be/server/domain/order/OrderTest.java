@@ -33,7 +33,7 @@ class OrderTest {
         orderProduct = OrderProduct.builder()
                 .productId(1L)
                 .quantity(2)
-                .unitPoint(BigDecimal.valueOf(500))
+                .unitPoint(new Money(BigDecimal.valueOf(500)))
                 .build();
     }
 

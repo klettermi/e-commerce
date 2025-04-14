@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.order;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.Money;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -29,5 +30,6 @@ public class OrderProduct extends BaseEntity {
     private int quantity;
 
     @Column(name = "unit_point", nullable = false)
-    private BigDecimal unitPoint;
+    @Embedded
+    private Money unitPoint;
 }

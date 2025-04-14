@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.option;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import lombok.Getter;
@@ -22,7 +23,8 @@ public class Option extends BaseEntity{
     private String name;
 
     @Column
-    private BigDecimal additionalCost;
+    @Embedded
+    private Money additionalCost;
 
     public static Option fromDto(OptionDto dto) {
         Option option = new Option();

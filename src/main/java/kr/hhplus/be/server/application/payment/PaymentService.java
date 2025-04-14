@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.payment;
 
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
@@ -31,7 +32,7 @@ public class PaymentService {
         UserPoint userPoint = userPointRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for user id: " + userId));
 
-        BigDecimal requiredPoints = order.getTotalPoint().amount();
+        Money requiredPoints = order.getTotalPoint();
         if (userPoint.getPointBalance().compareTo(requiredPoints) < 0) {
             throw new InvalidStateException("Insufficient points: required " + requiredPoints +
                     ", available " + userPoint.getPointBalance());
