@@ -21,6 +21,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -52,29 +53,25 @@ public class ApiE2ETests {
 
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
-        if (!mysql.isRunning()) {
-            mysql.start();
-        }
+        if (!mysql.isRunning()) mysql.start();
 
-        String jdbcUrl = mysql.getJdbcUrl();
+        String realUrl = mysql.getJdbcUrl();
+        String spyUrl = realUrl.replace("jdbc:mysql", "jdbc:p6spy:mysql");
         String username = mysql.getUsername();
         String password = mysql.getPassword();
 
-        // Flyway 수동 실행 (Spring Context보다 먼저)
-        Flyway flyway = Flyway.configure()
-                .dataSource(jdbcUrl, username, password)
+        // 수동 Flyway migration (p6spy는 여기선 필요 없음)
+        Flyway.configure()
+                .dataSource(realUrl, username, password)
                 .locations("classpath:db/migration")
                 .cleanDisabled(false)
-                .load();
+                .load()
+                .migrate();
 
-        flyway.clean();    // 💣 데이터 초기화
-        flyway.migrate();  // 🛠️ 마이그레이션
-
-        // Spring DataSource 설정은 마지막에 등록해야 함
-        registry.add("spring.datasource.url", () -> jdbcUrl);
+        registry.add("spring.datasource.url", () -> spyUrl);
         registry.add("spring.datasource.username", () -> username);
         registry.add("spring.datasource.password", () -> password);
-        registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
+        registry.add("spring.datasource.driver-class-name", () -> "com.p6spy.engine.spy.P6SpyDriver");
     }
 
 
@@ -82,6 +79,13 @@ public class ApiE2ETests {
     @Autowired
     private TestDataSeeder testDataSeeder;
 
+    @BeforeAll
+    static void ensureSpyLogDirectory() {
+        File dir = new File("logs");
+        if (!dir.exists()) {
+            dir.mkdirs(); // logs 디렉토리 없으면 자동 생성
+        }
+    }
 
     @BeforeAll
     void init() {
