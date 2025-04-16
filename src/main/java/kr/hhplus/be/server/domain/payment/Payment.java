@@ -24,8 +24,11 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "order_id", nullable = false, unique = true)
     private Order order;
 
-    @Column(name = "payment_amount", nullable = false)
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "payment_amount", nullable = false)
+    )
     private Money paymentAmount;
 
     public Payment(Order order, Money paymentAmount) {

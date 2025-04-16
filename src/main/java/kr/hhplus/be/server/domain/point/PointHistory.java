@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "point_history")
+@Table(name = "point_histories")
 @NoArgsConstructor
 public class PointHistory extends BaseEntity {
 

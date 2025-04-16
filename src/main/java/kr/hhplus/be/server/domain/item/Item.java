@@ -32,8 +32,11 @@ public class Item extends BaseEntity {
     @Column(name = "sale_status")
     private SaleStatus saleStatus;
 
-    @Column(name = "base_price", nullable = false)
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "base_price", nullable = false)
+    )
     private Money basePrice;
 
     @Column(name = "sale_start_date", columnDefinition = "DATETIME")

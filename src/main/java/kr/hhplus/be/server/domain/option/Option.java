@@ -22,8 +22,11 @@ public class Option extends BaseEntity{
     @Column
     private String name;
 
-    @Column
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "additional_cost", nullable = false)
+    )
     private Money additionalCost;
 
     public static Option fromDto(OptionDto dto) {

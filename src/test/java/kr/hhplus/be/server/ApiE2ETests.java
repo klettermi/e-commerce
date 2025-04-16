@@ -4,10 +4,22 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import kr.hhplus.be.server.domain.common.Money;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,15 +28,72 @@ import java.util.Map;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
-@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@Import(TestDataSeeder.class)
+@Testcontainers
+@TestPropertySource(properties = {
+        "spring.profiles.active=test",
+        "spring.flyway.enabled=false",
+        "spring.flyway.clean-disabled=false",
+        "spring.jpa.defer-datasource-initialization=true"
+})
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ApiE2ETests {
 
-    @BeforeAll
-    static void setup() {
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 8080;
+    @LocalServerPort
+    private int port;
+
+    @Container
+    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
+            .withDatabaseName("hhplus")
+            .withUsername("application")
+            .withPassword("application");
+
+    @DynamicPropertySource
+    static void overrideProperties(DynamicPropertyRegistry registry) {
+        if (!mysql.isRunning()) {
+            mysql.start();
+        }
+
+        String jdbcUrl = mysql.getJdbcUrl();
+        String username = mysql.getUsername();
+        String password = mysql.getPassword();
+
+        // Flyway 수동 실행 (Spring Context보다 먼저)
+        Flyway flyway = Flyway.configure()
+                .dataSource(jdbcUrl, username, password)
+                .locations("classpath:db/migration")
+                .cleanDisabled(false)
+                .load();
+
+        flyway.clean();    // 💣 데이터 초기화
+        flyway.migrate();  // 🛠️ 마이그레이션
+
+        // Spring DataSource 설정은 마지막에 등록해야 함
+        registry.add("spring.datasource.url", () -> jdbcUrl);
+        registry.add("spring.datasource.username", () -> username);
+        registry.add("spring.datasource.password", () -> password);
+        registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
     }
+
+
+
+    @Autowired
+    private TestDataSeeder testDataSeeder;
+
+
+    @BeforeAll
+    void init() {
+        testDataSeeder.testSeedData();
+    }
+
+    @BeforeEach
+    void setupRestAssured() {
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = port;
+    }
+
 
     @Test
     void 상품_조회_API() {
@@ -107,14 +176,14 @@ public class ApiE2ETests {
 
         // 2. 결제 처리
         given()
-            .contentType(ContentType.JSON)
-            .queryParam("userId", 1)
-            .when()
-            .post("/api/payments/{orderId}/pay", orderId)
-            .then()
-            .log().all()
-            .statusCode(200)
-            .extract().response();
+                .contentType(ContentType.JSON)
+                .queryParam("userId", 1)
+                .when()
+                .post("/api/payments/{orderId}/pay", orderId)
+                .then()
+                .log().all()
+                .statusCode(200)
+                .extract().response();
     }
 
     @Test

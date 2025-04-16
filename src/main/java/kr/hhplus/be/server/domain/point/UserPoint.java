@@ -22,8 +22,11 @@ public class UserPoint extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "point_balance", nullable = false)
+    )
     private Money pointBalance = new Money(BigDecimal.ZERO);
 
     @OneToOne

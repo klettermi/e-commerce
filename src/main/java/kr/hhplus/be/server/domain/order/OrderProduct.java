@@ -29,7 +29,10 @@ public class OrderProduct extends BaseEntity {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "unit_point", nullable = false)
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "unit_point", nullable = false)
+    )
     private Money unitPoint;
 }
