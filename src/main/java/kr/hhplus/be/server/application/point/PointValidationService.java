@@ -1,8 +1,9 @@
-package kr.hhplus.be.server.domain.point;
+package kr.hhplus.be.server.application.point;
 
 import java.math.BigDecimal;
 
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.point.TransactionType;
 import org.springframework.stereotype.Component;
 
 @Component

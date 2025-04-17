@@ -3,10 +3,9 @@ package kr.hhplus.be.server.application.cart;
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
-import kr.hhplus.be.server.domain.cart.CartRepository;
-import kr.hhplus.be.server.domain.product.ProductRepository;
-import kr.hhplus.be.server.interfaces.api.cart.CartResponse;
+import kr.hhplus.be.server.infrastructure.cart.CartJpaRepository;
 import kr.hhplus.be.server.interfaces.api.cart.CartItemRequest;
+import kr.hhplus.be.server.interfaces.api.cart.CartResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,20 +14,19 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CartService {
 
-    private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
+    private final CartJpaRepository cartJpaRepository;
 
     // 사용자 장바구니 조회 (없으면 새로 생성) → DTO 반환
     public CartResponse getCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+        Cart cart = cartJpaRepository.findByUserId(userId)
+                .orElseGet(() -> cartJpaRepository.save(new Cart(userId)));
         return CartResponse.fromEntity(cart);
     }
 
     // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트) → DTO 반환
     public CartResponse addItem(Long userId, CartItemRequest newItem) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+        Cart cart = cartJpaRepository.findByUserId(userId)
+                .orElseGet(() -> cartJpaRepository.save(new Cart(userId)));
 
         boolean found = false;
         for (CartItem item : cart.getCartItems()) {
@@ -42,14 +40,14 @@ public class CartService {
             cart.addItemInCart(CartItem.fromDto(newItem, cart));
         }
 
-        cart = cartRepository.save(cart);
+        cart = cartJpaRepository.save(cart);
         return CartResponse.fromEntity(cart);
     }
 
     public CartResponse updateItem(Long userId, CartItemRequest updatedItem) {
         // 사용자 장바구니 조회 (없으면 새로 생성)
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+        Cart cart = cartJpaRepository.findByUserId(userId)
+                .orElseGet(() -> cartJpaRepository.save(new Cart(userId)));
 
         boolean found = false;
         // 장바구니 아이템 업데이트
@@ -64,28 +62,28 @@ public class CartService {
              cart.addItemInCart(CartItem.fromDto(updatedItem, cart));
         }
 
-        cart = cartRepository.save(cart);
+        cart = cartJpaRepository.save(cart);
         return CartResponse.fromEntity(cart);
     }
 
 
     // 장바구니에서 아이템 제거 → DTO 반환
     public CartResponse removeItem(Long userId, Long productId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+        Cart cart = cartJpaRepository.findByUserId(userId)
+                .orElseGet(() -> cartJpaRepository.save(new Cart(userId)));
 
         cart.getCartItems().removeIf(item -> item.getProductId().equals(productId));
-        cart = cartRepository.save(cart);
+        cart = cartJpaRepository.save(cart);
         return CartResponse.fromEntity(cart);
     }
 
     // 장바구니 전체 비우기 → DTO 반환
     public CartResponse clearCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+        Cart cart = cartJpaRepository.findByUserId(userId)
+                .orElseGet(() -> cartJpaRepository.save(new Cart(userId)));
 
         cart.getCartItems().clear();
-        cart = cartRepository.save(cart);
+        cart = cartJpaRepository.save(cart);
         return CartResponse.fromEntity(cart);
     }
 }

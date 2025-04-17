@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.point.PointValidationService;
 import kr.hhplus.be.server.domain.point.TransactionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

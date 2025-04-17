@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.api.point;
 
-import kr.hhplus.be.server.application.common.dto.ApiResponse;
+import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.point.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

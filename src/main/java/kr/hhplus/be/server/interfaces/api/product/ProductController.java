@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.interfaces.api.product;
 
-import kr.hhplus.be.server.application.common.dto.ApiResponse;
-import kr.hhplus.be.server.application.product.ProductFacade;
+import kr.hhplus.be.server.application.common.ApiResponse;
+import kr.hhplus.be.server.application.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +15,7 @@ import java.util.Map;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductFacade productFacade;
+    private final ProductService productFacade;
 
     @GetMapping
     public ApiResponse<List<ProductResponse>> lookupProducts() {

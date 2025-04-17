@@ -2,27 +2,27 @@ package kr.hhplus.be.server;
 
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
-import kr.hhplus.be.server.domain.cart.CartRepository;
+import kr.hhplus.be.server.infrastructure.cart.CartJpaRepository;
 import kr.hhplus.be.server.domain.category.Category;
-import kr.hhplus.be.server.domain.category.CategoryRepository;
+import kr.hhplus.be.server.infrastructure.category.CategoryJpaRepository;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.inventory.Inventory;
-import kr.hhplus.be.server.domain.inventory.InventoryRepository;
+import kr.hhplus.be.server.infrastructure.inventory.InventoryJpaRepository;
 import kr.hhplus.be.server.domain.item.Item;
-import kr.hhplus.be.server.domain.item.ItemRepository;
+import kr.hhplus.be.server.infrastructure.item.ItemJpaRepository;
 import kr.hhplus.be.server.domain.item.SaleStatus;
 import kr.hhplus.be.server.domain.option.Option;
-import kr.hhplus.be.server.domain.option.OptionRepository;
+import kr.hhplus.be.server.infrastructure.option.OptionJpaRepository;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
-import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.point.UserPoint;
-import kr.hhplus.be.server.domain.point.UserPointRepository;
+import kr.hhplus.be.server.infrastructure.point.UserPointJpaRepository;
 import kr.hhplus.be.server.domain.product.Product;
-import kr.hhplus.be.server.domain.product.ProductRepository;
+import kr.hhplus.be.server.infrastructure.product.ProductJpaRepository;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import kr.hhplus.be.server.interfaces.api.category.CategoryRequest;
 import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
 import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
@@ -42,15 +42,15 @@ import java.util.List;
 @Slf4j
 public class TestDataSeeder {
 
-    private final UserRepository userRepository;
-    private final UserPointRepository userPointRepository;
-    private final ProductRepository productRepository;
-    private final ItemRepository itemRepository;
-    private final OptionRepository optionRepository;
-    private final CategoryRepository categoryRepository;
-    private final OrderRepository orderRepository;
-    private final InventoryRepository inventoryRepository;
-    private final CartRepository cartRepository;
+    private final UserJpaRepository userJpaRepository;
+    private final UserPointJpaRepository userPointJpaRepository;
+    private final ProductJpaRepository productJpaRepository;
+    private final ItemJpaRepository itemJpaRepository;
+    private final OptionJpaRepository optionJpaRepository;
+    private final CategoryJpaRepository categoryJpaRepository;
+    private final OrderJpaRepository orderJpaRepository;
+    private final InventoryJpaRepository inventoryJpaRepository;
+    private final CartJpaRepository cartJpaRepository;
 
     @Transactional  // 트랜잭션 보장
     public void testSeedData() {
@@ -59,26 +59,26 @@ public class TestDataSeeder {
 
         // 사용자 및 UserPoint 시딩
         User managedUser;
-        if (userRepository.count() == 0) {
+        if (userJpaRepository.count() == 0) {
             User user = User.builder()
                     .username("defaultUser")
                     .build();
-            managedUser = userRepository.saveAndFlush(user);
+            managedUser = userJpaRepository.saveAndFlush(user);
 
             UserPoint userPoint = new UserPoint();
             userPoint.setUser(managedUser);
             userPoint.chargePoints(new Money(BigDecimal.valueOf(100000)));
-            userPointRepository.save(userPoint);
+            userPointJpaRepository.save(userPoint);
         } else {
-            managedUser = userRepository.findAll().get(0);
+            managedUser = userJpaRepository.findAll().get(0);
         }
 
         // 상품 시딩
         Product product;
-        if (productRepository.count() == 0) {
+        if (productJpaRepository.count() == 0) {
             CategoryRequest categoryRequest = new CategoryRequest("일반");
             Category category = Category.fromDto(categoryRequest);
-            categoryRepository.save(category);
+            categoryJpaRepository.save(category);
 
             ItemRequest itemRequest = new ItemRequest(
                     "AirForce",
@@ -92,30 +92,30 @@ public class TestDataSeeder {
                     new Money(BigDecimal.valueOf(1000))
             );
             Item item = Item.fromDto(itemRequest, category);
-            itemRepository.save(item);
+            itemJpaRepository.save(item);
             Option option = Option.fromDto(optionRequest);
-            optionRepository.save(option);
+            optionJpaRepository.save(option);
             product = new Product(item, option);
-            productRepository.save(product);
+            productJpaRepository.save(product);
         } else {
-            product = productRepository.findAll().get(0);
+            product = productJpaRepository.findAll().get(0);
         }
 
         // 재고 시딩
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productJpaRepository.findAll();
         for (Product prod : products) {
-            if (inventoryRepository.findByProductId(prod.getId()).isEmpty()) {
+            if (inventoryJpaRepository.findByProductId(prod.getId()).isEmpty()) {
                 Inventory inventory = Inventory.builder()
                         .productId(prod.getId())
                         .quantity(10000)
                         .build();
-                inventoryRepository.save(inventory);
+                inventoryJpaRepository.save(inventory);
             }
         }
 
         // 주문 시딩
-        if (orderRepository.count() == 0) {
-            Item item = itemRepository.findById(product.getItem().getId())
+        if (orderJpaRepository.count() == 0) {
+            Item item = itemJpaRepository.findById(product.getItem().getId())
                     .orElseThrow(() -> new IllegalStateException("Item not found for product id: " + product.getId()));
             int quantity = 2;
             Money unitPoint = item.getBasePrice();
@@ -128,15 +128,15 @@ public class TestDataSeeder {
             String orderNumber = "ORD-" + System.currentTimeMillis();
             Order order = new Order(managedUser, orderNumber, totalPoint, OrderStatus.CREATED);
             order.addOrderProduct(orderProduct);
-            orderRepository.save(order);
+            orderJpaRepository.save(order);
         }
 
         // 장바구니 시딩
-        if (cartRepository.count() == 0) {
+        if (cartJpaRepository.count() == 0) {
             Cart cart = new Cart(managedUser.getId());
             CartItem cartItem = new CartItem(product, 3, new Money(BigDecimal.valueOf(10000)));
             cart.addItemInCart(cartItem);
-            cartRepository.save(cart);
+            cartJpaRepository.save(cart);
         }
     }
 }

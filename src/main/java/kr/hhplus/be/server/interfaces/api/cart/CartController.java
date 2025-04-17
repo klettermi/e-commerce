@@ -2,7 +2,7 @@ package kr.hhplus.be.server.interfaces.api.cart;
 
 
 import kr.hhplus.be.server.application.cart.CartService;
-import kr.hhplus.be.server.application.common.dto.ApiResponse;
+import kr.hhplus.be.server.application.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

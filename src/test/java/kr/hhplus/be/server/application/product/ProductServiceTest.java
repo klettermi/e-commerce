@@ -6,7 +6,7 @@ import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.item.SaleStatus;
 import kr.hhplus.be.server.domain.option.Option;
 import kr.hhplus.be.server.domain.product.Product;
-import kr.hhplus.be.server.domain.product.ProductRepository;
+import kr.hhplus.be.server.infrastructure.product.ProductJpaRepository;
 import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
 import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
 import kr.hhplus.be.server.interfaces.api.product.ProductResponse;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
     @Mock
-    private ProductRepository productRepository;
+    private ProductJpaRepository productJpaRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -81,7 +81,7 @@ class ProductServiceTest {
     void testLookupProducts() {
         // given
         List<Product> products = Arrays.asList(product1, product2);
-        when(productRepository.findAll()).thenReturn(products);
+        when(productJpaRepository.findAll()).thenReturn(products);
 
 
         // when
