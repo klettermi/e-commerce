@@ -2,6 +2,9 @@ package kr.hhplus.be.server.application.payment;
 
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
+import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.infrastructure.payment.PaymentJpaRepository;
@@ -17,16 +20,16 @@ import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-    private final OrderJpaRepository orderJpaRepository;
-    private final UserPointJpaRepository userPointJpaRepository;
-    private final PaymentJpaRepository paymentJpaRepository;
+    private final OrderRepository orderRepository;
+    private final PointRepository pointRepository;
+    private final PaymentRepository paymentRepository;
 
     @Transactional
     public Payment processPayment(Long orderId, Long userId, Long couponId) throws InvalidStateException {
-        Order order = orderJpaRepository.findById(orderId)
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
 
-        UserPoint userPoint = userPointJpaRepository.findByUserId(userId)
+        UserPoint userPoint = pointRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for user id: " + userId));
 
         Money requiredPoints = order.getTotalPoint();
@@ -36,10 +39,10 @@ public class PaymentService {
         }
 
         userPoint.usePoints(requiredPoints);
-        userPointJpaRepository.save(userPoint);
+        pointRepository.save(userPoint);
 
         order.markAsPaid();
-        orderJpaRepository.save(order);
+        orderRepository.save(order);
 
         PaymentResponse paymentResponse = new PaymentResponse(
                 orderId,
@@ -48,7 +51,7 @@ public class PaymentService {
         );
 
         Payment payment = Payment.toEntity(paymentResponse, order);
-        paymentJpaRepository.save(payment);
+        paymentRepository.save(payment);
         return payment;
     }
 }

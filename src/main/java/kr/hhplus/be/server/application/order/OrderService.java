@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.inventory.InventoryChecker;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
+import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
@@ -20,7 +21,7 @@ import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    private final OrderJpaRepository orderJpaRepository;
+    private final OrderRepository orderRepository;
     private final InventoryChecker inventoryChecker;
 
     public Order placeOrder(User user, String orderNumber, List<OrderProductRequest> orderRequest) throws InvalidStateException {
@@ -51,7 +52,7 @@ public class OrderService {
             }
         }
 
-        order = orderJpaRepository.save(order);
+        order = orderRepository.save(order);
 
         // 재고 차감
         for (OrderProduct orderProduct : order.getOrderProducts()) {
@@ -66,7 +67,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Order getOrderById(Long orderId) {
-        return orderJpaRepository.findById(orderId)
+        return orderRepository.findById(orderId)
                 .orElseThrow(() -> new DomainExceptions.EntityNotFoundException("Order not found with id: " + orderId));
     }
 }

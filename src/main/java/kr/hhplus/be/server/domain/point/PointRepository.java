@@ -9,4 +9,11 @@ public interface PointRepository {
     List<PointHistory> findByUserId(long userId);
 
     Optional<UserPoint> findByUserId(@Param("userId") Long userId);;
+
+    void save(UserPoint userPoint);
+
+    Optional<UserPoint> findById(long userId);
+
+    void save(PointHistory pointHistory);
+
 }

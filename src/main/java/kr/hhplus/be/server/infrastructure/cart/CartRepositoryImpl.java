@@ -11,10 +11,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CartRepositoryImpl implements CartRepository {
     private final CartJpaRepository cartRepo;
-    private final CartItemJpaRepository itemRepo;
+    private final CartItemJpaRepository cartItemRepo;
 
     @Override
     public Optional<Cart> findByUserId(Long userId) {
         return cartRepo.findByUserId(userId);
+    }
+
+    @Override
+    public Cart save(Cart cart) {
+        return cartRepo.save(cart);
     }
 }

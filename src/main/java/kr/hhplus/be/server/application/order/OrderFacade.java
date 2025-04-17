@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.order;
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import kr.hhplus.be.server.interfaces.api.order.OrderResponse;
@@ -17,7 +18,7 @@ import java.util.List;
 public class OrderFacade {
 
     private final OrderService orderService;
-    private final UserJpaRepository userJpaRepository;
+    private final UserRepository userJpaRepository;
 
     public OrderResponse createOrder(Long userId, List<OrderProductRequest> orderProductRequests) {
         // 사용자 조회: 존재하지 않으면 도메인 예외 발생

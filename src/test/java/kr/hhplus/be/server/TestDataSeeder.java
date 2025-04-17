@@ -50,7 +50,7 @@ public class TestDataSeeder {
     private final CategoryJpaRepository categoryJpaRepository;
     private final OrderJpaRepository orderJpaRepository;
     private final InventoryJpaRepository inventoryJpaRepository;
-    private final CartJpaRepository cartJpaRepository;
+    private final CartJpaRepository cartRepository;
 
     @Transactional  // 트랜잭션 보장
     public void testSeedData() {
@@ -132,11 +132,11 @@ public class TestDataSeeder {
         }
 
         // 장바구니 시딩
-        if (cartJpaRepository.count() == 0) {
+        if (cartRepository.count() == 0) {
             Cart cart = new Cart(managedUser.getId());
             CartItem cartItem = new CartItem(product, 3, new Money(BigDecimal.valueOf(10000)));
             cart.addItemInCart(cartItem);
-            cartJpaRepository.save(cart);
+            cartRepository.save(cart);
         }
     }
 }

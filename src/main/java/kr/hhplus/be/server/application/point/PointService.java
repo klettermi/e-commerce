@@ -2,10 +2,12 @@ package kr.hhplus.be.server.application.point;
 
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
-import kr.hhplus.be.server.domain.point.*;
+import kr.hhplus.be.server.domain.point.PointHistory;
+import kr.hhplus.be.server.domain.point.PointRepository;
+import kr.hhplus.be.server.domain.point.TransactionType;
+import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.infrastructure.point.PointHistoryJpaRepository;
-import kr.hhplus.be.server.infrastructure.point.UserPointJpaRepository;
+import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
 import kr.hhplus.be.server.interfaces.api.point.PointResponse;
@@ -16,26 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.EntityNotFoundException;
 
 @Service
 @RequiredArgsConstructor
 public class PointService {
-    private final UserPointJpaRepository userPointJpaRepository;
-    private final PointHistoryJpaRepository pointHistoryJpaRepository;
-    private final UserJpaRepository userJpaRepository;
+    private final PointRepository pointRepository;
+    private final UserRepository userRepository;
     private final PointValidationService validationService;
 
     @Transactional(readOnly = true)
     public PointResponse getPoint(long userId) {
-        UserPoint userPoint = userPointJpaRepository.findById(userId)
+        UserPoint userPoint = pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
         return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
     }
 
     @Transactional(readOnly = true)
     public List<PointHistoryResponse> getPointHistory(long userId) {
-        List<PointHistory> histories = pointHistoryJpaRepository.findByUserId(userId);
+        List<PointHistory> histories = pointRepository.findByUserId(userId);
         return histories.stream()
                 .map(PointHistory::toDto)
                 .collect(Collectors.toList());
@@ -51,18 +52,18 @@ public class PointService {
         // 유효성 검사
         validationService.validate(amount, TransactionType.CHARGE);
 
-        User user = userJpaRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
         // 충전 전 현재 포인트 조회
-        UserPoint userPoint = userPointJpaRepository.findById(userId)
+        UserPoint userPoint = pointRepository.findById(userId)
                 .orElseThrow(() -> new DomainExceptions.InvalidStateException("UserPoint not found for id: " + userId));
 
         userPoint.chargePoints(amount);
-        userPointJpaRepository.save(userPoint);
+        pointRepository.save(userPoint);
 
         // 포인트 충전 이력 기록
         PointHistory history = PointHistory.createChargeHistory(user, amount);
-        pointHistoryJpaRepository.save(history);
+        pointRepository.save(history);
 
         return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
     }
@@ -76,9 +77,9 @@ public class PointService {
     public PointResponse usePoint(Long userId, Money amount) {
         validationService.validate(amount, TransactionType.USE);
 
-        User user = userJpaRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
-        UserPoint userPoint = userPointJpaRepository.findById(userId)
+        UserPoint userPoint = pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
         if (amount.compareTo(userPoint.getPointBalance()) > 0) {
@@ -86,10 +87,10 @@ public class PointService {
         }
 
         userPoint.usePoints(amount);
-        userPointJpaRepository.save(userPoint);
+        pointRepository.save(userPoint);
 
         PointHistory history = PointHistory.createUseHistory(user, amount);
-        pointHistoryJpaRepository.save(history);
+        pointRepository.save(history);
 
         return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
     }
