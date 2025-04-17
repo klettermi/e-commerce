@@ -1,18 +1,19 @@
 package kr.hhplus.be.server.domain.inventory;
 
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class InventoryService implements InventoryChecker {
 
     private final InventoryRepository inventoryRepository;
 
-    public InventoryService(InventoryRepository inventoryRepository) {
-        this.inventoryRepository = inventoryRepository;
-    }
 
     @Override
+    @Transactional
     public boolean hasSufficientStock(Long productId, int quantity) {
         Inventory inventory = inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new DomainExceptions.EntityNotFoundException("Inventory not found for productId: " + productId));
@@ -20,6 +21,7 @@ public class InventoryService implements InventoryChecker {
     }
 
     @Override
+    @Transactional
     public void decreaseStock(Long productId, int quantity) {
         Inventory inventory = inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new DomainExceptions.EntityNotFoundException("Inventory not found for productId: " + productId));

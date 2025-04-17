@@ -1,0 +1,91 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'io.freefair.lombok' version '8.3'
+	id 'org.flywaydb.flyway' version '10.20.1'
+}
+
+group = 'kr.hhplus.be'
+
+// Use a helper method to get the current Git hash for your version
+def getGitHash() {
+	def stdout = new ByteArrayOutputStream()
+	exec {
+		commandLine 'git', 'rev-parse', '--short', 'HEAD'
+		standardOutput = stdout
+	}
+	return stdout.toString().trim()
+}
+version = getGitHash()
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+// Use Spring Dependency Management to import a BOM if needed.
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.0"
+	}
+}
+
+dependencies {
+	// Spring Boot Starters
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// MySQL Connector for application runtime
+	runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+	implementation 'mysql:mysql-connector-java:8.0.33'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok:1.18.26'
+	annotationProcessor 'org.projectlombok:lombok:1.18.26'
+	testCompileOnly 'org.projectlombok:lombok:1.18.26'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+	// Testing dependencies including Testcontainers
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:mysql'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Swagger UI for API documentation
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+	// RestAssured for end-to-end tests
+	testImplementation 'io.rest-assured:rest-assured:5.4.0'
+	testImplementation 'io.rest-assured:json-path:5.4.0'
+	testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
+	// Flyway Core for database migrations
+	implementation 'org.flywaydb:flyway-core:10.20.1'
+	implementation 'org.flywaydb:flyway-mysql:10.20.1'
+	runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+
+	// P6Spy for SQL logging
+	implementation 'p6spy:p6spy:3.9.1'
+	testImplementation 'p6spy:p6spy:3.9.1'
+
+}
+
+flyway {
+	url = 'jdbc:mysql://localhost:3306/hhplus?characterEncoding=UTF-8&serverTimezone=UTC'
+	user = 'application'
+	password = 'application'
+	driver = 'com.mysql.cj.jdbc.Driver'
+	locations = ['classpath:db/migration']
+	baselineOnMigrate = true
+	validateOnMigrate = false
+}
+
+test {
+	useJUnitPlatform()
+	systemProperty 'user.timezone', 'UTC'
+}

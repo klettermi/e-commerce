@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.interfaces.advice;
 
-import kr.hhplus.be.server.application.common.dto.ApiResponse;
-import kr.hhplus.be.server.application.common.dto.ErrorResponse;
+import kr.hhplus.be.server.application.common.ApiResponse;
+import kr.hhplus.be.server.application.common.ErrorResponse;
 import kr.hhplus.be.server.domain.common.exception.ApplicationException;
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.common.exception.ErrorCodes;
