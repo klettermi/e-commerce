@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.cart;
 
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
+import kr.hhplus.be.server.domain.cart.CartRepository;
 import kr.hhplus.be.server.infrastructure.cart.CartJpaRepository;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.cart.CartResponse;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.*;
 class CartServiceTest {
 
     @Mock
-    private CartJpaRepository cartRepository;
+    private CartRepository cartRepository;
 
     @InjectMocks
     private CartService cartService;
@@ -72,7 +73,7 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
 
         CartResponse result = cartService.addItem(userId, newItem);
@@ -82,7 +83,7 @@ class CartServiceTest {
         assertEquals(1001L, addedItem.productId(), "상품 ID가 동일해야 합니다.");
         assertEquals("Product 1", addedItem.productName(), "상품명이 동일해야 합니다.");
         assertEquals(2, addedItem.quantity(), "수량이 2여야 합니다.");
-        assertEquals(new Money(BigDecimal.valueOf(10000)), addedItem.price(), "가격이 50.0이어야 합니다.");
+        assertEquals(Money.of(10000), addedItem.price(), "가격이 50.0이어야 합니다.");
         verify(cartRepository).save(cart);
     }
 
@@ -95,7 +96,7 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
         cart.addItemInCart(existingItem);
 
@@ -107,7 +108,7 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(3)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
 
         CartResponse result = cartService.addItem(userId, newItem);
@@ -126,7 +127,7 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
         cart.addItemInCart(item);
 
@@ -138,7 +139,7 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(5)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
 
         CartResponse result = cartService.updateItem(userId, updatedItem);
@@ -156,13 +157,13 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
         CartItem item2 = CartItem.builder()
                 .productId(1002L)
                 .productName("Product 2")
                 .quantity(3)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
         cart.addItemInCart(item1);
         cart.addItemInCart(item2);
@@ -185,13 +186,13 @@ class CartServiceTest {
                 .productId(1001L)
                 .productName("Product 1")
                 .quantity(2)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
         CartItem item2 = CartItem.builder()
                 .productId(1002L)
                 .productName("Product 2")
                 .quantity(3)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
         cart.addItemInCart(item1);
         cart.addItemInCart(item2);

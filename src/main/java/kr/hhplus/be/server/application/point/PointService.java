@@ -8,7 +8,6 @@ import kr.hhplus.be.server.domain.point.TransactionType;
 import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
 import kr.hhplus.be.server.interfaces.api.point.PointResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,7 @@ public class PointService {
     public PointResponse getPoint(long userId) {
         UserPoint userPoint = pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
-        return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +64,7 @@ public class PointService {
         PointHistory history = PointHistory.createChargeHistory(user, amount);
         pointRepository.save(history);
 
-        return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 
     /**
@@ -92,6 +91,6 @@ public class PointService {
         PointHistory history = PointHistory.createUseHistory(user, amount);
         pointRepository.save(history);
 
-        return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 }

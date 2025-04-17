@@ -22,7 +22,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -80,14 +79,6 @@ public class ApiE2ETests {
     private TestDataSeeder testDataSeeder;
 
     @BeforeAll
-    static void ensureSpyLogDirectory() {
-        File dir = new File("logs");
-        if (!dir.exists()) {
-            dir.mkdirs(); // logs 디렉토리 없으면 자동 생성
-        }
-    }
-
-    @BeforeAll
     void init() {
         testDataSeeder.testSeedData();
     }
@@ -100,7 +91,7 @@ public class ApiE2ETests {
 
 
     @Test
-    void 상품_조회_API() {
+    void get_products_API() {
         given()
                 .when().get("/api/products")
                 .then()
@@ -109,7 +100,7 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 인기상품_조회_API() {
+    void get_popular_products_API() {
         given()
                 .when().get("/api/products/popular")
                 .then().statusCode(200)
@@ -117,7 +108,7 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 잔액_조회_API() {
+    void get_user_point_API() {
         given()
                 .when().get("/api/points/1")
                 .then().statusCode(200)
@@ -125,19 +116,19 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 잔액_충전_API() {
+    void charge_point_API() {
         given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("userId", 1, "amount", new Money(BigDecimal.valueOf(1500))))
+                .body(Map.of("userId", 1, "amount", Money.of(1500)))
                 .when().post("/api/points/charge")
                 .then().statusCode(200)
                 .body("data.userId", equalTo(1));
     }
 
     @Test
-    void 주문_생성_API_테스트() {
+    void create_order() {
         List<Map<String, Object>> orderItems = List.of(
-                Map.of("productId", 1, "quantity", 2, "unitPoint", new Money(BigDecimal.valueOf(1500)))
+                Map.of("productId", 1, "quantity", 2, "unitPoint", Money.of(1500))
         );
 
 
@@ -157,10 +148,10 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 결제_API_테스트() {
+    void payment() {
         // 1. 주문 생성
         List<Map<String, Object>> orderItems = List.of(
-                Map.of("productId", 1, "quantity", 2, "unitPoint", new Money(BigDecimal.valueOf(500)))
+                Map.of("productId", 1, "quantity", 2, "unitPoint", Money.of(500))
         );
 
         Response orderResponse = given()
@@ -191,7 +182,7 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 쿠폰_조회_API() {
+    void get_coupon() {
         given()
                 .queryParam("userId", 1)
                 .when().get("/api/coupons")
@@ -200,7 +191,7 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 쿠폰_발급_API() {
+    void issue_coupon() {
         given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("userId", 1, "couponId", 3))
@@ -209,14 +200,14 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 포인트_히스토리_API() {
+    void point_history() {
         given()
                 .when().get("/api/points/history/1")
                 .then().statusCode(200);
     }
 
     @Test
-    void 장바구니_조회_API() {
+    void get_cart() {
         given()
                 .when().get("/api/cart/1")
                 .then().statusCode(200);
@@ -224,12 +215,12 @@ public class ApiE2ETests {
 
 
     @Test
-    void 장바구니_아이템_추가_API() {
+    void add_item_in_cart() {
         Map<String, Object> newItem = Map.of(
                 "productId", 1001,
                 "productName", "Test Product",
                 "quantity", 2,
-                "price", new Money(BigDecimal.valueOf(50000))
+                "price", Money.of(50000)
         );
 
         given()
@@ -255,7 +246,7 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 장바구니_아이템_수정_API() {
+    void update_cart_item() {
         Long userId = 1L;
 
         // 1. 장바구니 비우기 (테스트 환경 초기화)
@@ -271,7 +262,7 @@ public class ApiE2ETests {
                 "productId", 1,
                 "productName", "Test Product",
                 "quantity", 2,
-                "price", new Money(BigDecimal.valueOf(50000))
+                "price", Money.of(50000)
         );
         given()
                 .contentType(ContentType.JSON)
@@ -299,7 +290,7 @@ public class ApiE2ETests {
 
 
     @Test
-    void 장바구니_아이템_제거_API() {
+    void remove_cart_item() {
         given()
                 .when()
                 .delete("/api/cart/1/items/1001")
@@ -309,19 +300,19 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 장바구니_전체_비우기_API() {
+    void clear_cart() {
         // 테스트를 위해 두 개의 다른 아이템 추가
         Map<String, Object> newItem1 = Map.of(
                 "productId", 1002,
                 "productName", "Product 2",
                 "quantity", 3,
-                "price", new Money(BigDecimal.valueOf(750000))
+                "price", Money.of(750000)
         );
         Map<String, Object> newItem2 = Map.of(
                 "productId", 1003,
                 "productName", "Product 3",
                 "quantity", 1,
-                "price", new Money(BigDecimal.valueOf(200000))
+                "price", Money.of(200000)
         );
         // 아이템 추가
         given()
@@ -348,9 +339,9 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 주문_상세_API_테스트() {
+    void get_order_detail() {
         List<Map<String, Object>> orderItems = List.of(
-                Map.of("productId", 1, "quantity", 2, "unitPoint", new Money(BigDecimal.valueOf(500)))
+                Map.of("productId", 1, "quantity", 2, "unitPoint", Money.of(500))
         );
 
         Response createResponse = given()
@@ -368,7 +359,7 @@ public class ApiE2ETests {
 
         // 응답의 id 값을 int로 읽음
         int orderIdInt = createResponse.path("data.id");
-        Long orderId = Long.valueOf(orderIdInt);
+        Long orderId = (long) orderIdInt;
 
         given()
                 .when()
@@ -384,7 +375,7 @@ public class ApiE2ETests {
 
 
     @Test
-    void 사용자_조회_API() {
+    void get_user() {
         given()
                 .when().get("/api/users/1")
                 .then().statusCode(200)
@@ -392,7 +383,7 @@ public class ApiE2ETests {
     }
 
     @Test
-    void 재고_조회_API() {
+    void get_inventory() {
         given()
                 .when().get("/api/inventory/1")
                 .then().statusCode(200)

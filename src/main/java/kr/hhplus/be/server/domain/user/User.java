@@ -3,6 +3,7 @@ package kr.hhplus.be.server.domain.user;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.point.UserPoint;
+import kr.hhplus.be.server.infrastructure.user.UserRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,4 +27,10 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user")
     private UserPoint userPoint;
 
+    public static User fromDto(UserRequest userRequest) {
+        User user = new User();
+        user.id = userRequest.id();
+        user.username = userRequest.username();
+        return user;
+    }
 }

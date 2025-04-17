@@ -24,7 +24,7 @@ class CartTest {
                 .productId(1L)
                 .productName("Test Product")
                 .quantity(2)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
 
         // when: 장바구니에 아이템 추가
@@ -41,14 +41,14 @@ class CartTest {
                 .productId(1L)
                 .productName("Test Product 1")
                 .quantity(1)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
 
         CartItem item2 = CartItem.builder()
                 .productId(2L)
                 .productName("Test Product 2")
                 .quantity(3)
-                .price(new Money(BigDecimal.valueOf(10000)))
+                .price(Money.of(10000))
                 .build();
 
         // when: 두 아이템을 장바구니에 추가

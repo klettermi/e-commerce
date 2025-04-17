@@ -1,132 +1,113 @@
 package kr.hhplus.be.server.domain.inventory;
 
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
-import kr.hhplus.be.server.infrastructure.inventory.InventoryJpaRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class InventoryCheckerTest {
+@ExtendWith(MockitoExtension.class)
+class InventoryServiceTest {
 
     @Mock
-    private InventoryJpaRepository inventoryJpaRepository;
+    private InventoryRepository inventoryRepository;
 
     @InjectMocks
     private InventoryService inventoryService;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    void testHasSufficientStock_whenStockIsSufficient() {
+    void hasSufficientStock_whenStockIsSufficient_returnsTrue() {
         // given
         Long productId = 1L;
-        int requiredQuantity = 5;
-        // Inventory 엔티티 생성 (예: 초기 재고 10)
-        Inventory inventory = Inventory.builder()
+        Inventory inv = Inventory.builder()
                 .productId(productId)
                 .quantity(10)
                 .build();
-        when(inventoryJpaRepository.findByProductId(productId)).thenReturn(Optional.of(inventory));
+        when(inventoryRepository.findByProductId(productId)).thenReturn(Optional.of(inv));
 
         // when
-        boolean result = inventoryService.hasSufficientStock(productId, requiredQuantity);
+        boolean ok = inventoryService.hasSufficientStock(productId, 5);
 
         // then
-        assertThat(result).isTrue();
+        assertThat(ok).isTrue();
     }
 
     @Test
-    void testHasSufficientStock_whenStockIsInsufficient() {
+    void hasSufficientStock_whenStockIsInsufficient_returnsFalse() {
         // given
         Long productId = 1L;
-        int requiredQuantity = 5;
-        Inventory inventory = Inventory.builder()
+        Inventory inv = Inventory.builder()
                 .productId(productId)
                 .quantity(3)
                 .build();
-        when(inventoryJpaRepository.findByProductId(productId)).thenReturn(Optional.of(inventory));
+        when(inventoryRepository.findByProductId(productId)).thenReturn(Optional.of(inv));
 
         // when
-        boolean result = inventoryService.hasSufficientStock(productId, requiredQuantity);
+        boolean ok = inventoryService.hasSufficientStock(productId, 5);
 
         // then
-        assertThat(result).isFalse();
+        assertThat(ok).isFalse();
     }
 
     @Test
-    void testHasSufficientStock_whenInventoryNotFound() {
-        // given
-        Long productId = 1L;
-        int requiredQuantity = 5;
-        when(inventoryJpaRepository.findByProductId(anyLong())).thenReturn(Optional.empty());
+    void hasSufficientStock_whenInventoryNotFound_throwsException() {
+        when(inventoryRepository.findByProductId(anyLong()))
+                .thenReturn(Optional.empty());
 
-        // when & then
-        assertThrows(DomainExceptions.EntityNotFoundException.class, () ->
-                inventoryService.hasSufficientStock(productId, requiredQuantity));
+        assertThatThrownBy(() ->
+                inventoryService.hasSufficientStock(1L, 5))
+                .isInstanceOf(DomainExceptions.EntityNotFoundException.class)
+                .hasMessageContaining("Inventory not found");
     }
 
     @Test
-    void testDecreaseStock_success() {
+    void decreaseStock_success_updatesAndSaves() {
         // given
         Long productId = 1L;
-        int initialQuantity = 10;
-        int decreaseQuantity = 3;
-        Inventory inventory = Inventory.builder()
+        Inventory inv = Inventory.builder()
                 .productId(productId)
-                .quantity(initialQuantity)
+                .quantity(10)
                 .build();
-        when(inventoryJpaRepository.findByProductId(productId)).thenReturn(Optional.of(inventory));
+        when(inventoryRepository.findByProductId(productId)).thenReturn(Optional.of(inv));
 
         // when
-        inventoryService.decreaseStock(productId, decreaseQuantity);
+        inventoryService.decreaseStock(productId, 3);
 
         // then
-        // Inventory 엔티티의 decreaseStock 메서드가 정상적으로 차감하여 재고가 initialQuantity - decreaseQuantity가 되어야 함
-        assertEquals(initialQuantity - decreaseQuantity, inventory.getQuantity());
-        // 재고 변경 후 save가 호출되어야 함
-        verify(inventoryJpaRepository, times(1)).save(inventory);
+        assertThat(inv.getQuantity()).isEqualTo(7);
+        verify(inventoryRepository).save(inv);
     }
 
     @Test
-    void testDecreaseStock_whenInventoryNotFound() {
-        // given
-        Long productId = 1L;
-        int decreaseQuantity = 3;
-        when(inventoryJpaRepository.findByProductId(productId)).thenReturn(Optional.empty());
+    void decreaseStock_whenInventoryNotFound_throwsException() {
+        when(inventoryRepository.findByProductId(1L))
+                .thenReturn(Optional.empty());
 
-        // when & then
-        assertThrows(DomainExceptions.EntityNotFoundException.class, () ->
-                inventoryService.decreaseStock(productId, decreaseQuantity));
+        assertThatThrownBy(() ->
+                inventoryService.decreaseStock(1L, 3))
+                .isInstanceOf(DomainExceptions.EntityNotFoundException.class);
     }
 
     @Test
-    void testDecreaseStock_whenInsufficientStock_thenThrowsException() {
+    void decreaseStock_whenInsufficientStock_throwsException() {
         // given
         Long productId = 1L;
-        int initialQuantity = 2;
-        int decreaseQuantity = 3;
-        Inventory inventory = Inventory.builder()
+        Inventory inv = Inventory.builder()
                 .productId(productId)
-                .quantity(initialQuantity)
+                .quantity(2)
                 .build();
-        when(inventoryJpaRepository.findByProductId(productId)).thenReturn(Optional.of(inventory));
+        when(inventoryRepository.findByProductId(productId))
+                .thenReturn(Optional.of(inv));
 
-        // when & then
-        // Inventory 엔티티의 decreaseStock 메서드 내에서 재고 부족 시 DomainExceptions.InvalidStateException을 던지도록 구현되었다고 가정
-        assertThrows(DomainExceptions.InvalidStateException.class, () ->
-                inventoryService.decreaseStock(productId, decreaseQuantity));
+        // when / then
+        assertThatThrownBy(() ->
+                inventoryService.decreaseStock(productId, 3))
+                .isInstanceOf(DomainExceptions.InvalidStateException.class)
+                .hasMessageContaining("재고 부족: productId="+productId);
     }
 }

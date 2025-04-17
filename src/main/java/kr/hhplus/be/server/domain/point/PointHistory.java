@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "point_histories")
 @NoArgsConstructor
+@Getter
 public class PointHistory extends BaseEntity {
 
     @Id

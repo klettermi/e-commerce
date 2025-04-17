@@ -24,12 +24,12 @@ class ProductTest {
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
-                new Money(BigDecimal.valueOf(10000)),
+                Money.of(10000),
                 LocalDateTime.now()
         );
         OptionRequest optionRequest = new OptionRequest(
                 "Black",
-                new Money(BigDecimal.valueOf(500))
+                Money.of(500)
         );
 
         Item item = Item.fromDto(itemRequest, category);
@@ -40,7 +40,7 @@ class ProductTest {
         Money finalPrice = product.calculateFinalPrice();
 
         // then
-        assertEquals(0, new Money(BigDecimal.valueOf(10500)).compareTo(finalPrice), "상품의 가격은 10500 이어야 합니다.");
+        assertEquals(Money.of(10500), finalPrice, "상품의 가격은 10500 이어야 합니다.");
     }
 
     @Test
@@ -51,12 +51,12 @@ class ProductTest {
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
-                new Money(BigDecimal.valueOf(10000)),
+                Money.of(10000),
                 LocalDateTime.now()
         );
         OptionRequest optionRequest = new OptionRequest(
                 "White240",
-                new Money(BigDecimal.valueOf(500))
+                Money.of(500)
         );
 
         Item item = Item.fromDto(itemRequest, category);
@@ -70,6 +70,6 @@ class ProductTest {
         assertNull(dto.id(), "Not persisted, so id should be null.");
         assertEquals("AirForce", dto.itemName(), "Item name should match.");
         assertEquals("White240", dto.optionName(), "Option name should match.");
-        assertEquals(0, new Money(BigDecimal.valueOf(10500)).compareTo(dto.finalPrice()), "상품의 최종 가격은 10500이어야 합니다.");
+        assertEquals(Money.of(10500), dto.finalPrice(), "상품의 최종 가격은 10500이어야 합니다.");
     }
 }

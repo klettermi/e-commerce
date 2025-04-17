@@ -5,19 +5,19 @@ import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ItemTest {
 
     @Test
-    void fromDto_정상적으로_Item_생성() {
+    void fromDto_createsItemSuccessfully() {
         String name = "Test Item";
         String description = "This is a test item description";
         SaleStatus saleStatus = SaleStatus.ON_SALE;
-        Money basePrice = new Money(BigDecimal.valueOf(1000));
+        Money basePrice = Money.of(1000);
         LocalDateTime saleStartDate = LocalDateTime.now();
 
         ItemRequest dto = new ItemRequest(name, description, saleStatus, basePrice, saleStartDate);

@@ -14,6 +14,10 @@ public record Money(BigDecimal amount) {
         }
     }
 
+    public static Money of(int number) {
+        return new Money(BigDecimal.valueOf(number));
+    }
+
     public Money add(Money other) {
         return new Money(this.amount.add(other.amount));
     }

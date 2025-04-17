@@ -1,16 +1,14 @@
 package kr.hhplus.be.server.domain.inventory;
 
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import org.junit.jupiter.api.Test;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.InvalidStateException;
 import static org.junit.jupiter.api.Assertions.*;
-
 
 public class InventoryTest {
 
     @Test
-    void 재고차감_정상처리() {
+    void decreaseStock_success() {
         // given: 초기 재고 10개
         Inventory inventory = Inventory.builder()
                 .productId(1L)
@@ -25,7 +23,7 @@ public class InventoryTest {
     }
 
     @Test
-    void 재고차감_재고부족_예외발생() {
+    void decreaseStock_insufficientStock_throwsException() {
         // given: 초기 재고 3개
         Inventory inventory = Inventory.builder()
                 .productId(1L)
@@ -40,7 +38,7 @@ public class InventoryTest {
     }
 
     @Test
-    void 재고차감_음수입력_예외발생() {
+    void decreaseStock_negativeQuantity_throwsException() {
         // given: 초기 재고 10개
         Inventory inventory = Inventory.builder()
                 .productId(1L)
@@ -56,7 +54,7 @@ public class InventoryTest {
     }
 
     @Test
-    void 재고증가_정상처리() {
+    void increaseStock_success() {
         // given: 초기 재고 10개
         Inventory inventory = Inventory.builder()
                 .productId(1L)
@@ -71,7 +69,7 @@ public class InventoryTest {
     }
 
     @Test
-    void 재고증가_음수입력_예외발생() {
+    void increaseStock_negativeQuantity_throwsException() {
         // given: 초기 재고 10개
         Inventory inventory = Inventory.builder()
                 .productId(1L)

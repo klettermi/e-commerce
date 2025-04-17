@@ -13,21 +13,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserPointTest {
 
-    // 수정: Money 타입으로 필드 값을 설정하도록 변경.
     private Money getPointBalance(UserPoint userPoint) throws Exception {
         Field field = UserPoint.class.getDeclaredField("pointBalance");
         field.setAccessible(true);
         return (Money) field.get(userPoint);
     }
 
-    private void setPointBalance(UserPoint userPoint, BigDecimal value) throws Exception {
+    private void setPointBalance(UserPoint userPoint, int value) throws Exception {
         Field field = UserPoint.class.getDeclaredField("pointBalance");
         field.setAccessible(true);
-        // BigDecimal을 Money로 변환해서 설정
-        field.set(userPoint, new Money(value));
+        field.set(userPoint, Money.of(value));
     }
 
-    private UserPoint createUserPointWithBalance(BigDecimal initialBalance) throws Exception {
+    private UserPoint createUserPointWithBalance(int initialBalance) throws Exception {
         UserPoint userPoint = new UserPoint();
         setPointBalance(userPoint, initialBalance);
         return userPoint;
@@ -36,25 +34,25 @@ class UserPointTest {
     @Test
     void testChargePointsValid() throws Exception {
         // given: 초기 포인트 잔액 1000
-        UserPoint userPoint = createUserPointWithBalance(BigDecimal.valueOf(1000));
+        UserPoint userPoint = createUserPointWithBalance(1000);
 
         // when: 500 포인트 충전
-        userPoint.chargePoints(new Money(BigDecimal.valueOf(500)));
+        userPoint.chargePoints(Money.of(500));
 
         // then: 잔액은 1000 + 500 = 1500이어야 함
-        assertEquals(new Money(BigDecimal.valueOf(1500)), getPointBalance(userPoint), "충전 후 잔액은 1500이어야 합니다.");
+        assertEquals(Money.of(1500), getPointBalance(userPoint), "충전 후 잔액은 1500이어야 합니다.");
     }
 
     @Test
     void testChargePointsInvalid() throws Exception {
         // given: 초기 잔액 1000
-        UserPoint userPoint = createUserPointWithBalance(BigDecimal.valueOf(1000));
+        UserPoint userPoint = createUserPointWithBalance(1000);
 
         // when & then: 0 또는 음수 금액 충전 시 예외 발생
         InvalidStateException ex1 = assertThrows(InvalidStateException.class, () -> userPoint.chargePoints(Money.ZERO));
         Assertions.assertEquals("충전 포인트는 0 이상이어야 합니다.", ex1.getMessage());
 
-        InvalidStateException ex2 = assertThrows(InvalidStateException.class, () -> userPoint.chargePoints(new Money(BigDecimal.valueOf(-100))));
+        InvalidStateException ex2 = assertThrows(InvalidStateException.class, () -> userPoint.chargePoints(Money.of(-100)));
         Assertions.assertEquals("금액은 0 이상이어야 합니다.", ex2.getMessage());
 
     }
@@ -62,22 +60,22 @@ class UserPointTest {
     @Test
     void testUsePointsValid() throws Exception {
         // given: 초기 잔액 1000
-        UserPoint userPoint = createUserPointWithBalance(BigDecimal.valueOf(1000));
+        UserPoint userPoint = createUserPointWithBalance(1000);
 
         // when: 400 포인트 사용
-        userPoint.usePoints(new Money(BigDecimal.valueOf(400)));
+        userPoint.usePoints(Money.of(400));
 
         // then: 잔액은 1000 - 400 = 600이어야 함
-        assertEquals(new Money(BigDecimal.valueOf(600)), getPointBalance(userPoint), "포인트 사용 후 잔액은 600이어야 합니다.");
+        assertEquals(new BigDecimal(600), getPointBalance(userPoint).amount(), "포인트 사용 후 잔액은 600이어야 합니다.");
     }
 
     @Test
     void testUsePointsInsufficient() throws Exception {
         // given: 초기 잔액 500
-        UserPoint userPoint = createUserPointWithBalance(BigDecimal.valueOf(500));
+        UserPoint userPoint = createUserPointWithBalance(500);
 
         // when & then: 사용 포인트가 잔액보다 많을 경우 예외 발생
-        InvalidStateException ex = assertThrows(InvalidStateException.class, () -> userPoint.usePoints(new Money(BigDecimal.valueOf(600))));
+        InvalidStateException ex = assertThrows(InvalidStateException.class, () -> userPoint.usePoints(Money.of(600)));
         assertEquals("금액은 0 이상이어야 합니다.", ex.getMessage());
     }
 }
