@@ -1,4 +1,3 @@
-// src/test/java/kr/hhplus/be/server/application/point/PointServiceTest.java
 package kr.hhplus.be.server.application.point;
 
 import kr.hhplus.be.server.domain.common.Money;
@@ -31,8 +30,11 @@ class PointServiceTest {
 
     @Mock PointRepository pointRepository;
     @Mock UserRepository userRepository;
-    @Mock PointValidationService validationService;
-    @InjectMocks PointService pointService;
+
+    @Mock
+    PointValidationService validationService;
+    @InjectMocks
+    PointService pointService;
 
     private final long USER_ID = 42L;
 

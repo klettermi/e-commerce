@@ -20,8 +20,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,12 @@ public class ApiE2ETests {
     static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
             .withDatabaseName("hhplus")
             .withUsername("application")
-            .withPassword("application");
+            .withPassword("application")
+            .withCopyFileToContainer(
+                    MountableFile.forHostPath("/Users/jangmi/mysql-conf/slow.cnf"),
+                    "/etc/mysql/conf.d/slow.cnf"
+            );
+
 
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {

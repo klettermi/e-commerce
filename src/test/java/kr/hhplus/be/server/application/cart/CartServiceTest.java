@@ -3,7 +3,6 @@ package kr.hhplus.be.server.application.cart;
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
 import kr.hhplus.be.server.domain.cart.CartRepository;
-import kr.hhplus.be.server.infrastructure.cart.CartJpaRepository;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.interfaces.api.cart.CartResponse;
 import kr.hhplus.be.server.interfaces.api.cart.CartItemRequest;
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

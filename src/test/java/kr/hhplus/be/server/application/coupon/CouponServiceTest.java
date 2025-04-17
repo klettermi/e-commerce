@@ -2,7 +2,6 @@ package kr.hhplus.be.server.application.coupon;
 
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
-import kr.hhplus.be.server.infrastructure.coupon.CouponJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
