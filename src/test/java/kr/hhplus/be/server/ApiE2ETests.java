@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestDataSeeder.class)
 @Testcontainers
 @TestPropertySource(properties = {
         "spring.profiles.active=test",
@@ -76,16 +75,6 @@ public class ApiE2ETests {
         registry.add("spring.datasource.username", () -> username);
         registry.add("spring.datasource.password", () -> password);
         registry.add("spring.datasource.driver-class-name", () -> "com.p6spy.engine.spy.P6SpyDriver");
-    }
-
-
-
-    @Autowired
-    private TestDataSeeder testDataSeeder;
-
-    @BeforeAll
-    void init() {
-        testDataSeeder.testSeedData();
     }
 
     @BeforeEach

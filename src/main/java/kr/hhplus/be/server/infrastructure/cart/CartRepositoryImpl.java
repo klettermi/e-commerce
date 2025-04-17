@@ -22,4 +22,14 @@ public class CartRepositoryImpl implements CartRepository {
     public Cart save(Cart cart) {
         return cartRepo.save(cart);
     }
+
+    @Override
+    public void deleteAll() {
+        cartRepo.deleteAll();
+    }
+
+    @Override
+    public void delete(Cart cart) {
+        cartRepo.delete(cart);
+    }
 }
