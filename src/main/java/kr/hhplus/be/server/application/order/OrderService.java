@@ -6,14 +6,14 @@ import kr.hhplus.be.server.domain.inventory.InventoryChecker;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.interfaces.api.order.dto.OrderProductRequest;
+import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;

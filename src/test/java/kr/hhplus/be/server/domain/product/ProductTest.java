@@ -1,9 +1,9 @@
 package kr.hhplus.be.server.domain.product;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
-import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
-import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
+import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
+import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
+import kr.hhplus.be.server.interfaces.api.product.ProductResponse;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.item.SaleStatus;
@@ -20,20 +20,20 @@ class ProductTest {
     void testCalculateFinalPriceWithoutDiscount() {
         // given
         Category category = new Category();
-        ItemDto itemDto = new ItemDto(
+        ItemRequest itemRequest = new ItemRequest(
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
                 new Money(BigDecimal.valueOf(10000)),
                 LocalDateTime.now()
         );
-        OptionDto optionDto = new OptionDto(
+        OptionRequest optionRequest = new OptionRequest(
                 "Black",
                 new Money(BigDecimal.valueOf(500))
         );
 
-        Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromDto(optionDto);
+        Item item = Item.fromDto(itemRequest, category);
+        Option option = Option.fromDto(optionRequest);
         Product product = new Product(item, option);
 
         // when
@@ -47,24 +47,24 @@ class ProductTest {
     void testToDtoConversion() {
         // given
         Category category = new Category();
-        ItemDto itemDto = new ItemDto(
+        ItemRequest itemRequest = new ItemRequest(
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
                 new Money(BigDecimal.valueOf(10000)),
                 LocalDateTime.now()
         );
-        OptionDto optionDto = new OptionDto(
+        OptionRequest optionRequest = new OptionRequest(
                 "White240",
                 new Money(BigDecimal.valueOf(500))
         );
 
-        Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromDto(optionDto);
+        Item item = Item.fromDto(itemRequest, category);
+        Option option = Option.fromDto(optionRequest);
         Product product = new Product(item, option);
 
         // when
-        ProductDto dto = product.toDto();
+        ProductResponse dto = product.toDto();
 
         // then
         assertNull(dto.id(), "Not persisted, so id should be null.");

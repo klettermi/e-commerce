@@ -34,6 +34,10 @@ public class Order extends BaseEntity {
     private String orderNumber;
 
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "total_point", nullable = false)
+    )
     private Money totalPoint;
 
     @Enumerated(EnumType.STRING)

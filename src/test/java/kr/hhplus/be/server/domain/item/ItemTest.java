@@ -2,8 +2,7 @@ package kr.hhplus.be.server.domain.item;
 
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
-import kr.hhplus.be.server.domain.item.SaleStatus;
+import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -21,7 +20,7 @@ class ItemTest {
         Money basePrice = new Money(BigDecimal.valueOf(1000));
         LocalDateTime saleStartDate = LocalDateTime.now();
 
-        ItemDto dto = new ItemDto(name, description, saleStatus, basePrice, saleStartDate);
+        ItemRequest dto = new ItemRequest(name, description, saleStatus, basePrice, saleStartDate);
 
         Category category = new Category();
 

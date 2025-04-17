@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.interfaces.api.point.dto.PointHistoryResponseDto;
+import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "point_history")
+@Table(name = "point_histories")
 @NoArgsConstructor
 public class PointHistory extends BaseEntity {
 
@@ -30,8 +29,8 @@ public class PointHistory extends BaseEntity {
     @Column
     private Long userId;
 
-    public PointHistoryResponseDto toDto() {
-        return new PointHistoryResponseDto(
+    public PointHistoryResponse toDto() {
+        return new PointHistoryResponse(
                 id,
                 userId,
                 amount,

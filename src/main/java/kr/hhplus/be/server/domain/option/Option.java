@@ -2,12 +2,10 @@ package kr.hhplus.be.server.domain.option;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
+import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "options")
@@ -22,11 +20,14 @@ public class Option extends BaseEntity{
     @Column
     private String name;
 
-    @Column
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "additional_cost", nullable = false)
+    )
     private Money additionalCost;
 
-    public static Option fromDto(OptionDto dto) {
+    public static Option fromDto(OptionRequest dto) {
         Option option = new Option();
         option.name = dto.name();
         option.additionalCost = dto.additionalCost();
