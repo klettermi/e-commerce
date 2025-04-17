@@ -1,35 +1,31 @@
 package kr.hhplus.be.server.domain.item;
 
 import kr.hhplus.be.server.domain.category.Category;
-import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
-import kr.hhplus.be.server.domain.item.SaleStatus;
+import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ItemTest {
 
     @Test
-    void fromDto_정상적으로_Item_생성() {
-        // given: 테스트 데이터를 준비합니다.
+    void fromDto_createsItemSuccessfully() {
         String name = "Test Item";
         String description = "This is a test item description";
         SaleStatus saleStatus = SaleStatus.ON_SALE;
-        int basePrice = 1000;
+        Money basePrice = Money.of(1000);
         LocalDateTime saleStartDate = LocalDateTime.now();
 
-        // ItemDto가 record 형태라고 가정 (또는 일반 DTO)
-        ItemDto dto = new ItemDto(name, description, saleStatus, basePrice, saleStartDate);
+        ItemRequest dto = new ItemRequest(name, description, saleStatus, basePrice, saleStartDate);
 
-        // Category 엔티티를 준비합니다.
         Category category = new Category();
 
-        // when: fromDto를 호출하여 Item 엔티티를 생성합니다.
         Item item = Item.fromDto(dto, category);
 
-        // then: 각 필드가 올바르게 매핑되었는지 검증합니다.
         assertNotNull(item, "생성된 Item 객체는 null이 아니어야 합니다.");
         assertEquals(name, item.getName(), "이름 필드가 DTO와 동일해야 합니다.");
         assertEquals(description, item.getDescription(), "설명 필드가 DTO와 동일해야 합니다.");

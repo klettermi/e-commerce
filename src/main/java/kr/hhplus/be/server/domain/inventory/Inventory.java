@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
+
 @Entity
 @Table(name = "inventories")
 @Getter
@@ -27,17 +29,17 @@ public class Inventory extends BaseEntity {
 
     public void decreaseStock(int amount) {
         if (amount < 0) {
-            throw new DomainExceptions.InvalidStateException("감소 수량은 음수가 될 수 없습니다.");
+            throw new InvalidStateException("감소 수량은 음수가 될 수 없습니다.");
         }
         if (this.quantity < amount) {
-            throw new DomainExceptions.InvalidStateException("재고 부족: productId=" + productId);
+            throw new InvalidStateException("재고 부족: productId=" + productId);
         }
         this.quantity -= amount;
     }
 
     public void increaseStock(int amount) {
         if (amount < 0) {
-            throw new DomainExceptions.InvalidStateException("증가 수량은 음수가 될 수 없습니다.");
+            throw new InvalidStateException("증가 수량은 음수가 될 수 없습니다.");
         }
         this.quantity += amount;
     }
