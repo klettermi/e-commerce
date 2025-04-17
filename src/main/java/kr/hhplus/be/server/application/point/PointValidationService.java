@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PointValidationService {
 
-    public void validate(Money amount, TransactionType type) {
+    public boolean validate(Money amount, TransactionType type) {
         if (type == TransactionType.CHARGE) {
             // 충전은 최소 1000 포인트 이상이어야 함.
             if (amount.compareTo(new Money(new BigDecimal("1000"))) < 0) {
@@ -27,5 +27,6 @@ public class PointValidationService {
         } else {
             throw new IllegalArgumentException("유효하지 않은 거래 타입입니다.");
         }
+        return true;
     }
 }

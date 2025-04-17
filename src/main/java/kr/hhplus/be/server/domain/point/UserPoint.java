@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.infrastructure.point.UserPointRequest;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,6 +33,13 @@ public class UserPoint extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
+
+    public static UserPoint fromDto(UserPointRequest userpointRequest, User user) {
+        UserPoint userPoint = new UserPoint();
+        userPoint.pointBalance = userpointRequest.pointBalance();
+        userPoint.user = user;
+        return userPoint;
+    }
 
     public void chargePoints(Money amount) {
         if (amount.amount().compareTo(BigDecimal.ZERO) <= 0) {

@@ -17,4 +17,9 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     public Optional<Inventory> findByProductId(Long id) {
         return inventoryRepo.findByProductId(id);
     }
+
+    @Override
+    public void save(Inventory inventory) {
+        inventoryRepo.save(inventory);
+    }
 }
