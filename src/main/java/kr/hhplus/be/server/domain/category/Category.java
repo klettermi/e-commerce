@@ -1,10 +1,9 @@
 package kr.hhplus.be.server.domain.category;
 
 import jakarta.persistence.*;
-import jdk.jfr.Description;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.item.Item;
-import kr.hhplus.be.server.interfaces.api.category.dto.CategoryDto;
+import kr.hhplus.be.server.interfaces.api.category.CategoryRequest;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -27,9 +26,9 @@ public class Category extends BaseEntity {
     @OneToMany(mappedBy = "category")
     private List<Item> items = new ArrayList<>();
 
-    public static Category fromDto(CategoryDto categoryDto) {
+    public static Category fromDto(CategoryRequest categoryRequest) {
         Category category = new Category();
-        category.name = categoryDto.name();
+        category.name = categoryRequest.name();
         return category;
     }
 

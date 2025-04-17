@@ -6,13 +6,12 @@ import kr.hhplus.be.server.domain.point.*;
 import kr.hhplus.be.server.domain.point.PointValidationService;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.point.dto.PointHistoryResponseDto;
-import kr.hhplus.be.server.interfaces.api.point.dto.PointResponseDto;
+import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
+import kr.hhplus.be.server.interfaces.api.point.PointResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,14 +26,14 @@ public class PointService {
     private final PointValidationService validationService;
 
     @Transactional(readOnly = true)
-    public PointResponseDto getPoint(long userId) {
+    public PointResponse getPoint(long userId) {
         UserPoint userPoint = userPointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
-        return new PointResponseDto(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
     }
 
     @Transactional(readOnly = true)
-    public List<PointHistoryResponseDto> getPointHistory(long userId) {
+    public List<PointHistoryResponse> getPointHistory(long userId) {
         List<PointHistory> histories = pointHistoryRepository.findByUserId(userId);
         return histories.stream()
                 .map(PointHistory::toDto)
@@ -47,7 +46,7 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto chargePoint(long userId, Money amount) {
+    public PointResponse chargePoint(long userId, Money amount) {
         // 유효성 검사
         validationService.validate(amount, TransactionType.CHARGE);
 
@@ -64,7 +63,7 @@ public class PointService {
         PointHistory history = PointHistory.createChargeHistory(user, amount);
         pointHistoryRepository.save(history);
 
-        return new PointResponseDto(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
     }
 
     /**
@@ -73,7 +72,7 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto usePoint(Long userId, Money amount) {
+    public PointResponse usePoint(Long userId, Money amount) {
         validationService.validate(amount, TransactionType.USE);
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
@@ -91,6 +90,6 @@ public class PointService {
         PointHistory history = PointHistory.createUseHistory(user, amount);
         pointHistoryRepository.save(history);
 
-        return new PointResponseDto(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getId(), userPoint.getPointBalance());
     }
 }

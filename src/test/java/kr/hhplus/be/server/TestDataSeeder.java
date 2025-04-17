@@ -23,14 +23,11 @@ import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.category.dto.CategoryDto;
-import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
-import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
+import kr.hhplus.be.server.interfaces.api.category.CategoryRequest;
+import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
+import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,24 +76,24 @@ public class TestDataSeeder {
         // 상품 시딩
         Product product;
         if (productRepository.count() == 0) {
-            CategoryDto categoryDto = new CategoryDto("일반");
-            Category category = Category.fromDto(categoryDto);
+            CategoryRequest categoryRequest = new CategoryRequest("일반");
+            Category category = Category.fromDto(categoryRequest);
             categoryRepository.save(category);
 
-            ItemDto itemDto = new ItemDto(
+            ItemRequest itemRequest = new ItemRequest(
                     "AirForce",
                     "AirForce Description",
                     SaleStatus.ON_SALE,
                     new Money(BigDecimal.valueOf(100000)),
                     LocalDateTime.now()
             );
-            OptionDto optionDto = new OptionDto(
+            OptionRequest optionRequest = new OptionRequest(
                     "White240",
                     new Money(BigDecimal.valueOf(1000))
             );
-            Item item = Item.fromDto(itemDto, category);
+            Item item = Item.fromDto(itemRequest, category);
             itemRepository.save(item);
-            Option option = Option.fromDto(optionDto);
+            Option option = Option.fromDto(optionRequest);
             optionRepository.save(option);
             product = new Product(item, option);
             productRepository.save(product);

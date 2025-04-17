@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.application.product;
 
-import jakarta.transaction.Transactional;
-import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
+import kr.hhplus.be.server.interfaces.api.product.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +12,7 @@ public class ProductFacade {
 
     private final ProductService productService;
 
-    public List<ProductDto> getProductList() {
+    public List<ProductResponse> getProductList() {
         return productService.getProductList();
     }
 }

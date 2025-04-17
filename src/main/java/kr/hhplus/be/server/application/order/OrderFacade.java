@@ -2,11 +2,10 @@ package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.order.dto.OrderProductRequest;
-import kr.hhplus.be.server.interfaces.api.order.dto.OrderResponse;
+import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
+import kr.hhplus.be.server.interfaces.api.order.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

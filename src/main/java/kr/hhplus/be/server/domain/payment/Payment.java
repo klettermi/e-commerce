@@ -4,11 +4,9 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.interfaces.api.payment.dto.PaymentDto;
+import kr.hhplus.be.server.interfaces.api.payment.PaymentResponse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "payments")
@@ -36,7 +34,7 @@ public class Payment extends BaseEntity {
         this.paymentAmount = paymentAmount;
     }
 
-    public static Payment toEntity(PaymentDto paymentDto, Order order) {
-        return new Payment(order, paymentDto.paidAmount());
+    public static Payment toEntity(PaymentResponse paymentResponse, Order order) {
+        return new Payment(order, paymentResponse.paidAmount());
     }
 }

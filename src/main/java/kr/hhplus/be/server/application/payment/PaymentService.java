@@ -1,19 +1,16 @@
 package kr.hhplus.be.server.application.payment;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.point.UserPointRepository;
-import kr.hhplus.be.server.interfaces.api.payment.dto.PaymentDto;
+import kr.hhplus.be.server.interfaces.api.payment.PaymentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 
@@ -44,13 +41,13 @@ public class PaymentService {
         order.markAsPaid();
         orderRepository.save(order);
 
-        PaymentDto paymentDto = new PaymentDto(
+        PaymentResponse paymentResponse = new PaymentResponse(
                 orderId,
                 requiredPoints
 
         );
 
-        Payment payment = Payment.toEntity(paymentDto, order);
+        Payment payment = Payment.toEntity(paymentResponse, order);
         paymentRepository.save(payment);
         return payment;
     }
