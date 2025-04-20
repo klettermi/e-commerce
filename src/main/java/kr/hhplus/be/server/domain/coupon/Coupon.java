@@ -2,11 +2,11 @@ package kr.hhplus.be.server.domain.coupon;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import lombok.*;
 
 @Entity
-@Table(name = "coupons")
+@Table(name = "coupon")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class Coupon extends BaseEntity {
      */
     public void issueCoupon() {
         if (remainingQuantity <= 0) {
-            throw new DomainExceptions.InvalidStateException("모든 쿠폰 발급이 완료되었습니다.");
+            throw new DomainException.InvalidStateException("모든 쿠폰 발급이 완료되었습니다.");
         }
         remainingQuantity--;
     }

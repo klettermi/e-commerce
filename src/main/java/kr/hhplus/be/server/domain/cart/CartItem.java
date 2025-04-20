@@ -8,7 +8,7 @@ import kr.hhplus.be.server.interfaces.api.cart.CartItemRequest;
 import lombok.*;
 
 @Entity
-@Table(name = "cart_items")
+@Table(name = "cart_item")
 @Getter
 @Builder
 @NoArgsConstructor

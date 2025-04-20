@@ -1,10 +1,9 @@
 package kr.hhplus.be.server.domain.order;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,10 +12,9 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "order")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -67,7 +65,7 @@ public class Order extends BaseEntity {
 
     public void markAsPaid() {
         if (!OrderStatus.CREATED.equals(this.status)) {
-            throw new InvalidStateException("결제 가능한 상태가 아닙니다.");
+            throw new DomainException.InvalidStateException("결제 가능한 상태가 아닙니다.");
         }
         this.status = OrderStatus.PAID;
     }

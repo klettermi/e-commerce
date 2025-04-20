@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "options")
+@Table(name = "option")
 @Getter
 @NoArgsConstructor
 public class Option extends BaseEntity{

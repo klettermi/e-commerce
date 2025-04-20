@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "category")
 @NoArgsConstructor
 public class Category extends BaseEntity {
     @Id
