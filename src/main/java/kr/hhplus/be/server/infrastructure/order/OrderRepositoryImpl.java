@@ -2,6 +2,7 @@ package kr.hhplus.be.server.infrastructure.order;
 
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +22,10 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public Optional<Order> findById(Long orderId) {
         return orderRepo.findById(orderId);
+    }
+
+    @Override
+    public long countByUserId(User user) {
+        return orderRepo.countByUser(user);
     }
 }

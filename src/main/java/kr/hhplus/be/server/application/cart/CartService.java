@@ -18,9 +18,8 @@ public class CartService {
 
     // 사용자 장바구니 조회 (없으면 새로 생성) 
     public Cart getCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
+        return cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(new Cart(userId)));
-        return cart;
     }
 
     // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트) 
