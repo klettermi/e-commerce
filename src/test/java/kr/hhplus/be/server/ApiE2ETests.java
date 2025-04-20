@@ -20,8 +20,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestDataSeeder.class)
 @Testcontainers
 @TestPropertySource(properties = {
         "spring.profiles.active=test",
@@ -48,7 +47,12 @@ public class ApiE2ETests {
     static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
             .withDatabaseName("hhplus")
             .withUsername("application")
-            .withPassword("application");
+            .withPassword("application")
+            .withCopyFileToContainer(
+                    MountableFile.forHostPath("/Users/jangmi/mysql-conf/slow.cnf"),
+                    "/etc/mysql/conf.d/slow.cnf"
+            );
+
 
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
@@ -71,16 +75,6 @@ public class ApiE2ETests {
         registry.add("spring.datasource.username", () -> username);
         registry.add("spring.datasource.password", () -> password);
         registry.add("spring.datasource.driver-class-name", () -> "com.p6spy.engine.spy.P6SpyDriver");
-    }
-
-
-
-    @Autowired
-    private TestDataSeeder testDataSeeder;
-
-    @BeforeAll
-    void init() {
-        testDataSeeder.testSeedData();
     }
 
     @BeforeEach

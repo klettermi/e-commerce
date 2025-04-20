@@ -6,4 +6,8 @@ public interface CartRepository{
     Optional<Cart> findByUserId(Long userId);
 
     Cart save(Cart cart);
+
+    void deleteAll();
+
+    void delete(Cart cart);
 }

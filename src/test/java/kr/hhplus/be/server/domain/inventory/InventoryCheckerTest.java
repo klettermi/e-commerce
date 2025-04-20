@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class InventoryServiceTest {
+class InventoryCheckerTest {
 
     @Mock
     private InventoryRepository inventoryRepository;

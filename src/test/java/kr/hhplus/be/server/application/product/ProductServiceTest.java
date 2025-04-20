@@ -7,7 +7,6 @@ import kr.hhplus.be.server.domain.item.SaleStatus;
 import kr.hhplus.be.server.domain.option.Option;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
-import kr.hhplus.be.server.infrastructure.product.ProductJpaRepository;
 import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
 import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
 import kr.hhplus.be.server.interfaces.api.product.ProductResponse;
