@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "point_histories")
+@Table(name = "point_history")
 @NoArgsConstructor
 @Getter
 public class PointHistory extends BaseEntity {

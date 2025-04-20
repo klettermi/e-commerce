@@ -4,15 +4,11 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import kr.hhplus.be.server.domain.common.Money;
-import org.flywaydb.core.Flyway;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -33,8 +29,6 @@ import static org.hamcrest.Matchers.*;
 @Testcontainers
 @TestPropertySource(properties = {
         "spring.profiles.active=test",
-        "spring.flyway.enabled=false",
-        "spring.flyway.clean-disabled=false",
         "spring.jpa.defer-datasource-initialization=true"
 })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -63,13 +57,6 @@ public class ApiE2ETests {
         String username = mysql.getUsername();
         String password = mysql.getPassword();
 
-        // 수동 Flyway migration (p6spy는 여기선 필요 없음)
-        Flyway.configure()
-                .dataSource(realUrl, username, password)
-                .locations("classpath:db/migration")
-                .cleanDisabled(false)
-                .load()
-                .migrate();
 
         registry.add("spring.datasource.url", () -> spyUrl);
         registry.add("spring.datasource.username", () -> username);

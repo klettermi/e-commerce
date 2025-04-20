@@ -1,12 +1,11 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.inventory.InventoryChecker;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
-import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
@@ -16,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +68,6 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new DomainExceptions.EntityNotFoundException("Order not found with id: " + orderId));
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
     }
 }

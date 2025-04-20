@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public record CartResponse(Long id, Long userId, List<CartItemRequest> cartItems) {
 
     @Transactional
-    public static CartResponse fromEntity(Cart cart) {
+    public static CartResponse from(Cart cart) {
         if (cart == null) {
             return null;
         }

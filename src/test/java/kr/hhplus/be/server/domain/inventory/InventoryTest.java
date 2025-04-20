@@ -2,7 +2,7 @@ package kr.hhplus.be.server.domain.inventory;
 
 import org.junit.jupiter.api.Test;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.InvalidStateException;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InventoryTest {

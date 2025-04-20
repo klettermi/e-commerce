@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.inventory;
 
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -61,7 +62,7 @@ class InventoryCheckerTest {
 
         assertThatThrownBy(() ->
                 inventoryService.hasSufficientStock(1L, 5))
-                .isInstanceOf(DomainExceptions.EntityNotFoundException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Inventory not found");
     }
 
@@ -90,7 +91,7 @@ class InventoryCheckerTest {
 
         assertThatThrownBy(() ->
                 inventoryService.decreaseStock(1L, 3))
-                .isInstanceOf(DomainExceptions.EntityNotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -107,7 +108,7 @@ class InventoryCheckerTest {
         // when / then
         assertThatThrownBy(() ->
                 inventoryService.decreaseStock(productId, 3))
-                .isInstanceOf(DomainExceptions.InvalidStateException.class)
+                .isInstanceOf(InvalidStateException.class)
                 .hasMessageContaining("재고 부족: productId="+productId);
     }
 }

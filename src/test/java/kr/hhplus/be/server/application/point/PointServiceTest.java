@@ -1,10 +1,9 @@
 package kr.hhplus.be.server.application.point;
 
+import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.PointRepository;
-import kr.hhplus.be.server.domain.point.TransactionType;
 import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
@@ -19,6 +18,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +31,6 @@ class PointServiceTest {
     @Mock PointRepository pointRepository;
     @Mock UserRepository userRepository;
 
-    @Mock
-    PointValidationService validationService;
     @InjectMocks
     PointService pointService;
 
@@ -56,7 +54,8 @@ class PointServiceTest {
     void getPoint_whenExists_returnsDto() {
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
 
-        PointResponse resp = pointService.getPoint(USER_ID);
+        UserPoint point = pointService.getPoint(USER_ID);
+        PointResponse resp = PointResponse.from(point);
 
         assertEquals(USER_ID, resp.userId());
         assertEquals(DUMMY_USER_POINT.getPointBalance(), resp.point());
@@ -67,7 +66,7 @@ class PointServiceTest {
     void getPoint_whenNotExists_throwsNotFound() {
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(DomainExceptions.EntityNotFoundException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> pointService.getPoint(USER_ID));
     }
 
@@ -77,7 +76,10 @@ class PointServiceTest {
         PointHistory h2 = PointHistory.createUseHistory(DUMMY_USER, Money.of(200));
         when(pointRepository.findByUserId(USER_ID)).thenReturn(List.of(h1, h2));
 
-        List<PointHistoryResponse> list = pointService.getPointHistory(USER_ID);
+        List<PointHistory> pointHistoryList = pointService.getPointHistory(USER_ID);
+        List<PointHistoryResponse> list = pointHistoryList.stream()
+                        .map(PointHistoryResponse::from)
+                                .toList();
 
         assertEquals(2, list.size());
         assertTrue(list.stream().anyMatch(r -> r.transactionType().equals(h1.getType().name())&& r.changeAmount().equals(h1.getAmount())));
@@ -89,16 +91,15 @@ class PointServiceTest {
     void chargePoint_valid_savesAndReturns() {
         Money amount = Money.of(300);
 
-        when(validationService.validate(amount, TransactionType.CHARGE)).thenReturn(true);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER));
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
 
-        PointResponse resp = pointService.chargePoint(USER_ID, amount);
+        UserPoint userPoint = pointService.chargePoint(USER_ID, amount);
+        PointResponse resp = PointResponse.from(userPoint);
 
         assertEquals(USER_ID, resp.userId());
         assertEquals(Money.of(1300), resp.point());
-        InOrder ord = inOrder(validationService, userRepository, pointRepository);
-        ord.verify(validationService).validate(amount, TransactionType.CHARGE);
+        InOrder ord = inOrder(userRepository, pointRepository);
         ord.verify(userRepository).findById(USER_ID);
         ord.verify(pointRepository, times(1)).save((UserPoint) any());
         ord.verify(pointRepository, times(1)).save((PointHistory) any());
@@ -107,10 +108,9 @@ class PointServiceTest {
     @Test
     void chargePoint_whenUserNotFound_throwsNotFound() {
         Money amount = Money.of(100);
-        when(validationService.validate(amount, TransactionType.CHARGE)).thenReturn(true);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(DomainExceptions.EntityNotFoundException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> pointService.chargePoint(USER_ID, amount));
     }
 
@@ -118,16 +118,15 @@ class PointServiceTest {
     void usePoint_valid_savesAndReturns() {
         Money amount = Money.of(200);
 
-        when(validationService.validate(amount, TransactionType.USE)).thenReturn(true);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER));
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
 
-        PointResponse resp = pointService.usePoint(USER_ID, amount);
+        UserPoint userPoint = pointService.usePoint(USER_ID, amount);
+        PointResponse resp = PointResponse.from(userPoint);
 
         assertEquals(USER_ID, resp.userId());
         assertEquals(Money.of(800), resp.point());
-        InOrder ord = inOrder(validationService, userRepository, pointRepository);
-        ord.verify(validationService).validate(amount, TransactionType.USE);
+        InOrder ord = inOrder( userRepository, pointRepository);
         ord.verify(userRepository).findById(USER_ID);
         ord.verify(pointRepository, times(1)).save((UserPoint) any());
         ord.verify(pointRepository, times(1)).save((PointHistory) any());
@@ -136,7 +135,6 @@ class PointServiceTest {
     @Test
     void usePoint_insufficient_throwsIllegalArgument() {
         Money amount = Money.of(1200);
-        when(validationService.validate(amount, TransactionType.USE)).thenReturn(true);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER));
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
 

@@ -3,7 +3,7 @@ package kr.hhplus.be.server.interfaces.advice;
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.common.ErrorResponse;
 import kr.hhplus.be.server.domain.common.exception.ApplicationException;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.common.exception.ErrorCodes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DomainExceptions.DomainException.class)
-    public ResponseEntity<ApiResponse<Object>> handleDomainException(DomainExceptions.DomainException ex) {
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDomainException(DomainException ex) {
         ErrorResponse error = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
         ApiResponse<Object> response = ApiResponse.failure(error);
         return ResponseEntity.badRequest().body(response);

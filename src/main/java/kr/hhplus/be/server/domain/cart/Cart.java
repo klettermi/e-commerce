@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "carts")
+@Table(name = "cart")
 @Getter
 @NoArgsConstructor
 public class Cart extends BaseEntity {

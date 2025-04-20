@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.application.point;
 
+import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.TransactionType;
@@ -14,31 +15,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.EntityNotFoundException;
 
 @Service
 @RequiredArgsConstructor
 public class PointService {
     private final PointRepository pointRepository;
     private final UserRepository userRepository;
-    private final PointValidationService validationService;
 
     @Transactional(readOnly = true)
-    public PointResponse getPoint(long userId) {
-        UserPoint userPoint = pointRepository.findById(userId)
+    public UserPoint getPoint(long userId) {
+        return pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
-        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 
     @Transactional(readOnly = true)
-    public List<PointHistoryResponse> getPointHistory(long userId) {
-        List<PointHistory> histories = pointRepository.findByUserId(userId);
-        return histories.stream()
-                .map(PointHistory::toDto)
-                .collect(Collectors.toList());
+    public List<PointHistory> getPointHistory(long userId) {
+        return pointRepository.findByUserId(userId);
     }
 
     /**
@@ -47,15 +43,14 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponse chargePoint(long userId, Money amount) {
-        // 유효성 검사
-        validationService.validate(amount, TransactionType.CHARGE);
-
+    public UserPoint chargePoint(long userId, Money amount) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
         // 충전 전 현재 포인트 조회
         UserPoint userPoint = pointRepository.findById(userId)
-                .orElseThrow(() -> new DomainExceptions.InvalidStateException("UserPoint not found for id: " + userId));
+                .orElseThrow(() -> new DomainException.InvalidStateException("UserPoint not found for id: " + userId));
+
+        userPoint.validate(amount, TransactionType.CHARGE);
 
         userPoint.chargePoints(amount);
         pointRepository.save(userPoint);
@@ -64,7 +59,7 @@ public class PointService {
         PointHistory history = PointHistory.createChargeHistory(user, amount);
         pointRepository.save(history);
 
-        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
+        return userPoint;
     }
 
     /**
@@ -73,8 +68,7 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponse usePoint(Long userId, Money amount) {
-        validationService.validate(amount, TransactionType.USE);
+    public UserPoint usePoint(Long userId, Money amount) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
@@ -85,12 +79,14 @@ public class PointService {
             throw new IllegalArgumentException("사용 포인트가 부족합니다.");
         }
 
+        userPoint.validate(amount, TransactionType.USE);
+
         userPoint.usePoints(amount);
         pointRepository.save(userPoint);
 
         PointHistory history = PointHistory.createUseHistory(user, amount);
         pointRepository.save(history);
 
-        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
+        return userPoint;
     }
 }

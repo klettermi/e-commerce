@@ -2,6 +2,7 @@ package kr.hhplus.be.server.interfaces.api.point;
 
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.point.PointService;
+import kr.hhplus.be.server.domain.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,16 +15,25 @@ public class PointController {
 
     @GetMapping("/{userId}")
     public ApiResponse<PointResponse> getPoints(@PathVariable long userId) {
-        return ApiResponse.success(pointService.getPoint(userId));
+        UserPoint userPoint = pointService.getPoint(userId);
+        PointResponse pointResponse = PointResponse.from(userPoint);
+
+        return ApiResponse.success(pointResponse);
     }
 
     @PostMapping("/charge")
     public ApiResponse<PointResponse> chargePoints(@RequestBody ChargePointRequest dto) {
-        return ApiResponse.success(pointService.chargePoint(dto.userId(), dto.amount()));
+        UserPoint userPoint = pointService.chargePoint(dto.userId(), dto.amount());
+        PointResponse pointResponse = PointResponse.from(userPoint);
+
+        return ApiResponse.success(pointResponse);
     }
 
     @PostMapping("/use")
     public ApiResponse<PointResponse> usePoints(@RequestBody UsePointRequest dto) {
-        return ApiResponse.success(pointService.usePoint(dto.userId(), dto.amount()));
+        UserPoint userPoint = pointService.usePoint(dto.userId(), dto.amount());
+        PointResponse pointResponse = PointResponse.from(userPoint);
+
+        return ApiResponse.success(pointResponse);
     }
 }

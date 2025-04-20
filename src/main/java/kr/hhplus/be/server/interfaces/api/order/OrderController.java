@@ -3,6 +3,7 @@ package kr.hhplus.be.server.interfaces.api.order;
 
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.order.OrderFacade;
+import kr.hhplus.be.server.domain.order.Order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,13 +22,17 @@ public class OrderController {
             @RequestParam Long userId,
             @RequestBody List<OrderProductRequest> orderProductRequests) {
 
-        OrderResponse orderResponse = orderFacade.createOrder(userId, orderProductRequests);
+        Order order = orderFacade.createOrder(userId, orderProductRequests);
+        OrderResponse orderResponse = OrderResponse.from(order);
+
         return ApiResponse.success(orderResponse);
     }
 
     @GetMapping("/{orderId}")
     public ApiResponse<OrderResponse> getOrder(@PathVariable Long orderId) {
-        OrderResponse orderResponse = orderFacade.getOrder(orderId);
+        Order order = orderFacade.getOrder(orderId);
+        OrderResponse orderResponse = OrderResponse.from(order);
+
         return ApiResponse.success(orderResponse);
     }
 }

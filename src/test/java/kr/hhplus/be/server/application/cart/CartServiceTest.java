@@ -36,7 +36,8 @@ class CartServiceTest {
         Cart newCart = new Cart(userId);
         when(cartRepository.save(any(Cart.class))).thenReturn(newCart);
 
-        CartResponse result = cartService.getCart(userId);
+        Cart cart = cartService.getCart(userId);
+        CartResponse result = CartResponse.from(cart);
 
         assertNotNull(result, "새로 생성된 Cart가 null이면 안 됩니다.");
         assertEquals(userId, result.userId(), "userId가 동일해야 합니다.");
@@ -51,7 +52,8 @@ class CartServiceTest {
         Cart existingCart = new Cart(userId);
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(existingCart));
 
-        CartResponse result = cartService.getCart(userId);
+        Cart cart = cartService.getCart(userId);
+        CartResponse result = CartResponse.from(cart);
 
         assertNotNull(result, "반환된 Cart가 null이면 안 됩니다.");
         assertEquals(userId, result.userId(), "userId가 동일해야 합니다.");
@@ -74,7 +76,8 @@ class CartServiceTest {
                 .price(Money.of(10000))
                 .build();
 
-        CartResponse result = cartService.addItem(userId, newItem);
+        Cart cart1 = cartService.addItem(userId, newItem);
+        CartResponse result = CartResponse.from(cart1);
 
         assertEquals(1, result.cartItems().size(), "아이템이 1건 추가되어야 합니다.");
         CartItemRequest addedItem = result.cartItems().get(0);
@@ -109,7 +112,8 @@ class CartServiceTest {
                 .price(Money.of(10000))
                 .build();
 
-        CartResponse result = cartService.addItem(userId, newItem);
+        Cart cart1 = cartService.addItem(userId, newItem);
+        CartResponse result = CartResponse.from(cart1);
         assertEquals(1, result.cartItems().size(), "아이템은 1건이어야 합니다.");
         CartItemRequest updatedItem = result.cartItems().get(0);
         assertEquals(5, updatedItem.quantity(), "수량이 5여야 합니다.");
@@ -140,7 +144,8 @@ class CartServiceTest {
                 .price(Money.of(10000))
                 .build();
 
-        CartResponse result = cartService.updateItem(userId, updatedItem);
+        Cart cart1 = cartService.updateItem(userId, updatedItem);
+        CartResponse result = CartResponse.from(cart1);
         assertEquals(1, result.cartItems().size(), "아이템은 1건이어야 합니다.");
         assertEquals(5, result.cartItems().get(0).quantity(), "수량이 5여야 합니다.");
         verify(cartRepository).save(cart);
@@ -169,7 +174,8 @@ class CartServiceTest {
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
-        CartResponse result = cartService.removeItem(userId, 1001L);
+        Cart cart1 = cartService.removeItem(userId, 1001L);
+        CartResponse result = CartResponse.from(cart1);
         assertEquals(1, result.cartItems().size(), "제거 후 남은 아이템 수는 1건이어야 합니다.");
         assertEquals(1002L, result.cartItems().get(0).productId(), "남은 아이템의 상품 ID는 1002여야 합니다.");
         verify(cartRepository).save(cart);
@@ -198,7 +204,8 @@ class CartServiceTest {
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
-        CartResponse result = cartService.clearCart(userId);
+        Cart cart1 = cartService.clearCart(userId);
+        CartResponse result = CartResponse.from(cart1);
         assertTrue(result.cartItems().isEmpty(), "장바구니가 비어 있어야 합니다.");
         verify(cartRepository).save(cart);
     }

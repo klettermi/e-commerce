@@ -1,16 +1,18 @@
 package kr.hhplus.be.server.domain.common;
 
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+
+import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 
 public record Money(BigDecimal amount) {
     public static final Money ZERO = new Money(BigDecimal.ZERO);
 
     public Money {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new DomainExceptions.InvalidStateException("금액은 0 이상이어야 합니다.");
+            throw new InvalidStateException("금액은 0 이상이어야 합니다.");
         }
     }
 

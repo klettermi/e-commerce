@@ -2,16 +2,17 @@ package kr.hhplus.be.server.domain.inventory;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
+
 
 @Entity
-@Table(name = "inventories")
+@Table(name = "inventory")
 @Getter
 @Builder
 @NoArgsConstructor

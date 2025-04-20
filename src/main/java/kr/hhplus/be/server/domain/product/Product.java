@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "products")
+@Table(name = "product")
 @NoArgsConstructor
 @Getter
 public class Product extends BaseEntity {

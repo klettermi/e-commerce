@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions.InvalidStateException;
+import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;

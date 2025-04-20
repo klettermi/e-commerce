@@ -17,10 +17,7 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public List<ProductResponse> getProductList() {
-        List<Product> products = productRepository.findAll();
-        return products.stream()
-                .map(Product::toDto)
-                .collect(Collectors.toList());
+    public List<Product> getProductList() {
+        return productRepository.findAll();
     }
 }
