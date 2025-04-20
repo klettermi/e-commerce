@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +12,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 
 @Entity
 @Table(name = "orders")
@@ -31,6 +34,10 @@ public class Order extends BaseEntity {
     private String orderNumber;
 
     @Embedded
+    @AttributeOverride(
+            name = "amount",
+            column = @Column(name = "total_point", nullable = false)
+    )
     private Money totalPoint;
 
     @Enumerated(EnumType.STRING)
@@ -60,7 +67,7 @@ public class Order extends BaseEntity {
 
     public void markAsPaid() {
         if (!OrderStatus.CREATED.equals(this.status)) {
-            throw new IllegalStateException("결제 가능한 상태가 아닙니다.");
+            throw new InvalidStateException("결제 가능한 상태가 아닙니다.");
         }
         this.status = OrderStatus.PAID;
     }

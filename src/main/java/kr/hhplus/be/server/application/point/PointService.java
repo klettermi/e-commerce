@@ -1,10 +1,15 @@
 package kr.hhplus.be.server.application.point;
 
-import kr.hhplus.be.server.domain.point.*;
+import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.point.PointHistory;
+import kr.hhplus.be.server.domain.point.PointRepository;
+import kr.hhplus.be.server.domain.point.TransactionType;
+import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.point.dto.PointHistoryResponseDto;
-import kr.hhplus.be.server.interfaces.api.point.dto.PointResponseDto;
+import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
+import kr.hhplus.be.server.interfaces.api.point.PointResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,24 +17,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.EntityNotFoundException;
+
 @Service
 @RequiredArgsConstructor
 public class PointService {
-    private final UserPointRepository userPointRepository;
-    private final PointHistoryRepository pointHistoryRepository;
+    private final PointRepository pointRepository;
     private final UserRepository userRepository;
     private final PointValidationService validationService;
 
     @Transactional(readOnly = true)
-    public PointResponseDto getPoint(long userId) {
-        UserPoint userPoint = userPointRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("UserPoint not found for id: " + userId));
-        return new PointResponseDto(userPoint.getId(), userPoint.getPointBalance());
+    public PointResponse getPoint(long userId) {
+        UserPoint userPoint = pointRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
+        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 
     @Transactional(readOnly = true)
-    public List<PointHistoryResponseDto> getPointHistory(long userId) {
-        List<PointHistory> histories = pointHistoryRepository.findByUserId(userId);
+    public List<PointHistoryResponse> getPointHistory(long userId) {
+        List<PointHistory> histories = pointRepository.findByUserId(userId);
         return histories.stream()
                 .map(PointHistory::toDto)
                 .collect(Collectors.toList());
@@ -41,25 +47,24 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto chargePoint(long userId, int amount) {
+    public PointResponse chargePoint(long userId, Money amount) {
         // 유효성 검사
         validationService.validate(amount, TransactionType.CHARGE);
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
         // 충전 전 현재 포인트 조회
-        UserPoint userPoint = userPointRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("UserPoint not found for id: " + userId));
+        UserPoint userPoint = pointRepository.findById(userId)
+                .orElseThrow(() -> new DomainExceptions.InvalidStateException("UserPoint not found for id: " + userId));
 
-        // 포인트 갱신: (실제 도메인 로직은 UserPoint 내의 chargePoints 메서드로 위임할 수 있습니다.)
         userPoint.chargePoints(amount);
-        userPointRepository.save(userPoint);
+        pointRepository.save(userPoint);
 
         // 포인트 충전 이력 기록
         PointHistory history = PointHistory.createChargeHistory(user, amount);
-        pointHistoryRepository.save(history);
+        pointRepository.save(history);
 
-        return new PointResponseDto(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 
     /**
@@ -68,24 +73,24 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponseDto usePoint(Long userId, int amount) {
+    public PointResponse usePoint(Long userId, Money amount) {
         validationService.validate(amount, TransactionType.USE);
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
-        UserPoint userPoint = userPointRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("UserPoint not found for id: " + userId));
+        UserPoint userPoint = pointRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
-        if (amount > userPoint.getPointBalance()) {
+        if (amount.compareTo(userPoint.getPointBalance()) > 0) {
             throw new IllegalArgumentException("사용 포인트가 부족합니다.");
         }
 
         userPoint.usePoints(amount);
-        userPointRepository.save(userPoint);
+        pointRepository.save(userPoint);
 
         PointHistory history = PointHistory.createUseHistory(user, amount);
-        pointHistoryRepository.save(history);
+        pointRepository.save(history);
 
-        return new PointResponseDto(userPoint.getId(), userPoint.getPointBalance());
+        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 }

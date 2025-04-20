@@ -1,74 +1,75 @@
 package kr.hhplus.be.server.domain.product;
 
-import kr.hhplus.be.server.interfaces.api.item.dto.ItemDto;
-import kr.hhplus.be.server.interfaces.api.option.dto.OptionDto;
-import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
+import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
+import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
+import kr.hhplus.be.server.interfaces.api.product.ProductResponse;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.item.SaleStatus;
 import kr.hhplus.be.server.domain.option.Option;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ProductTest {
     @Test
     void testCalculateFinalPriceWithoutDiscount() {
         // given
         Category category = new Category();
-        ItemDto itemDto = new ItemDto(
+        ItemRequest itemRequest = new ItemRequest(
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
-                100000,
+                Money.of(10000),
                 LocalDateTime.now()
         );
-        OptionDto optionDto = new OptionDto(
+        OptionRequest optionRequest = new OptionRequest(
                 "Black",
-                5000
+                Money.of(500)
         );
 
-        Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromDto(optionDto);
+        Item item = Item.fromDto(itemRequest, category);
+        Option option = Option.fromDto(optionRequest);
         Product product = new Product(item, option);
 
         // when
-        double finalPrice = product.calculateFinalPrice();
+        Money finalPrice = product.calculateFinalPrice();
 
         // then
-        assertEquals(105000.0, finalPrice, 0.001, "Final price without discount should be 105000.0");
+        assertEquals(Money.of(10500), finalPrice, "상품의 가격은 10500 이어야 합니다.");
     }
 
     @Test
     void testToDtoConversion() {
         // given
         Category category = new Category();
-        ItemDto itemDto = new ItemDto(
+        ItemRequest itemRequest = new ItemRequest(
                 "AirForce",
                 "AirForce",
                 SaleStatus.ON_SALE,
-                100000,
+                Money.of(10000),
                 LocalDateTime.now()
         );
-        OptionDto optionDto = new OptionDto(
+        OptionRequest optionRequest = new OptionRequest(
                 "White240",
-                5000
+                Money.of(500)
         );
 
-        Item item = Item.fromDto(itemDto, category);
-        Option option = Option.fromDto(optionDto);
+        Item item = Item.fromDto(itemRequest, category);
+        Option option = Option.fromDto(optionRequest);
         Product product = new Product(item, option);
 
         // when
-        ProductDto dto = product.toDto();
+        ProductResponse dto = product.toDto();
 
         // then
         assertNull(dto.id(), "Not persisted, so id should be null.");
         assertEquals("AirForce", dto.itemName(), "Item name should match.");
         assertEquals("White240", dto.optionName(), "Option name should match.");
-        assertEquals(105000.0, dto.finalPrice(), 0.001, "Final price should be 105000.0");
+        assertEquals(Money.of(10500), dto.finalPrice(), "상품의 최종 가격은 10500이어야 합니다.");
     }
 }

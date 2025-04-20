@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.domain.product;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.interfaces.api.product.dto.ProductDto;
+import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.interfaces.api.product.ProductResponse;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.option.Option;
@@ -34,15 +35,19 @@ public class Product extends BaseEntity {
     }
 
 
-    // 최종 가격 계산: Item 기본가격 + Option 추가금액
-    // 그리고 제품 자체 할인(정액 또는 정률)을 적용
-    public double calculateFinalPrice() {
-        double total = item.getBasePrice() + option.getAdditionalCost();
-        return Math.max(total, 0);
+    public Money calculateFinalPrice() {
+        return item.getBasePrice().add(option.getAdditionalCost());
     }
 
-    public ProductDto toDto() {
-        double finalPrice = calculateFinalPrice();
-        return new ProductDto(item.getId(), item.getName(), option.getName(), finalPrice);
+    public ProductResponse toDto() {
+        if (item == null) {
+            System.err.println("Error: item is null in Product.toDto()");
+        }
+        if (option == null) {
+            System.err.println("Error: option is null in Product.toDto()");
+        }
+        Money finalPrice = calculateFinalPrice();
+        return new ProductResponse(item.getId(), item.getName(), option.getName(), finalPrice);
     }
+
 }

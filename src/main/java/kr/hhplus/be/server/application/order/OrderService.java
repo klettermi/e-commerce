@@ -1,20 +1,22 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.inventory.InventoryChecker;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.interfaces.api.order.dto.OrderProductRequest;
+import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+
+import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,25 +24,23 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final InventoryChecker inventoryChecker;
 
-    public Order placeOrder(User user, String orderNumber, List<OrderProductRequest> orderRequest) {
+    public Order placeOrder(User user, String orderNumber, List<OrderProductRequest> orderRequest) throws InvalidStateException {
         // 주문 항목 리스트 생성
         List<OrderProduct> orderProducts = orderRequest.stream()
                 .map(req -> OrderProduct.builder()
                         .productId(req.productId())
                         .quantity(req.quantity())
-                        .unitPoint(req.unitPoiont())
+                        .unitPoint(req.unitPoint())
                         .build())
                 .toList();
 
         // 총 결제 포인트 계산
-        int totalPointValue = orderProducts.stream()
-                .mapToInt(op -> op.getUnitPoint() * op.getQuantity())
-                .sum();
-
-        Money totalPoint = new Money(BigDecimal.valueOf(totalPointValue));
+        Money totalPointValue = orderProducts.stream()
+                .map(op -> op.getUnitPoint().multiply(op.getQuantity()))
+                .reduce(Money.ZERO, Money::add);
 
         // 주문 생성
-        Order order = new Order(user, orderNumber, totalPoint, OrderStatus.CREATED);
+        Order order = new Order(user, orderNumber, totalPointValue, OrderStatus.CREATED);
 
         // 주문 항목 추가
         orderProducts.forEach(order::addOrderProduct);
@@ -48,7 +48,7 @@ public class OrderService {
         // 재고 체크
         for (OrderProduct orderProduct : order.getOrderProducts()) {
             if (!inventoryChecker.hasSufficientStock(orderProduct.getProductId(), orderProduct.getQuantity())) {
-                throw new IllegalStateException("재고 부족: productId=" + orderProduct.getProductId());
+                throw new InvalidStateException("재고 부족: productId=" + orderProduct.getProductId());
             }
         }
 
@@ -67,10 +67,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Order getOrderById(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
-        // Optionally, initialize lazy collections
-        order.getOrderProducts().size();
-        return order;
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new DomainExceptions.EntityNotFoundException("Order not found with id: " + orderId));
     }
 }

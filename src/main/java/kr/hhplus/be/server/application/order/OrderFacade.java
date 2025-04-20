@@ -4,10 +4,12 @@ import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.order.dto.OrderProductRequest;
-import kr.hhplus.be.server.interfaces.api.order.dto.OrderResponse;
+import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
+import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
+import kr.hhplus.be.server.interfaces.api.order.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,11 +18,11 @@ import java.util.List;
 public class OrderFacade {
 
     private final OrderService orderService;
-    private final UserRepository userRepository;
+    private final UserRepository userJpaRepository;
 
     public OrderResponse createOrder(Long userId, List<OrderProductRequest> orderProductRequests) {
         // 사용자 조회: 존재하지 않으면 도메인 예외 발생
-        User user = userRepository.findById(userId)
+        User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new DomainExceptions.EntityNotFoundException("User not found with id: " + userId));
 
         String orderNumber = generateOrderNumber();
@@ -28,6 +30,7 @@ public class OrderFacade {
         return OrderResponse.from(order);
     }
 
+    @Transactional
     public OrderResponse getOrder(Long orderId) {
         Order order = orderService.getOrderById(orderId);
         return OrderResponse.from(order);
