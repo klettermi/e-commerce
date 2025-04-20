@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 public class PointService {
     private final PointRepository pointRepository;
     private final UserRepository userRepository;
-    private final PointValidationService validationService;
 
     @Transactional(readOnly = true)
     public PointResponse getPoint(long userId) {
@@ -48,14 +47,13 @@ public class PointService {
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
     public PointResponse chargePoint(long userId, Money amount) {
-        // 유효성 검사
-        validationService.validate(amount, TransactionType.CHARGE);
-
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
         // 충전 전 현재 포인트 조회
         UserPoint userPoint = pointRepository.findById(userId)
                 .orElseThrow(() -> new DomainException.InvalidStateException("UserPoint not found for id: " + userId));
+
+        userPoint.validate(amount, TransactionType.CHARGE);
 
         userPoint.chargePoints(amount);
         pointRepository.save(userPoint);
@@ -74,7 +72,6 @@ public class PointService {
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
     public PointResponse usePoint(Long userId, Money amount) {
-        validationService.validate(amount, TransactionType.USE);
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
@@ -84,6 +81,8 @@ public class PointService {
         if (amount.compareTo(userPoint.getPointBalance()) > 0) {
             throw new IllegalArgumentException("사용 포인트가 부족합니다.");
         }
+
+        userPoint.validate(amount, TransactionType.USE);
 
         userPoint.usePoints(amount);
         pointRepository.save(userPoint);
