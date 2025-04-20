@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.application.point;
 
+import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.TransactionType;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.EntityNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +55,7 @@ public class PointService {
 
         // 충전 전 현재 포인트 조회
         UserPoint userPoint = pointRepository.findById(userId)
-                .orElseThrow(() -> new DomainExceptions.InvalidStateException("UserPoint not found for id: " + userId));
+                .orElseThrow(() -> new DomainException.InvalidStateException("UserPoint not found for id: " + userId));
 
         userPoint.chargePoints(amount);
         pointRepository.save(userPoint);

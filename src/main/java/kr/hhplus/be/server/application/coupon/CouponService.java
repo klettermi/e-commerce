@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.InvalidStateException;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 
 @Service
 @RequiredArgsConstructor

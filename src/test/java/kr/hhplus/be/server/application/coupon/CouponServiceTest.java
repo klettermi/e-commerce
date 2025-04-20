@@ -8,7 +8,7 @@ import org.mockito.ArgumentMatchers;
 
 import java.util.Optional;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainExceptions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

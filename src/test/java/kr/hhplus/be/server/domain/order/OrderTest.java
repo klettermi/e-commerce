@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.domain.order;
 
+import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class OrderTest {
     void markAsPaid_invalidState_throwsException() {
         // 상태가 CREATED인 상태에서 한 번 결제 진행
         order.markAsPaid();
-        Exception exception = assertThrows(DomainExceptions.InvalidStateException.class, () -> order.markAsPaid());
+        Exception exception = assertThrows(InvalidStateException.class, () -> order.markAsPaid());
         assertEquals("결제 가능한 상태가 아닙니다.", exception.getMessage());
     }
 

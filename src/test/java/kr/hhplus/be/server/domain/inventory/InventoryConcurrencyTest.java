@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.inventory;
 
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions.InvalidStateException;
+import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;

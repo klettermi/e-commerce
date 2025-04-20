@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.application.point;
 
+import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.TransactionType;
@@ -67,7 +68,7 @@ class PointServiceTest {
     void getPoint_whenNotExists_throwsNotFound() {
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(DomainExceptions.EntityNotFoundException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> pointService.getPoint(USER_ID));
     }
 
@@ -110,7 +111,7 @@ class PointServiceTest {
         when(validationService.validate(amount, TransactionType.CHARGE)).thenReturn(true);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(DomainExceptions.EntityNotFoundException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> pointService.chargePoint(USER_ID, amount));
     }
 

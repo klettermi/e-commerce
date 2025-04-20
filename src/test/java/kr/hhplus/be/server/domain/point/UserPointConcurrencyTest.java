@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.point;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainExceptions.InvalidStateException;
+import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
