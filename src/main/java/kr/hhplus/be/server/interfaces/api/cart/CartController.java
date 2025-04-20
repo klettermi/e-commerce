@@ -3,6 +3,7 @@ package kr.hhplus.be.server.interfaces.api.cart;
 
 import kr.hhplus.be.server.application.cart.CartService;
 import kr.hhplus.be.server.application.common.ApiResponse;
+import kr.hhplus.be.server.domain.cart.Cart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,8 @@ public class CartController {
     // 사용자 장바구니 조회 (없으면 생성)
     @GetMapping("/{userId}")
     public ApiResponse<CartResponse> getCart(@PathVariable Long userId) {
-        CartResponse cartResponse = cartService.getCart(userId);
+        Cart cart = cartService.getCart(userId);
+        CartResponse cartResponse = CartResponse.from(cart);
         return ApiResponse.success(cartResponse);
     }
 
@@ -24,7 +26,8 @@ public class CartController {
     @PostMapping("/{userId}/items")
     public ApiResponse<CartResponse> addItem(@PathVariable Long userId,
                                              @RequestBody CartItemRequest newItem) {
-        CartResponse cartResponse = cartService.addItem(userId, newItem);
+        Cart cart = cartService.addItem(userId, newItem);
+        CartResponse cartResponse = CartResponse.from(cart);
         return ApiResponse.success(cartResponse);
     }
 
@@ -32,7 +35,8 @@ public class CartController {
     @PutMapping("/{userId}/items")
     public ApiResponse<CartResponse> updateItem(@PathVariable Long userId,
                                                 @RequestBody CartItemRequest updatedItem) {
-        CartResponse cartResponse = cartService.updateItem(userId, updatedItem);
+        Cart cart = cartService.updateItem(userId, updatedItem);
+        CartResponse cartResponse = CartResponse.from(cart);
         return ApiResponse.success(cartResponse);
     }
 
@@ -40,14 +44,17 @@ public class CartController {
     @DeleteMapping("/{userId}/items/{productId}")
     public ApiResponse<CartResponse> removeItem(@PathVariable Long userId,
                                                 @PathVariable Long productId) {
-        CartResponse cartResponse = cartService.removeItem(userId, productId);
+        Cart cart = cartService.removeItem(userId, productId);
+        CartResponse cartResponse = CartResponse.from(cart);
+
         return ApiResponse.success(cartResponse);
     }
 
     // 장바구니 전체 비우기
     @DeleteMapping("/{userId}")
     public ApiResponse<CartResponse> clearCart(@PathVariable Long userId) {
-        CartResponse cartResponse = cartService.clearCart(userId);
+        Cart cart = cartService.clearCart(userId);
+        CartResponse cartResponse = CartResponse.from(cart);
         return ApiResponse.success(cartResponse);
     }
 }

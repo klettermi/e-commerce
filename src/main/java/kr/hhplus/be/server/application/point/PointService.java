@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,18 +27,14 @@ public class PointService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public PointResponse getPoint(long userId) {
-        UserPoint userPoint = pointRepository.findById(userId)
+    public UserPoint getPoint(long userId) {
+        return pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
-        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
     }
 
     @Transactional(readOnly = true)
-    public List<PointHistoryResponse> getPointHistory(long userId) {
-        List<PointHistory> histories = pointRepository.findByUserId(userId);
-        return histories.stream()
-                .map(PointHistory::toDto)
-                .collect(Collectors.toList());
+    public List<PointHistory> getPointHistory(long userId) {
+        return pointRepository.findByUserId(userId);
     }
 
     /**
@@ -46,7 +43,7 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponse chargePoint(long userId, Money amount) {
+    public UserPoint chargePoint(long userId, Money amount) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
         // 충전 전 현재 포인트 조회
@@ -62,7 +59,7 @@ public class PointService {
         PointHistory history = PointHistory.createChargeHistory(user, amount);
         pointRepository.save(history);
 
-        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
+        return userPoint;
     }
 
     /**
@@ -71,7 +68,7 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
-    public PointResponse usePoint(Long userId, Money amount) {
+    public UserPoint usePoint(Long userId, Money amount) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
@@ -90,6 +87,6 @@ public class PointService {
         PointHistory history = PointHistory.createUseHistory(user, amount);
         pointRepository.save(history);
 
-        return new PointResponse(userPoint.getUser().getId(), userPoint.getPointBalance());
+        return userPoint;
     }
 }

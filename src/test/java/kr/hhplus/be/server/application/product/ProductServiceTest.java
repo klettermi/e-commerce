@@ -85,7 +85,10 @@ class ProductServiceTest {
 
 
         // when
-        List<ProductResponse> responses = productService.getProductList();
+        List<Product> productList = productService.getProductList();
+        List<ProductResponse> responses = productList.stream()
+                .map(ProductResponse::from)
+                .toList();
 
         // then
         assertEquals(2, responses.size(), "상품 목록의 크기는 2여야 합니다.");

@@ -2,6 +2,8 @@ package kr.hhplus.be.server.interfaces.api.product;
 
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.product.ProductService;
+import kr.hhplus.be.server.domain.point.UserPoint;
+import kr.hhplus.be.server.domain.product.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +21,11 @@ public class ProductController {
 
     @GetMapping
     public ApiResponse<List<ProductResponse>> lookupProducts() {
-        return ApiResponse.success(productFacade.getProductList());
+        List<Product> userPoint = productFacade.getProductList();
+        List<ProductResponse> productResponseList = userPoint.stream()
+                .map(ProductResponse::from)
+                .toList();
+        return ApiResponse.success(productResponseList);
     }
 
     @GetMapping("/popular")
