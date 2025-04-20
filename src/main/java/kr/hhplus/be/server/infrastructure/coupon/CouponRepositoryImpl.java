@@ -10,15 +10,16 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class CouponRepositoryImpl implements CouponRepository {
-    private CouponRepository couponRepo;
+
+    private final CouponJpaRepository couponJpaRepository;
 
     @Override
     public Optional<Coupon> findByCouponCode(String couponCode) {
-        return couponRepo.findByCouponCode(couponCode);
+        return couponJpaRepository.findByCouponCode(couponCode);
     }
 
     @Override
     public Coupon save(Coupon coupon) {
-        return couponRepo.save(coupon);
+        return couponJpaRepository.save(coupon);
     }
 }
