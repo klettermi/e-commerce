@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 
@@ -36,6 +37,6 @@ public class OrderFacade {
     }
 
     private String generateOrderNumber() {
-        return "ORD-" + System.currentTimeMillis();
+        return "ORD-" + UUID.randomUUID();
     }
 }

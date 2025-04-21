@@ -1,0 +1,90 @@
+package kr.hhplus.be.server.application.order;
+
+import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
+import kr.hhplus.be.server.domain.inventory.InventoryChecker;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderProduct;
+import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class OrderServiceTest {
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private InventoryChecker inventoryChecker;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    private User dummyUser;
+    private List<OrderProductRequest> reqs;
+    private String orderNumber;
+
+    @BeforeEach
+    void setUp() {
+        // 공통 더미 데이터
+        dummyUser = User.builder()
+                .username("username")
+                .build();
+
+        orderNumber = "ORD-001";
+        reqs = List.of(
+                new OrderProductRequest(10L, 2, Money.of(500)),  // 2×500=1000
+                new OrderProductRequest(20L, 3, Money.of(200))   // 3×200=600
+        );
+
+        when(inventoryChecker.hasSufficientStock(anyLong(), anyInt()))
+                .thenReturn(true);
+    }
+
+    @Test
+    void placeOrder_successfulFlow() {
+        when(orderRepository.save(any(Order.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        Order result = orderService.placeOrder(dummyUser, orderNumber, reqs);
+
+        // 검증
+        assertThat(result.getTotalPoint()).isEqualTo(Money.of(1600));
+        assertThat(result.getStatus()).isEqualTo(OrderStatus.PAID);
+        assertThat(result.getOrderProducts()).hasSize(2)
+                .extracting(OrderProduct::getProductId)
+                .containsExactlyInAnyOrder(10L, 20L);
+
+        verify(inventoryChecker).decreaseStock(10L, 2);
+        verify(inventoryChecker).decreaseStock(20L, 3);
+        verify(orderRepository).save(any(Order.class));
+    }
+
+    @Test
+    void placeOrder_insufficientStock_throwsException() {
+        // given: 첫 번째 상품만 재고 부족
+        when(inventoryChecker.hasSufficientStock(10L, 2)).thenReturn(false);
+
+        // when / then
+        assertThatThrownBy(() ->
+                orderService.placeOrder(dummyUser, orderNumber, reqs)
+        )
+                .isInstanceOf(InvalidStateException.class)
+                .hasMessageContaining("재고 부족: productId=10");
+
+        verify(orderRepository, never()).save(any());
+        verify(inventoryChecker, never()).decreaseStock(anyLong(), anyInt());
+    }
+}
