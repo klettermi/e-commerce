@@ -8,9 +8,7 @@ import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -38,7 +36,7 @@ class OrderServiceConcurrencyTest {
 
     private User testUser;
 
-    @BeforeAll
+    @BeforeEach
     void initData() {
         // 1) 테스트용 유저 생성
         testUser = userRepository.save(
@@ -54,6 +52,13 @@ class OrderServiceConcurrencyTest {
                         .quantity(INITIAL_STOCK)
                         .build()
         );
+    }
+
+    @AfterEach
+    void destroyData() {
+        orderRepository.deleteAll();
+        inventoryRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test

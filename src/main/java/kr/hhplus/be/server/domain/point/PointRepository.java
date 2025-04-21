@@ -16,4 +16,5 @@ public interface PointRepository {
 
     void save(PointHistory pointHistory);
 
+    void deleteAll();
 }

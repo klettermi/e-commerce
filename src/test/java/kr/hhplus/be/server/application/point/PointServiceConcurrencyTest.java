@@ -7,6 +7,7 @@ import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -51,6 +52,12 @@ class PointServiceConcurrencyTest {
                 .pointBalance(Money.of(INITIAL_BALANCE))
                 .build();
         pointRepository.save(up);
+    }
+
+    @AfterEach
+    void destroyData() {
+        userRepository.deleteAll();
+        pointRepository.deleteAll();
     }
 
     @Test

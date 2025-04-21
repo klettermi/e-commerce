@@ -6,4 +6,6 @@ public interface CouponRepository {
     Optional<Coupon> findByCouponCode(String couponCode);
 
     Coupon save(Coupon coupon);
+
+    void deleteAll();
 }

@@ -6,4 +6,6 @@ public interface InventoryRepository {
     Optional<Inventory> findByProductId(Long id);
 
     void save(Inventory inventory);
+
+    void deleteAll();
 }

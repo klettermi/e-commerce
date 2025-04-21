@@ -2,7 +2,8 @@ package kr.hhplus.be.server.application.coupon;
 
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +29,18 @@ class CouponServiceConcurrencyTest {
     private CouponRepository couponRepository;
     @Autowired private CouponService couponService;
 
-    @BeforeAll
-    void setupCoupon() {
-        // 초기 쿠폰 생성: 남은 수량 = INITIAL_QUANTITY
+
+    @BeforeEach
+    void initData() {
         Coupon coupon = new Coupon(couponCode, INITIAL_QUANTITY);
         couponRepository.save(coupon);
     }
+
+    @AfterEach
+    void destroyData() {
+        couponRepository.deleteAll();
+    }
+
 
     @Test
     void 동시에_쿠폰_발급시_수량_초과되지_않아야_한다() throws InterruptedException {

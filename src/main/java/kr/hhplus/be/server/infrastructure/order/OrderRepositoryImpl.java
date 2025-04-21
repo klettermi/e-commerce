@@ -28,4 +28,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     public long countByUserId(User user) {
         return orderRepo.countByUser(user);
     }
+
+    @Override
+    public void deleteAll() {
+        orderRepo.deleteAll();
+    }
 }

@@ -22,4 +22,9 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     public void save(Inventory inventory) {
         inventoryRepo.save(inventory);
     }
+
+    @Override
+    public void deleteAll() {
+        inventoryRepo.deleteAll();
+    }
 }
