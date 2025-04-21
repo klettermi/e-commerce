@@ -12,4 +12,6 @@ public interface OrderRepository {
     long countByUserId(User userId);
 
     void deleteAll();
+
+    long count();
 }

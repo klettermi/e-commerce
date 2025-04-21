@@ -69,8 +69,6 @@ dependencies {
 
 	implementation "org.instancio:instancio-core:2.0.0"
 
-	implementation 'org.springframework.batch:spring-batch-core'
-	implementation 'org.springframework.batch:spring-batch-infrastructure:5.2.1'
 
 }
 

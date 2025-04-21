@@ -3,21 +3,43 @@ package kr.hhplus.be.server;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import kr.hhplus.be.server.domain.category.Category;
+import kr.hhplus.be.server.domain.category.CategoryRepository;
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.inventory.Inventory;
+import kr.hhplus.be.server.domain.inventory.InventoryRepository;
+import kr.hhplus.be.server.domain.item.Item;
+import kr.hhplus.be.server.domain.item.ItemRepository;
+import kr.hhplus.be.server.domain.item.SaleStatus;
+import kr.hhplus.be.server.domain.option.Option;
+import kr.hhplus.be.server.domain.option.OptionRepository;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderProduct;
+import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.domain.point.PointRepository;
+import kr.hhplus.be.server.domain.point.UserPoint;
+import kr.hhplus.be.server.domain.product.Product;
+import kr.hhplus.be.server.domain.product.ProductRepository;
+import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.interfaces.api.category.CategoryRequest;
+import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
+import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.MountableFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -27,10 +49,6 @@ import static org.hamcrest.Matchers.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Testcontainers
-@TestPropertySource(properties = {
-        "spring.profiles.active=test",
-        "spring.jpa.defer-datasource-initialization=true"
-})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ApiE2ETests {
 
@@ -42,10 +60,7 @@ public class ApiE2ETests {
             .withDatabaseName("hhplus")
             .withUsername("application")
             .withPassword("application")
-            .withCopyFileToContainer(
-                    MountableFile.forHostPath("/Users/jangmi/mysql-conf/slow.cnf"),
-                    "/etc/mysql/conf.d/slow.cnf"
-            );
+           ;
 
 
     @DynamicPropertySource
@@ -53,21 +68,105 @@ public class ApiE2ETests {
         if (!mysql.isRunning()) mysql.start();
 
         String realUrl = mysql.getJdbcUrl();
-        String spyUrl = realUrl.replace("jdbc:mysql", "jdbc:p6spy:mysql");
         String username = mysql.getUsername();
         String password = mysql.getPassword();
 
 
-        registry.add("spring.datasource.url", () -> spyUrl);
+        registry.add("spring.datasource.url", () -> realUrl);
         registry.add("spring.datasource.username", () -> username);
         registry.add("spring.datasource.password", () -> password);
-        registry.add("spring.datasource.driver-class-name", () -> "com.p6spy.engine.spy.P6SpyDriver");
     }
 
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PointRepository pointRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private OptionRepository optionRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private InventoryRepository inventoryRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+
     @BeforeEach
-    void setupRestAssured() {
+    void setupRestAssuredAndSeed() {
         RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
+        RestAssured.port    = port;
+
+
+        User managedUser;
+        if (userRepository.count() == 0) {
+            User user = new User("mi");
+            managedUser = userRepository.saveAndFlush(user);
+
+            UserPoint userPoint = new UserPoint();
+            userPoint.setUser(managedUser);
+            userPoint.chargePoints(Money.of(100_000));
+            pointRepository.save(userPoint);
+        } else {
+            managedUser = userRepository.findAll().get(0);
+        }
+
+        // 2. 카테고리, 아이템, 옵션, 상품
+        Product product;
+        if (productRepository.count() == 0) {
+            // 카테고리
+            Category category = Category.fromDto(new CategoryRequest("일반"));
+            categoryRepository.save(category);
+
+            // 아이템
+            Item item = Item.fromDto(new ItemRequest(
+                    "AirForce",
+                    "AirForce Description",
+                    SaleStatus.ON_SALE,
+                    Money.of(100_000),
+                    LocalDateTime.now()
+            ), category);
+            itemRepository.save(item);
+
+            // 옵션
+            Option option = Option.fromDto(new OptionRequest("White240", Money.of(5_000)));
+            optionRepository.save(option);
+
+            // 상품
+            product = new Product(item, option);
+            productRepository.save(product);
+        } else {
+            product = productRepository.findAll().get(0);
+        }
+
+        // 3. 재고
+        if (inventoryRepository.findByProductId(product.getId()).isEmpty()) {
+            Inventory inv = Inventory.builder()
+                    .productId(product.getId())
+                    .quantity(10)
+                    .build();
+            inventoryRepository.save(inv);
+        }
+
+        // 4. 주문
+        if (orderRepository.count() == 0) {
+            Item item = itemRepository.findById(product.getItem().getId())
+                    .orElseThrow(() -> new IllegalStateException("Item not found"));
+            int qty = 2;
+            Money unitPoint = item.getBasePrice();
+            OrderProduct op = OrderProduct.builder()
+                    .productId(product.getId())
+                    .quantity(qty)
+                    .unitPoint(unitPoint)
+                    .build();
+            Money total = unitPoint.multiply(qty);
+            Order order = new Order(managedUser, "ORD-" + System.currentTimeMillis(), total, OrderStatus.CREATED);
+            order.addOrderProduct(op);
+            orderRepository.save(order);
+        }
     }
 
 

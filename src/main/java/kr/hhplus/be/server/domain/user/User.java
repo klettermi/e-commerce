@@ -27,6 +27,10 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user")
     private UserPoint userPoint;
 
+    public User(String username) {
+        this.username = username;
+    }
+
     public static User fromDto(UserRequest userRequest) {
         User user = new User();
         user.id = userRequest.id();
