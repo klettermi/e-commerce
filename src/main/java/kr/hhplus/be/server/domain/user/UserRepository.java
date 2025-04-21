@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.user;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 

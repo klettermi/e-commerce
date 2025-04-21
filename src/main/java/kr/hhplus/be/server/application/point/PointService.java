@@ -9,15 +9,11 @@ import kr.hhplus.be.server.domain.point.TransactionType;
 import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
-import kr.hhplus.be.server.interfaces.api.point.PointResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -43,6 +39,7 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
+    @Transactional
     public UserPoint chargePoint(long userId, Money amount) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 

@@ -42,6 +42,7 @@ public class PointRepositoryImpl implements PointRepository {
 
     @Override
     public void deleteAll() {
+        pointHistoryRepo.deleteAll();
         userPointRepo.deleteAll();
     }
 }

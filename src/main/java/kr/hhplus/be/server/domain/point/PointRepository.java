@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.point;
 
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
