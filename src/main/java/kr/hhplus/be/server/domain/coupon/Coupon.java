@@ -26,11 +26,6 @@ public class Coupon extends BaseEntity {
     @Column(name = "remaining_quantity", nullable = false)
     private int remainingQuantity;
 
-    public Coupon(String couponCode, int initialQuantity) {
-        this.couponCode = couponCode;
-        this.totalQuantity = initialQuantity;
-    }
-
     /**
      * 쿠폰 발급 요청 처리: 남은 쿠폰 수량이 0보다 크면 1 차감하고, 없으면 예외를 발생
      */
