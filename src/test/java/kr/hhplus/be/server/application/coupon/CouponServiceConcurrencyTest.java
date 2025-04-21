@@ -26,7 +26,7 @@ class CouponServiceConcurrencyTest {
 
     @Autowired
     private CouponRepository couponRepository;
-    @Autowired private CouponService    couponService;
+    @Autowired private CouponService couponService;
 
     @BeforeAll
     void setupCoupon() {
