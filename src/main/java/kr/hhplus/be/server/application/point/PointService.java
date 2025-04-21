@@ -75,9 +75,6 @@ public class PointService {
         UserPoint userPoint = pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
-        if (amount.compareTo(userPoint.getPointBalance()) > 0) {
-            throw new IllegalArgumentException("사용 포인트가 부족합니다.");
-        }
 
         userPoint.validate(amount, TransactionType.USE);
 
