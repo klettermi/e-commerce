@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.infrastructure.category;
 
+import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.category.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -9,4 +10,9 @@ import org.springframework.stereotype.Repository;
 public class CategoryRepositoryImpl implements CategoryRepository {
 
     private final CategoryJpaRepository categoryRepo;
+
+    @Override
+    public void save(Category category) {
+        categoryRepo.save(category);
+    }
 }

@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.point;
 
 import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
@@ -11,6 +12,7 @@ import kr.hhplus.be.server.infrastructure.point.UserPointRequest;
 import kr.hhplus.be.server.infrastructure.user.UserRequest;
 import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
 import kr.hhplus.be.server.interfaces.api.point.PointResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +20,6 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +49,12 @@ class PointServiceTest {
         // DTO → 도메인 엔티티 변환
         DUMMY_USER       = User.fromDto(DUMMY_USER_DTO);
         DUMMY_USER_POINT = UserPoint.fromDto(DUMMY_POINT_DTO, DUMMY_USER);
+    }
+
+    @AfterEach
+    void clean() {
+        pointRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -89,16 +96,18 @@ class PointServiceTest {
 
     @Test
     void chargePoint_valid_savesAndReturns() {
-        Money amount = Money.of(300);
+        Money amount = Money.of(1300);
 
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER));
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
+
+        Money originBalance = DUMMY_USER_POINT.getPointBalance();
 
         UserPoint userPoint = pointService.chargePoint(USER_ID, amount);
         PointResponse resp = PointResponse.from(userPoint);
 
         assertEquals(USER_ID, resp.userId());
-        assertEquals(Money.of(1300), resp.point());
+        assertEquals(amount.add(originBalance), resp.point());
         InOrder ord = inOrder(userRepository, pointRepository);
         ord.verify(userRepository).findById(USER_ID);
         ord.verify(pointRepository, times(1)).save((UserPoint) any());
@@ -138,7 +147,7 @@ class PointServiceTest {
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER));
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DomainException.InvalidStateException.class,
                 () -> pointService.usePoint(USER_ID, amount));
     }
 }

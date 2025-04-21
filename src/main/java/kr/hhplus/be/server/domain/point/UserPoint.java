@@ -60,14 +60,12 @@ public class UserPoint extends BaseEntity {
             if (amount.compareTo(MAX_CHARGE_AMOUNT) > 0) {
                 throw new InvalidStateException("1일 충전 금액은 최대 100,000 포인트입니다.");
             }
-            chargePoints(amount);
 
         } else if (type == TransactionType.USE) {
             // 사용은 최소 100 포인트 이상
             if (amount.compareTo(MIN_USE_AMOUNT) < 0) {
                 throw new InvalidStateException("사용 금액은 100 포인트 이상이어야 합니다.");
             }
-            usePoints(amount);
 
         } else {
             throw new InvalidStateException("유효하지 않은 거래 타입입니다.");
@@ -78,7 +76,7 @@ public class UserPoint extends BaseEntity {
         if (amount.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidStateException("충전 포인트는 0 이상이어야 합니다.");
         }
-        this.pointBalance = new Money(this.pointBalance.amount().add(amount.amount()));
+        this.pointBalance = this.pointBalance.add(amount);
     }
 
     public void usePoints(Money amount) {

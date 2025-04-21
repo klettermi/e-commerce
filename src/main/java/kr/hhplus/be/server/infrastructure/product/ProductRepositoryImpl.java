@@ -16,4 +16,14 @@ public class ProductRepositoryImpl implements ProductRepository {
     public List<Product> findAll() {
         return productJpaRepository.findAll();
     }
+
+    @Override
+    public long count() {
+        return productJpaRepository.count();
+    }
+
+    @Override
+    public void save(Product product) {
+        productJpaRepository.save(product);
+    }
 }

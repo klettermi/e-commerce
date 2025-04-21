@@ -33,4 +33,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     public void deleteAll() {
         orderRepo.deleteAll();
     }
+
+    @Override
+    public long count() {
+        return orderRepo.count();
+    }
 }

@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,5 +26,20 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void deleteAll() {
         userJpaRepository.deleteAll();
+    }
+
+    @Override
+    public long count() {
+        return userJpaRepository.count();
+    }
+
+    @Override
+    public User saveAndFlush(User user) {
+        return userJpaRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userJpaRepository.findAll();
     }
 }
