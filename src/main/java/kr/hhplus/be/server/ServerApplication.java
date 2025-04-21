@@ -4,10 +4,11 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.retry.annotation.EnableRetry;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "kr.hhplus.be.server")
-@EnableBatchProcessing
+@EnableRetry
 public class ServerApplication {
 
 	public static void main(String[] args) {

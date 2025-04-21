@@ -1,20 +1,30 @@
 package kr.hhplus.be.server.application.coupon;
 
-import kr.hhplus.be.server.domain.common.exception.DomainException;
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureEmbeddedDatabase(
+        provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.DOCKER
+)
+@EnableAspectJAutoProxy
 class CouponServiceConcurrencyTest {
   @Autowired
   CouponService couponService;
@@ -40,6 +50,8 @@ class CouponServiceConcurrencyTest {
 
       // 스레드 풀 생성 후 즉시 실행
       ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+
       for (int i = 0; i < threadCount; i++) {
           executor.execute(() -> {
               try {
@@ -62,4 +74,5 @@ class CouponServiceConcurrencyTest {
       executor.shutdown();
 
   }
+
 }

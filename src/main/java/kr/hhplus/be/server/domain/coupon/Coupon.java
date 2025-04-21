@@ -26,6 +26,10 @@ public class Coupon extends BaseEntity {
     @Column(name = "remaining_quantity", nullable = false)
     private int remainingQuantity;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     /**
      * 쿠폰 발급 요청 처리: 남은 쿠폰 수량이 0보다 크면 1 차감하고, 없으면 예외를 발생
      */
