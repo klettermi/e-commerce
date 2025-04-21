@@ -39,4 +39,9 @@ public class PointRepositoryImpl implements PointRepository {
     public void save(PointHistory pointHistory) {
         pointHistoryRepo.save(pointHistory);
     }
+
+    @Override
+    public void deleteAll() {
+        userPointRepo.deleteAll();
+    }
 }
