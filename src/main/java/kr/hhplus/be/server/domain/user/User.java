@@ -24,7 +24,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String username;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserPoint userPoint;
 
     public User(String username) {
