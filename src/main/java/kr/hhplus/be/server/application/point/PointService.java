@@ -22,13 +22,11 @@ public class PointService {
     private final PointRepository pointRepository;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
     public UserPoint getPoint(long userId) {
         return pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
     }
 
-    @Transactional(readOnly = true)
     public List<PointHistory> getPointHistory(long userId) {
         return pointRepository.findByUserId(userId);
     }

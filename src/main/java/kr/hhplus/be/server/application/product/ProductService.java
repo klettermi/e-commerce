@@ -13,7 +13,6 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
 
-    @Transactional(readOnly = true)
     public List<Product> getProductList() {
         return productRepository.findAll();
     }

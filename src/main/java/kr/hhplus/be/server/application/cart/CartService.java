@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class CartService {
 
@@ -20,7 +19,8 @@ public class CartService {
                 .orElseGet(() -> cartRepository.save(new Cart(userId)));
     }
 
-    // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트) 
+    // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트)
+    @Transactional
     public Cart addItem(Long userId, CartItem newItem) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(new Cart(userId)));
@@ -41,6 +41,7 @@ public class CartService {
         return cart;
     }
 
+    @Transactional
     public Cart updateItem(Long userId, CartItem updatedItem) {
         // 사용자 장바구니 조회 (없으면 새로 생성)
         Cart cart = cartRepository.findByUserId(userId)
@@ -64,7 +65,8 @@ public class CartService {
     }
 
 
-    // 장바구니에서 아이템 제거 
+    // 장바구니에서 아이템 제거
+    @Transactional
     public Cart removeItem(Long userId, Long productId) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(new Cart(userId)));
@@ -74,7 +76,8 @@ public class CartService {
         return cart;
     }
 
-    // 장바구니 전체 비우기 
+    // 장바구니 전체 비우기
+    @Transactional
     public Cart clearCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(new Cart(userId)));

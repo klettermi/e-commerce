@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.api.point_history;
+package kr.hhplus.be.server.interfaces.api.pointhistory;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
