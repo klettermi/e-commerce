@@ -3,19 +3,16 @@ package kr.hhplus.be.server.application.payment;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.point.PointRepository;
-import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
-import kr.hhplus.be.server.domain.payment.Payment;
-import kr.hhplus.be.server.infrastructure.payment.PaymentJpaRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
-import kr.hhplus.be.server.infrastructure.point.UserPointJpaRepository;
-import kr.hhplus.be.server.interfaces.api.payment.PaymentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.EntityNotFoundException;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 
 @Service
 @RequiredArgsConstructor
@@ -44,13 +41,11 @@ public class PaymentService {
         order.markAsPaid();
         orderRepository.save(order);
 
-        PaymentResponse paymentResponse = new PaymentResponse(
-                orderId,
-                requiredPoints
 
-        );
-
-        Payment payment = Payment.toEntity(paymentResponse, order);
+        Payment payment = Payment.builder()
+                .paymentAmount(requiredPoints)
+                .order(order)
+                .build();
         paymentRepository.save(payment);
         return payment;
     }

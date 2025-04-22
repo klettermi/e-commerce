@@ -4,11 +4,11 @@ import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.inventory.InventoryChecker;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,9 +63,17 @@ class OrderServiceConcurrencyTest {
         );
 
         String orderNumber = "ORD-";
-        List<OrderProductRequest> reqs = List.of(
-                new OrderProductRequest(1L, 2, Money.of(500)),
-                new OrderProductRequest(2L, 3, Money.of(200))
+        List<OrderProduct> reqs = List.of(
+                OrderProduct.builder()
+                        .productId(10L)
+                        .quantity(2)
+                        .unitPoint(Money.of(500))
+                        .build(),
+                OrderProduct.builder()
+                        .productId(20L)
+                        .quantity(3)
+                        .unitPoint(Money.of(200))
+                        .build()
         );
 
         CountDownLatch latch = new CountDownLatch(threadCount);
@@ -89,7 +97,7 @@ class OrderServiceConcurrencyTest {
         assertEquals(threadCount, saved.size(), "저장된 주문 개수가 같아야 합니다.");
 
         var expectedTotal = reqs.stream()
-                .map(r -> r.unitPoint().multiply(r.quantity()))
+                .map(r -> r.getUnitPoint().multiply(r.getQuantity()))
                 .reduce(Money.ZERO, Money::add);
 
         for (Order o : saved) {

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,15 +29,6 @@ public class PointHistory extends BaseEntity {
 
     @Column
     private Long userId;
-
-    public PointHistoryResponse toDto() {
-        return new PointHistoryResponse(
-                id,
-                userId,
-                amount,
-                type.toString()
-        );
-    }
 
     /**
      * 정적 팩토리 메서드: 포인트 충전 이력 생성

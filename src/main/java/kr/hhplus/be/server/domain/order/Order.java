@@ -6,6 +6,7 @@ import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.user.User;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "`order`")
+@Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

@@ -4,8 +4,6 @@ import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
 import kr.hhplus.be.server.domain.cart.CartRepository;
-import kr.hhplus.be.server.interfaces.api.cart.CartItemRequest;
-import kr.hhplus.be.server.interfaces.api.cart.CartResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,27 +21,27 @@ public class CartService {
     }
 
     // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트) 
-    public Cart addItem(Long userId, CartItemRequest newItem) {
+    public Cart addItem(Long userId, CartItem newItem) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(new Cart(userId)));
 
         boolean found = false;
         for (CartItem item : cart.getCartItems()) {
-            if (item.getProductId().equals(newItem.productId())) {
-                item.setQuantity(item.getQuantity() + newItem.quantity());
+            if (item.getProductId().equals(newItem.getProductId())) {
+                item.setQuantity(item.getQuantity() + newItem.getQuantity());
                 found = true;
                 break;
             }
         }
         if (!found) {
-            cart.addItemInCart(CartItem.fromDto(newItem, cart));
+            cart.addItemInCart(newItem);
         }
 
         cart = cartRepository.save(cart);
         return cart;
     }
 
-    public Cart updateItem(Long userId, CartItemRequest updatedItem) {
+    public Cart updateItem(Long userId, CartItem updatedItem) {
         // 사용자 장바구니 조회 (없으면 새로 생성)
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(new Cart(userId)));
@@ -51,14 +49,14 @@ public class CartService {
         boolean found = false;
         // 장바구니 아이템 업데이트
         for (CartItem item : cart.getCartItems()) {
-            if (item.getProductId().equals(updatedItem.productId())) {
-                item.setQuantity(updatedItem.quantity());
+            if (item.getProductId().equals(updatedItem.getProductId())) {
+                item.setQuantity(updatedItem.getQuantity());
                 found = true;
                 break;
             }
         }
         if (!found) {
-             cart.addItemInCart(CartItem.fromDto(updatedItem, cart));
+             cart.addItemInCart(updatedItem);
         }
 
         cart = cartRepository.save(cart);

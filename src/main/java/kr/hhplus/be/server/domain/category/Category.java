@@ -3,7 +3,8 @@ package kr.hhplus.be.server.domain.category;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.item.Item;
-import kr.hhplus.be.server.interfaces.api.category.CategoryRequest;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "category")
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Category extends BaseEntity {
     @Id
@@ -25,12 +28,6 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "category")
     private List<Item> items = new ArrayList<>();
-
-    public static Category fromDto(CategoryRequest categoryRequest) {
-        Category category = new Category();
-        category.name = categoryRequest.name();
-        return category;
-    }
 
     public void addItem(Item item) {
         items.add(item);
