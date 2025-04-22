@@ -35,13 +35,9 @@ public class UserPoint extends BaseEntity {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
+    @Version
+    private Long version;
 
-    public static UserPoint fromDto(UserPointRequest userpointRequest, User user) {
-        UserPoint userPoint = new UserPoint();
-        userPoint.pointBalance = userpointRequest.pointBalance();
-        userPoint.user = user;
-        return userPoint;
-    }
 
     /**
      * 거래 유형에 따라 충전/사용 로직과 금액 검증을 수행합니다.

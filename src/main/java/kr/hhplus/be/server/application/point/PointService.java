@@ -22,11 +22,13 @@ public class PointService {
     private final PointRepository pointRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public UserPoint getPoint(long userId) {
         return pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
     }
 
+    @Transactional(readOnly = true)
     public List<PointHistory> getPointHistory(long userId) {
         return pointRepository.findByUserId(userId);
     }
@@ -63,11 +65,12 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
+    @Transactional
     public UserPoint usePoint(Long userId, Money amount) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
 
-        UserPoint userPoint = pointRepository.findById(userId)
+        UserPoint userPoint = pointRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
 
@@ -81,4 +84,5 @@ public class PointService {
 
         return userPoint;
     }
+
 }
