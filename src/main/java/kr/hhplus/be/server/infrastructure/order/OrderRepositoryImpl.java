@@ -26,11 +26,6 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public long countByUserId(User user) {
-        return orderRepo.countByUser(user);
-    }
-
-    @Override
     public void deleteAll() {
         orderRepo.deleteAll();
     }
@@ -44,4 +39,5 @@ public class OrderRepositoryImpl implements OrderRepository {
     public List<Order> findAll() {
         return orderRepo.findAll();
     }
+
 }

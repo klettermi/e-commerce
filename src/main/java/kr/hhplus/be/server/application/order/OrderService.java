@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainException;
-import kr.hhplus.be.server.domain.inventory.InventoryChecker;
+import kr.hhplus.be.server.domain.inventory.Inventory;
+import kr.hhplus.be.server.domain.inventory.InventoryRepository;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
@@ -15,54 +15,45 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.EntityNotFoundException;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final InventoryChecker inventoryChecker;
+    private final InventoryRepository inventoryRepository;
 
-    public Order placeOrder(User user, String orderNumber, List<OrderProductRequest> orderRequest) throws InvalidStateException {
-        // 주문 항목 리스트 생성
-        List<OrderProduct> orderProducts = orderRequest.stream()
-                .map(req -> OrderProduct.builder()
-                        .productId(req.productId())
-                        .quantity(req.quantity())
-                        .unitPoint(req.unitPoint())
-                        .build())
-                .toList();
-
-        // 총 결제 포인트 계산
-        Money totalPointValue = orderProducts.stream()
-                .map(op -> op.getUnitPoint().multiply(op.getQuantity()))
+    @Transactional
+    public Order placeOrder(User user, String orderNumber, List<OrderProductRequest> orderRequest) {
+        Money totalPointValue = orderRequest.stream()
+                .map(req -> req.unitPoint().multiply(req.quantity()))
                 .reduce(Money.ZERO, Money::add);
 
-        // 주문 생성
         Order order = new Order(user, orderNumber, totalPointValue, OrderStatus.CREATED);
+        orderRequest.forEach(r ->
+                order.addOrderProduct(OrderProduct.builder()
+                        .productId(r.productId())
+                        .quantity(r.quantity())
+                        .unitPoint(r.unitPoint())
+                        .build())
+        );
 
-        // 주문 항목 추가
-        orderProducts.forEach(order::addOrderProduct);
+        for (OrderProduct p : order.getOrderProducts()) {
+            Inventory inv = inventoryRepository
+                    .findByProductIdForUpdate(p.getProductId())  // @Lock(PESSIMISTIC_WRITE)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Inventory not found: productId=" + p.getProductId()));
 
-        // 재고 체크
-        for (OrderProduct orderProduct : order.getOrderProducts()) {
-            if (!inventoryChecker.hasSufficientStock(orderProduct.getProductId(), orderProduct.getQuantity())) {
-                throw new InvalidStateException("재고 부족: productId=" + orderProduct.getProductId());
+            if (inv.getQuantity() < p.getQuantity()) {
+                throw new InvalidStateException("재고 부족: productId=" + p.getProductId());
             }
+            inv.decreaseStock(p.getQuantity());
         }
 
-        order = orderRepository.save(order);
-
-        // 재고 차감
-        for (OrderProduct orderProduct : order.getOrderProducts()) {
-            inventoryChecker.decreaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
-        }
-
-        // 주문 상태 변경
         order.markAsPaid();
-
-        return order;
+        return orderRepository.save(order);
     }
 
     @Transactional(readOnly = true)

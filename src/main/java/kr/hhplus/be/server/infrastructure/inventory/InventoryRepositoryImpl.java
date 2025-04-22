@@ -27,4 +27,9 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     public void deleteAll() {
         inventoryRepo.deleteAll();
     }
+
+    @Override
+    public Optional<Inventory> findByProductIdForUpdate(Long id) {
+        return inventoryRepo.findByProductIdForUpdate(id);
+    }
 }
