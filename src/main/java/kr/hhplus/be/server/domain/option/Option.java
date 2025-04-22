@@ -2,14 +2,17 @@ package kr.hhplus.be.server.domain.option;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "`option`")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Option extends BaseEntity{
 
@@ -27,10 +30,4 @@ public class Option extends BaseEntity{
     )
     private Money additionalCost;
 
-    public static Option fromDto(OptionRequest dto) {
-        Option option = new Option();
-        option.name = dto.name();
-        option.additionalCost = dto.additionalCost();
-        return option;
-    }
 }

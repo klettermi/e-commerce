@@ -4,6 +4,7 @@ package kr.hhplus.be.server.interfaces.api.cart;
 import kr.hhplus.be.server.application.cart.CartService;
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.domain.cart.Cart;
+import kr.hhplus.be.server.domain.cart.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,8 @@ public class CartController {
     @PostMapping("/{userId}/items")
     public ApiResponse<CartResponse> addItem(@PathVariable Long userId,
                                              @RequestBody CartItemRequest newItem) {
-        Cart cart = cartService.addItem(userId, newItem);
+        CartItem cartItem = newItem.toCartItem();
+        Cart cart = cartService.addItem(userId, cartItem);
         CartResponse cartResponse = CartResponse.from(cart);
         return ApiResponse.success(cartResponse);
     }
@@ -35,7 +37,8 @@ public class CartController {
     @PutMapping("/{userId}/items")
     public ApiResponse<CartResponse> updateItem(@PathVariable Long userId,
                                                 @RequestBody CartItemRequest updatedItem) {
-        Cart cart = cartService.updateItem(userId, updatedItem);
+        CartItem cartItem = updatedItem.toCartItem();
+        Cart cart = cartService.updateItem(userId, cartItem);
         CartResponse cartResponse = CartResponse.from(cart);
         return ApiResponse.success(cartResponse);
     }

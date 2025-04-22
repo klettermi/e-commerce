@@ -2,7 +2,6 @@ package kr.hhplus.be.server.domain.item;
 
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -20,11 +19,18 @@ class ItemTest {
         Money basePrice = Money.of(1000);
         LocalDateTime saleStartDate = LocalDateTime.now();
 
-        ItemRequest dto = new ItemRequest(name, description, saleStatus, basePrice, saleStartDate);
-
         Category category = new Category();
 
-        Item item = Item.fromDto(dto, category);
+        Item item = Item.builder()
+                .name(name)
+                .category(category)
+                .description(description)
+                .saleStatus(saleStatus)
+                .basePrice(basePrice)
+                .saleStartDate(saleStartDate)
+                .build();
+
+
 
         assertNotNull(item, "생성된 Item 객체는 null이 아니어야 합니다.");
         assertEquals(name, item.getName(), "이름 필드가 DTO와 동일해야 합니다.");

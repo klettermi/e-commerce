@@ -7,9 +7,6 @@ import kr.hhplus.be.server.domain.item.SaleStatus;
 import kr.hhplus.be.server.domain.option.Option;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
-import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
-import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
-import kr.hhplus.be.server.interfaces.api.product.ProductResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,34 +43,33 @@ class ProductServiceTest {
         category = new Category();
 
         // 첫 번째 상품: 할인 없음
-        ItemRequest itemRequest1 = new ItemRequest(
-                "AirForce",            // item name
-                "AirForce",            // item description
-                SaleStatus.ON_SALE,
-                Money.of(100000),                // basePrice
-                LocalDateTime.now()
-        );
-        OptionRequest optionRequest1 = new OptionRequest(
-                "White240",            // option name
-                Money.of(5000)                 // additionalCost
-        );
-        item1 = Item.fromDto(itemRequest1, category);
-        option1 = Option.fromDto(optionRequest1);
+         item1 = Item.builder()
+                .name("AirForce")
+                .description("AirForce Description")
+                .category(category)
+                .saleStartDate(LocalDateTime.now())
+                .saleStatus(SaleStatus.ON_SALE)
+                .basePrice(Money.of(100_000))
+                .build();
+        option1 = Option.builder()
+                .name("White240")
+                .additionalCost(Money.of(5_000))
+                .build();
         product1 = new Product(item1, option1);  // 기본 최종 가격: 100000 + 5000 = 105000
 
-        ItemRequest itemRequest2 = new ItemRequest(
-                "AirMax",
-                "AirMax",
-                SaleStatus.ON_SALE,
-                Money.of(100000),
-                LocalDateTime.now()
-        );
-        OptionRequest optionRequest2 = new OptionRequest(
-                "Black",
-                Money.of(60000)
-        );
-        item2 = Item.fromDto(itemRequest2, category);
-        option2 = Option.fromDto(optionRequest2);
+        item2 = Item.builder()
+                .name("AirMax")
+                .description("AirMax Description")
+                .category(category)
+                .saleStartDate(LocalDateTime.now())
+                .saleStatus(SaleStatus.ON_SALE)
+                .basePrice(Money.of(100_000))
+                .build();
+        option2 = Option.builder()
+                .name("Black")
+                .additionalCost(Money.of(60_000))
+                .build();
+
         product2 = new Product(item2, option2);
     }
 
@@ -86,26 +82,24 @@ class ProductServiceTest {
 
         // when
         List<Product> productList = productService.getProductList();
-        List<ProductResponse> responses = productList.stream()
-                .map(ProductResponse::from)
-                .toList();
+
 
         // then
-        assertEquals(2, responses.size(), "상품 목록의 크기는 2여야 합니다.");
+        assertEquals(2, productList.size(), "상품 목록의 크기는 2여야 합니다.");
 
         // 첫 번째 상품 검증
-        ProductResponse responses1 = responses.get(0);
+        Product responses1 = productList.get(0);
         // 아직 영속화되지 않았으므로 id는 null이어야 합니다.
-        assertNull(responses1.id(), "영속화되지 않은 상태면 첫 상품 id는 null이어야 합니다.");
-        assertEquals("AirForce", responses1.itemName(), "첫 상품의 itemName은 'AirForce'여야 합니다.");
+        assertNull(responses1.getId(), "영속화되지 않은 상태면 첫 상품 id는 null이어야 합니다.");
+        assertEquals("AirForce", responses1.getItem().getName(), "첫 상품의 itemName은 'AirForce'여야 합니다.");
         // 도메인에서 Option의 이름은 DTO 변환 시 optionName으로 노출됩니다.
-        assertEquals("White240", responses1.optionName(), "첫 상품의 optionName은 'White240'이어야 합니다.");
-        assertEquals(new Money(BigDecimal.valueOf(105000)), responses1.finalPrice(), "첫 상품의 최종 가격은 105000이어야 합니다.");
+        assertEquals("White240", responses1.getOption().getName(), "첫 상품의 optionName은 'White240'이어야 합니다.");
+        assertEquals(new Money(BigDecimal.valueOf(105000)), responses1.getItem().getBasePrice().add(option1.getAdditionalCost()), "첫 상품의 최종 가격은 105000이어야 합니다.");
         // 두 번째 상품 검증
-        ProductResponse responses2 = responses.get(1);
-        assertNull(responses2.id(), "영속화되지 않은 상태면 두 번째 상품 id는 null이어야 합니다.");
-        assertEquals("AirMax", responses2.itemName(), "두 번째 상품의 itemName은 'AirMax'여야 합니다.");
-        assertEquals("Black", responses2.optionName(), "두 번째 상품의 optionName은 'Black'이어야 합니다.");
-        assertEquals(new Money(BigDecimal.valueOf(160000)), responses2.finalPrice(), "두 번째 상품의 최종 가격은 160000이어야 합니다.");
+        Product responses2 = productList.get(1);
+        assertNull(responses2.getId(), "영속화되지 않은 상태면 두 번째 상품 id는 null이어야 합니다.");
+        assertEquals("AirMax", responses2.getItem().getName(), "두 번째 상품의 itemName은 'AirMax'여야 합니다.");
+        assertEquals("Black", responses2.getOption().getName(), "두 번째 상품의 optionName은 'Black'이어야 합니다.");
+        assertEquals(new Money(BigDecimal.valueOf(160000)), responses2.getItem().getBasePrice().add(responses2.getOption().getAdditionalCost()), "두 번째 상품의 최종 가격은 160000이어야 합니다.");
     }
 }

@@ -8,7 +8,6 @@ import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,7 @@ class OrderServiceTest {
     private OrderService orderService;
 
     private User dummyUser;
-    private List<OrderProductRequest> reqs;
+    private List<OrderProduct> reqs;
     private String orderNumber;
 
     @BeforeEach
@@ -45,10 +44,17 @@ class OrderServiceTest {
 
         orderNumber = "ORD-001";
         reqs = List.of(
-                new OrderProductRequest(10L, 2, Money.of(500)),  // 2×500=1000
-                new OrderProductRequest(20L, 3, Money.of(200))   // 3×200=600
+                OrderProduct.builder()
+                        .productId(10L)
+                        .quantity(2)
+                        .unitPoint(Money.of(500))
+                        .build(),
+                OrderProduct.builder()
+                        .productId(20L)
+                        .quantity(3)
+                        .unitPoint(Money.of(200))
+                        .build()
         );
-
         when(inventoryChecker.hasSufficientStock(anyLong(), anyInt()))
                 .thenReturn(true);
     }

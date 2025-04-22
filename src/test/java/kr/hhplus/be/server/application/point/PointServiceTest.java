@@ -9,9 +9,6 @@ import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.infrastructure.point.UserPointRequest;
-import kr.hhplus.be.server.infrastructure.user.UserRequest;
-import kr.hhplus.be.server.interfaces.api.point.PointHistoryResponse;
-import kr.hhplus.be.server.interfaces.api.point.PointResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,36 +34,20 @@ class PointServiceTest {
 
     private final long USER_ID = 42L;
 
-    // User DTO and UserPoint DTO
-    private final UserRequest DUMMY_USER_DTO = new UserRequest(USER_ID, "username", "password");
-    private final UserPointRequest DUMMY_POINT_DTO = new UserPointRequest(USER_ID, Money.of(1000));
+    private User DUMMY_USER = User.builder()
+            .id(USER_ID)
+            .username("username")
+            .build();
+    private UserPoint DUMMY_USER_POINT = UserPoint.builder()
+            .user(DUMMY_USER)
+            .pointBalance(Money.of(100))
+            .build();
 
-    private User      DUMMY_USER;
-    private UserPoint DUMMY_USER_POINT;
-
-    @BeforeEach
-    void setup() {
-        // DTO → 도메인 엔티티 변환
-        DUMMY_USER       = User.fromDto(DUMMY_USER_DTO);
-        DUMMY_USER_POINT = UserPoint.fromDto(DUMMY_POINT_DTO, DUMMY_USER);
-    }
 
     @AfterEach
     void clean() {
         pointRepository.deleteAll();
         userRepository.deleteAll();
-    }
-
-    @Test
-    void getPoint_whenExists_returnsDto() {
-        when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
-
-        UserPoint point = pointService.getPoint(USER_ID);
-        PointResponse resp = PointResponse.from(point);
-
-        assertEquals(USER_ID, resp.userId());
-        assertEquals(DUMMY_USER_POINT.getPointBalance(), resp.point());
-        verify(pointRepository).findById(USER_ID);
     }
 
     @Test
@@ -84,13 +65,10 @@ class PointServiceTest {
         when(pointRepository.findByUserId(USER_ID)).thenReturn(List.of(h1, h2));
 
         List<PointHistory> pointHistoryList = pointService.getPointHistory(USER_ID);
-        List<PointHistoryResponse> list = pointHistoryList.stream()
-                        .map(PointHistoryResponse::from)
-                                .toList();
 
-        assertEquals(2, list.size());
-        assertTrue(list.stream().anyMatch(r -> r.transactionType().equals(h1.getType().name())&& r.changeAmount().equals(h1.getAmount())));
-        assertTrue(list.stream().anyMatch(r -> r.transactionType().equals(h2.getType().name()) && r.changeAmount().equals(h2.getAmount())));
+        assertEquals(2, pointHistoryList.size());
+        assertTrue(pointHistoryList.stream().anyMatch(r -> r.getType().name().equals(h1.getType().name())&& r.getAmount().equals(h1.getAmount())));
+        assertTrue(pointHistoryList.stream().anyMatch(r -> r.getType().name().equals(h2.getType().name()) && r.getAmount().equals(h2.getAmount())));
         verify(pointRepository).findByUserId(USER_ID);
     }
 
@@ -104,10 +82,9 @@ class PointServiceTest {
         Money originBalance = DUMMY_USER_POINT.getPointBalance();
 
         UserPoint userPoint = pointService.chargePoint(USER_ID, amount);
-        PointResponse resp = PointResponse.from(userPoint);
 
-        assertEquals(USER_ID, resp.userId());
-        assertEquals(amount.add(originBalance), resp.point());
+        assertEquals(USER_ID, userPoint.getId());
+        assertEquals(amount.add(originBalance), userPoint.getPointBalance());
         InOrder ord = inOrder(userRepository, pointRepository);
         ord.verify(userRepository).findById(USER_ID);
         ord.verify(pointRepository, times(1)).save((UserPoint) any());
@@ -131,10 +108,9 @@ class PointServiceTest {
         when(pointRepository.findById(USER_ID)).thenReturn(Optional.of(DUMMY_USER_POINT));
 
         UserPoint userPoint = pointService.usePoint(USER_ID, amount);
-        PointResponse resp = PointResponse.from(userPoint);
 
-        assertEquals(USER_ID, resp.userId());
-        assertEquals(Money.of(800), resp.point());
+        assertEquals(USER_ID, userPoint.getUser().getId());
+        assertEquals(Money.of(800), userPoint.getUser().getUserPoint());
         InOrder ord = inOrder( userRepository, pointRepository);
         ord.verify(userRepository).findById(USER_ID);
         ord.verify(pointRepository, times(1)).save((UserPoint) any());

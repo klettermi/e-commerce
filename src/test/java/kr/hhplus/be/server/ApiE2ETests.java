@@ -23,9 +23,6 @@ import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.category.CategoryRequest;
-import kr.hhplus.be.server.interfaces.api.item.ItemRequest;
-import kr.hhplus.be.server.interfaces.api.option.OptionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -103,7 +100,9 @@ public class ApiE2ETests {
 
         User managedUser;
         if (userRepository.count() == 0) {
-            User user = new User("mi");
+            User user = User.builder()
+                    .username("mi")
+                    .build();
             managedUser = userRepository.saveAndFlush(user);
 
             UserPoint userPoint = new UserPoint();
@@ -118,21 +117,27 @@ public class ApiE2ETests {
         Product product;
         if (productRepository.count() == 0) {
             // 카테고리
-            Category category = Category.fromDto(new CategoryRequest("일반"));
+            Category category = Category.builder()
+                    .name("일반")
+                    .build();
             categoryRepository.save(category);
 
             // 아이템
-            Item item = Item.fromDto(new ItemRequest(
-                    "AirForce",
-                    "AirForce Description",
-                    SaleStatus.ON_SALE,
-                    Money.of(100_000),
-                    LocalDateTime.now()
-            ), category);
+            Item item = Item.builder()
+                    .name("AirForce")
+                    .description("AirForce Description")
+                    .category(category)
+                    .saleStartDate(LocalDateTime.now())
+                    .saleStatus(SaleStatus.ON_SALE)
+                    .basePrice(Money.of(100_000))
+                    .build();
             itemRepository.save(item);
 
             // 옵션
-            Option option = Option.fromDto(new OptionRequest("White240", Money.of(5_000)));
+            Option option = Option.builder()
+                    .name("White240")
+                    .additionalCost(Money.of(5_000))
+                    .build();
             optionRepository.save(option);
 
             // 상품

@@ -4,10 +4,12 @@ package kr.hhplus.be.server.interfaces.api.order;
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.order.OrderFacade;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderProduct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -22,7 +24,10 @@ public class OrderController {
             @RequestParam Long userId,
             @RequestBody List<OrderProductRequest> orderProductRequests) {
 
-        Order order = orderFacade.createOrder(userId, orderProductRequests);
+        List<OrderProduct> orderProductList = orderProductRequests.stream()
+                .map(OrderProductRequest::toOrderProduct)
+                .toList();
+        Order order = orderFacade.createOrder(userId, orderProductList);
         OrderResponse orderResponse = OrderResponse.from(order);
 
         return ApiResponse.success(orderResponse);

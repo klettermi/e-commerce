@@ -1,21 +1,20 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.inventory.InventoryChecker;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.EntityNotFoundException;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 
 
 @Service
@@ -24,18 +23,9 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final InventoryChecker inventoryChecker;
 
-    public Order placeOrder(User user, String orderNumber, List<OrderProductRequest> orderRequest) throws InvalidStateException {
-        // 주문 항목 리스트 생성
-        List<OrderProduct> orderProducts = orderRequest.stream()
-                .map(req -> OrderProduct.builder()
-                        .productId(req.productId())
-                        .quantity(req.quantity())
-                        .unitPoint(req.unitPoint())
-                        .build())
-                .toList();
-
+    public Order placeOrder(User user, String orderNumber, List<OrderProduct> orderProductList) throws InvalidStateException {
         // 총 결제 포인트 계산
-        Money totalPointValue = orderProducts.stream()
+        Money totalPointValue = orderProductList.stream()
                 .map(op -> op.getUnitPoint().multiply(op.getQuantity()))
                 .reduce(Money.ZERO, Money::add);
 
@@ -43,7 +33,7 @@ public class OrderService {
         Order order = new Order(user, orderNumber, totalPointValue, OrderStatus.CREATED);
 
         // 주문 항목 추가
-        orderProducts.forEach(order::addOrderProduct);
+        orderProductList.forEach(order::addOrderProduct);
 
         // 재고 체크
         for (OrderProduct orderProduct : order.getOrderProducts()) {
