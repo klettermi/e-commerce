@@ -20,11 +20,11 @@ import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 public class OrderFacade {
 
     private final OrderService orderService;
-    private final UserRepository userJpaRepository;
+    private final UserRepository userRepository;
 
     public Order createOrder(Long userId, List<OrderProductRequest> orderProductRequests) {
         // 사용자 조회: 존재하지 않으면 도메인 예외 발생
-        User user = userJpaRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         String orderNumber = generateOrderNumber();
