@@ -17,11 +17,11 @@ import java.util.Map;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductService productFacade;
+    private final ProductService productService;
 
     @GetMapping
     public ApiResponse<List<ProductResponse>> lookupProducts() {
-        List<Product> userPoint = productFacade.getProductList();
+        List<Product> userPoint = productService.getProductList();
         List<ProductResponse> productResponseList = userPoint.stream()
                 .map(ProductResponse::from)
                 .toList();
