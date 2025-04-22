@@ -69,8 +69,17 @@ dependencies {
 
 	implementation "org.instancio:instancio-core:2.0.0"
 
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+	// 테스트용 Embedded DB (Zonky Embedded Postgres 등)
+	testImplementation 'io.zonky.test:embedded-database-spring-test:2.6.0'
+
+	// AOP
+	implementation "org.springframework.boot:spring-boot-starter-aop"
 }
+
+
 
 test {
 	useJUnitPlatform()
