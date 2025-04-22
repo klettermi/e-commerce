@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.inventory.InventoryChecker;
+import kr.hhplus.be.server.domain.inventory.Inventory;
+import kr.hhplus.be.server.domain.inventory.InventoryRepository;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
@@ -21,40 +22,40 @@ import static kr.hhplus.be.server.domain.common.exception.DomainException.Invali
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final InventoryChecker inventoryChecker;
+    private final InventoryRepository inventoryRepository;
 
-    public Order placeOrder(User user, String orderNumber, List<OrderProduct> orderProductList) throws InvalidStateException {
-        // 총 결제 포인트 계산
-        Money totalPointValue = orderProductList.stream()
-                .map(op -> op.getUnitPoint().multiply(op.getQuantity()))
+    @Transactional
+    public Order placeOrder(User user, String orderNumber, List<OrderProduct> orderRequest) {
+        Money totalPointValue = orderRequest.stream()
+                .map(req -> req.getUnitPoint().multiply(req.getQuantity()))
                 .reduce(Money.ZERO, Money::add);
 
-        // 주문 생성
         Order order = new Order(user.getId(), orderNumber, totalPointValue, OrderStatus.CREATED);
+        orderRequest.forEach(r ->
+                order.addOrderProduct(OrderProduct.builder()
+                        .productId(r.getProductId())
+                        .quantity(r.getQuantity())
+                        .unitPoint(r.getUnitPoint())
+                        .build())
+        );
 
-        // 주문 항목 추가
-        orderProductList.forEach(order::addOrderProduct);
+        for (OrderProduct p : order.getOrderProducts()) {
+            Inventory inv = inventoryRepository
+                    .findByProductIdForUpdate(p.getProductId())  // @Lock(PESSIMISTIC_WRITE)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Inventory not found: productId=" + p.getProductId()));
 
-        // 재고 체크
-        for (OrderProduct orderProduct : order.getOrderProducts()) {
-            if (!inventoryChecker.hasSufficientStock(orderProduct.getProductId(), orderProduct.getQuantity())) {
-                throw new InvalidStateException("재고 부족: productId=" + orderProduct.getProductId());
+            if (inv.getQuantity() < p.getQuantity()) {
+                throw new InvalidStateException("재고 부족: productId=" + p.getProductId());
             }
+            inv.decreaseStock(p.getQuantity());
         }
 
-        order = orderRepository.save(order);
-
-        // 재고 차감
-        for (OrderProduct orderProduct : order.getOrderProducts()) {
-            inventoryChecker.decreaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
-        }
-
-        // 주문 상태 변경
         order.markAsPaid();
-
-        return order;
+        return orderRepository.save(order);
     }
 
+    @Transactional(readOnly = true)
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));

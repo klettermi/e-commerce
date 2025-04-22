@@ -8,4 +8,6 @@ public interface InventoryRepository {
     void save(Inventory inventory);
 
     void deleteAll();
+
+    Optional<Inventory> findByProductIdForUpdate(Long id);
 }

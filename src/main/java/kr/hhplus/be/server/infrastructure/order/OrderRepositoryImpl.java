@@ -12,7 +12,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
     private final OrderJpaRepository orderRepo;
-    private final OrderProductJpaRepository orderProductRepo;
 
     @Override
     public Order save(Order order) {
@@ -24,10 +23,6 @@ public class OrderRepositoryImpl implements OrderRepository {
         return orderRepo.findById(orderId);
     }
 
-    @Override
-    public long countByUserId(Long userId) {
-        return orderRepo.countByUserId(userId);
-    }
 
     @Override
     public void deleteAll() {

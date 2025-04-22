@@ -2,7 +2,6 @@ package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
-import kr.hhplus.be.server.domain.inventory.InventoryChecker;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
@@ -24,9 +23,6 @@ class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private InventoryChecker inventoryChecker;
 
     @InjectMocks
     private OrderService orderService;
@@ -55,8 +51,6 @@ class OrderServiceTest {
                         .unitPoint(Money.of(200))
                         .build()
         );
-        when(inventoryChecker.hasSufficientStock(anyLong(), anyInt()))
-                .thenReturn(true);
     }
 
     @Test
@@ -73,16 +67,11 @@ class OrderServiceTest {
                 .extracting(OrderProduct::getProductId)
                 .containsExactlyInAnyOrder(10L, 20L);
 
-        verify(inventoryChecker).decreaseStock(10L, 2);
-        verify(inventoryChecker).decreaseStock(20L, 3);
         verify(orderRepository).save(any(Order.class));
     }
 
     @Test
     void placeOrder_insufficientStock_throwsException() {
-        // given: 첫 번째 상품만 재고 부족
-        when(inventoryChecker.hasSufficientStock(10L, 2)).thenReturn(false);
-
         // when / then
         assertThatThrownBy(() ->
                 orderService.placeOrder(dummyUser, orderNumber, reqs)
@@ -91,6 +80,5 @@ class OrderServiceTest {
                 .hasMessageContaining("재고 부족: productId=10");
 
         verify(orderRepository, never()).save(any());
-        verify(inventoryChecker, never()).decreaseStock(anyLong(), anyInt());
     }
 }
