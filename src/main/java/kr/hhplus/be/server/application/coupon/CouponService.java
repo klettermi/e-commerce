@@ -20,7 +20,7 @@ public class CouponService {
      */
     @Transactional
     public Coupon issueCoupon(String couponCode) {
-        Coupon coupon = CouponRepository.findByCouponCode(couponCode)
+        Coupon coupon = CouponRepository.findByCouponCodeForUpdate(couponCode)
                 .orElseThrow(() -> new InvalidStateException("Coupon not found: " + couponCode));
         coupon.issueCoupon();
         return CouponRepository.save(coupon);

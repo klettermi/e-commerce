@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.coupon;
 
+import org.springframework.data.repository.query.Param;
+
 import java.util.Optional;
 
 public interface CouponRepository {
@@ -8,4 +10,6 @@ public interface CouponRepository {
     Coupon save(Coupon coupon);
 
     void deleteAll();
+
+    Optional<Coupon> findByCouponCodeForUpdate(@Param("code") String couponCode);
 }

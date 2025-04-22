@@ -1,11 +1,15 @@
 package kr.hhplus.be.server.application.coupon;
 
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +18,12 @@ import java.util.concurrent.Executors;
 import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
+@AutoConfigureEmbeddedDatabase(
+        provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.DOCKER
+)
 @SpringBootTest
 class CouponServiceConcurrencyTest {
   @Autowired

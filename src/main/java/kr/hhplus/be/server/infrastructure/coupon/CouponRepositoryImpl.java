@@ -27,4 +27,9 @@ public class CouponRepositoryImpl implements CouponRepository {
     public void deleteAll() {
         couponJpaRepository.deleteAll();
     }
+
+    @Override
+    public Optional<Coupon> findByCouponCodeForUpdate(String couponCode) {
+        return couponJpaRepository.findByCouponCodeForUpdate(couponCode);
+    }
 }
