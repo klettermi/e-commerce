@@ -18,4 +18,6 @@ public interface PointRepository {
     void save(PointHistory pointHistory);
 
     void deleteAll();
+
+    Optional<UserPoint> findByIdForUpdate(Long id);
 }

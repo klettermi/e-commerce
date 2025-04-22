@@ -41,19 +41,16 @@ public class PointService {
      */
     @Transactional
     public UserPoint chargePoint(long userId, Money amount) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
-
         // 충전 전 현재 포인트 조회
-        UserPoint userPoint = pointRepository.findById(userId)
-                .orElseThrow(() -> new DomainException.InvalidStateException("UserPoint not found for id: " + userId));
+        UserPoint userPoint = pointRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
         userPoint.validate(amount, TransactionType.CHARGE);
-
         userPoint.chargePoints(amount);
         pointRepository.save(userPoint);
 
-        // 포인트 충전 이력 기록
-        PointHistory history = PointHistory.createChargeHistory(user, amount);
+        PointHistory history = PointHistory.createChargeHistory(
+                userRepository.findById(userId).orElseThrow(), amount);
         pointRepository.save(history);
 
         return userPoint;
@@ -65,20 +62,17 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
+    @Transactional
     public UserPoint usePoint(Long userId, Money amount) {
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
-
-        UserPoint userPoint = pointRepository.findById(userId)
+        UserPoint userPoint = pointRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
 
-
         userPoint.validate(amount, TransactionType.USE);
-
         userPoint.usePoints(amount);
         pointRepository.save(userPoint);
 
-        PointHistory history = PointHistory.createUseHistory(user, amount);
+        PointHistory history = PointHistory.createUseHistory(
+                userRepository.findById(userId).orElseThrow(), amount);
         pointRepository.save(history);
 
         return userPoint;

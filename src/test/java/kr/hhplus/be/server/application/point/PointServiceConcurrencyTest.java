@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,9 @@ import static kr.hhplus.be.server.domain.common.exception.DomainException.Invali
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.DOCKER)
+@EnableAspectJAutoProxy
 class PointServiceConcurrencyTest {
     @Autowired
     PointService pointService;
@@ -79,7 +85,11 @@ class PointServiceConcurrencyTest {
 
         // 검증
         UserPoint updatedUserPoint = pointRepository.findById(user.getId()).get();
-        assertEquals(Money.of(defaultPoint).add(Money.of(chargePoint).multiply(threadCount)), updatedUserPoint.getPointBalance());
+        assertEquals(
+                0,
+                Money.of(defaultPoint).add(Money.of(chargePoint).multiply(threadCount)).amount().compareTo(updatedUserPoint.getPointBalance().amount()),
+                "총 포인트가 같아야 합니다."
+        );
     }
 
     @Test
@@ -124,6 +134,10 @@ class PointServiceConcurrencyTest {
 
         // 검증
         UserPoint updatedUserPoint = pointRepository.findById(user.getId()).get();
-        assertEquals(Money.of(defaultPoint).subtract(Money.of(usePoint).multiply(threadCount)), updatedUserPoint.getPointBalance());
+        assertEquals(
+                0,
+                Money.of(defaultPoint).subtract(Money.of(usePoint).multiply(threadCount)).amount().compareTo(updatedUserPoint.getPointBalance().amount()),
+                "총 포인트가 같아야 합니다."
+        );
     }
 }

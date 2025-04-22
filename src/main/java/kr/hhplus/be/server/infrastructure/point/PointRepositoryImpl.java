@@ -45,4 +45,9 @@ public class PointRepositoryImpl implements PointRepository {
         pointHistoryRepo.deleteAll();
         userPointRepo.deleteAll();
     }
+
+    @Override
+    public Optional<UserPoint> findByIdForUpdate(Long id) {
+        return userPointRepo.findByIdForUpdate(id);
+    }
 }
