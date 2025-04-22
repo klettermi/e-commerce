@@ -31,11 +31,6 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final InventoryChecker inventoryChecker;
 
-    @Retryable(
-            value = ObjectOptimisticLockingFailureException.class,
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 100, multiplier = 2)
-    )
     @Transactional
     public Order placeOrder(User user, String orderNumber, List<OrderProductRequest> orderRequest) throws InvalidStateException {
         // 주문 항목 리스트 생성
@@ -84,12 +79,4 @@ public class OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
     }
 
-    @Recover
-    public Order recover(ObjectOptimisticLockingFailureException retryEx, Long orderId) {
-        throw new BusinessExceptionHandler(
-                ErrorCodes.CONCURRENCY_COMFLICT_NOT_RESOLVED,
-                "동시성 충돌로 주문 실패 (orderId=" + orderId + ")",
-                retryEx.getStackTrace()
-        );
-    }
 }

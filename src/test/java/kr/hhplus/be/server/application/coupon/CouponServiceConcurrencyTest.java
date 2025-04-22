@@ -8,12 +8,15 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,13 +53,14 @@ class CouponServiceConcurrencyTest {
 
       // 스레드 풀 생성 후 즉시 실행
       ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-
+      AtomicInteger successCount = new AtomicInteger(0);
 
       for (int i = 0; i < threadCount; i++) {
           executor.execute(() -> {
               try {
                   couponService.issueCoupon(code);
-              } catch (InvalidStateException e){
+                  successCount.getAndIncrement();
+              } catch (ObjectOptimisticLockingFailureException e){
 
               } finally {
                   latch.countDown();
@@ -69,7 +73,7 @@ class CouponServiceConcurrencyTest {
 
       // 검증
       Coupon updatedCoupon = couponRepository.findByCouponCode(code).orElseThrow();
-      assertEquals(0, updatedCoupon.getRemainingQuantity());
+      assertEquals(initialQuantity - successCount.get(), updatedCoupon.getRemainingQuantity());
 
       executor.shutdown();
 

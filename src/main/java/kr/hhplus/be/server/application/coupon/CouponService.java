@@ -28,11 +28,6 @@ public class CouponService {
      * 선착순 쿠폰 발급: 주어진 couponCode에 해당하는 쿠폰을 찾고,
      * 남은 쿠폰이 있으면 발급 처리(remainingQuantity 감소)
      */
-    @Retryable(
-            value = ObjectOptimisticLockingFailureException.class,
-            maxAttempts = 10,
-            backoff = @Backoff(delay = 100, multiplier = 2)
-    )
     @Transactional
     public Coupon issueCoupon(String couponCode) {
         Coupon coupon = CouponRepository.findByCouponCode(couponCode)
@@ -41,12 +36,4 @@ public class CouponService {
         return CouponRepository.save(coupon);
     }
 
-    @Recover
-    public Coupon recover(ObjectOptimisticLockingFailureException retryEx, String couponCode) {
-        throw new BusinessExceptionHandler(
-                ErrorCodes.CONCURRENCY_COMFLICT_NOT_RESOLVED,
-                "동시성 충돌로 쿠폰 발급 실패 (code=" + couponCode + ")",
-                retryEx.getStackTrace()
-        );
-    }
 }

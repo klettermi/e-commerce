@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -28,6 +29,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -81,12 +83,14 @@ class OrderServiceConcurrencyTest {
 
         CountDownLatch latch = new CountDownLatch(threadCount);
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        AtomicInteger successCount = new AtomicInteger(0);
 
         for (int i = 0; i < threadCount; i++) {
             executor.execute(() -> {
                 try {
                     orderService.placeOrder(dummyUser, orderNumber + UUID.randomUUID(), reqs);
-                } catch (DomainException.InvalidStateException ignored) {
+                    successCount.incrementAndGet();
+                } catch (ObjectOptimisticLockingFailureException ignored) {
                 } finally {
                     latch.countDown();
                 }
@@ -97,7 +101,7 @@ class OrderServiceConcurrencyTest {
         executor.shutdown();
 
         List<Order> saved = orderRepository.findAll();
-        assertEquals(threadCount, saved.size(), "저장된 주문 개수가 같아야 합니다.");
+        assertEquals(successCount.get(), saved.size(), "저장된 주문 개수가 같아야 합니다.");
 
         var expectedTotal = reqs.stream()
                 .map(r -> r.unitPoint().multiply(r.quantity()))

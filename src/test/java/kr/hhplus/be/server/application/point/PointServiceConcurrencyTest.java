@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,14 +72,15 @@ class PointServiceConcurrencyTest {
 
         // CountDownLatch 준비
         CountDownLatch latch = new CountDownLatch(threadCount);
-
+        AtomicInteger successCount = new AtomicInteger(0);
         // 스레드 풀 생성 후 즉시 실행
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         for (int i = 0; i < threadCount; i++) {
             executor.execute(() -> {
                 try {
                     pointService.chargePoint(user.getId(), Money.of(chargePoint));
-                } catch (InvalidStateException e) {
+                    successCount.incrementAndGet();
+                } catch (ObjectOptimisticLockingFailureException e) {
 
                 } finally {
                     latch.countDown();
@@ -91,7 +94,7 @@ class PointServiceConcurrencyTest {
         // 검증
         UserPoint updatedUserPoint = pointRepository.findById(user.getId()).get();
         assertTrue(
-                Money.of(defaultPoint).add(Money.of(chargePoint).multiply(threadCount)).amount().compareTo(updatedUserPoint.getPointBalance().amount()) == 0,
+                Money.of(defaultPoint).add(Money.of(chargePoint).multiply(successCount.get())).amount().compareTo(updatedUserPoint.getPointBalance().amount()) == 0,
                 "금액이 같아야 합니다"
         );
 
@@ -119,6 +122,7 @@ class PointServiceConcurrencyTest {
 
         // CountDownLatch 준비
         CountDownLatch latch = new CountDownLatch(threadCount);
+        AtomicInteger successCount = new AtomicInteger(0);
 
         // 스레드 풀 생성 후 즉시 실행
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -126,7 +130,7 @@ class PointServiceConcurrencyTest {
             executor.execute(() -> {
                 try {
                     pointService.usePoint(user.getId(), Money.of(usePoint));
-                } catch (InvalidStateException e) {
+                } catch (ObjectOptimisticLockingFailureException e) {
 
                 } finally {
                     latch.countDown();
@@ -140,7 +144,7 @@ class PointServiceConcurrencyTest {
         // 검증
         UserPoint updatedUserPoint = pointRepository.findById(user.getId()).get();
         assertTrue(
-                Money.of(defaultPoint).subtract(Money.of(usePoint).multiply(threadCount)).amount().compareTo(updatedUserPoint.getPointBalance().amount()) == 0,
+                Money.of(defaultPoint).subtract(Money.of(usePoint).multiply(successCount.get())).amount().compareTo(updatedUserPoint.getPointBalance().amount()) == 0,
                 "금액이 같아야 합니다"
         );
     }

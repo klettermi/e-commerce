@@ -46,11 +46,7 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
-    @Retryable(
-            value = ObjectOptimisticLockingFailureException.class,
-            maxAttempts = 10,
-            backoff = @Backoff(delay = 100, multiplier = 2)
-    )
+
     @Transactional
     public UserPoint chargePoint(long userId, Money amount) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
@@ -77,11 +73,7 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
-    @Retryable(
-            value = ObjectOptimisticLockingFailureException.class,
-            maxAttempts = 10,
-            backoff = @Backoff(delay = 100, multiplier = 2)
-    )
+
     @Transactional
     public UserPoint usePoint(Long userId, Money amount) {
 
@@ -102,12 +94,4 @@ public class PointService {
         return userPoint;
     }
 
-    @Recover
-    public UserPoint recover(ObjectOptimisticLockingFailureException retryEx, Long userId, Money amount) {
-        throw new BusinessExceptionHandler(
-                ErrorCodes.CONCURRENCY_COMFLICT_NOT_RESOLVED,
-                "동시성 충돌로 충전/사용 실패 (result=" + userId + ", " + amount.amount() + ")",
-                retryEx.getStackTrace()
-        );
-    }
 }
