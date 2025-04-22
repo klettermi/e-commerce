@@ -10,7 +10,7 @@ public interface OrderRepository {
 
     Optional<Order> findById(Long orderId);
 
-    long countByUserId(User userId);
+    long countByUserId(Long userId);
 
     void deleteAll();
 

@@ -22,6 +22,7 @@ class CouponServiceConcurrencyTest {
   @Autowired
   CouponRepository couponRepository;
 
+
   @Test
   void 동시에_쿠폰_발급_테스트() throws InterruptedException {
       // 준비

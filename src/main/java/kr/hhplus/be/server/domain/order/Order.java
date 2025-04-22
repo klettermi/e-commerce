@@ -26,9 +26,8 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column
+    private Long userId;
 
     @Column(name = "order_number", length = 50, nullable = false, unique = true)
     private String orderNumber;
@@ -47,9 +46,9 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
-    public Order(User user, String orderNumber, Money totalPoint, OrderStatus status) {
+    public Order(Long userId, String orderNumber, Money totalPoint, OrderStatus status) {
         super();
-        this.user = user;
+        this.userId = userId;
         this.orderNumber = orderNumber;
         this.totalPoint = totalPoint;
         this.status = status;

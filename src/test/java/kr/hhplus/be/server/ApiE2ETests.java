@@ -168,7 +168,7 @@ public class ApiE2ETests {
                     .unitPoint(unitPoint)
                     .build();
             Money total = unitPoint.multiply(qty);
-            Order order = new Order(managedUser, "ORD-" + System.currentTimeMillis(), total, OrderStatus.CREATED);
+            Order order = new Order(managedUser.getId(), "ORD-" + System.currentTimeMillis(), total, OrderStatus.CREATED);
             order.addOrderProduct(op);
             orderRepository.save(order);
         }

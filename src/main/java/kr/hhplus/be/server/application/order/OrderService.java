@@ -30,7 +30,7 @@ public class OrderService {
                 .reduce(Money.ZERO, Money::add);
 
         // 주문 생성
-        Order order = new Order(user, orderNumber, totalPointValue, OrderStatus.CREATED);
+        Order order = new Order(user.getId(), orderNumber, totalPointValue, OrderStatus.CREATED);
 
         // 주문 항목 추가
         orderProductList.forEach(order::addOrderProduct);
