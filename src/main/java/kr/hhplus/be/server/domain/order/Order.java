@@ -45,6 +45,11 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
+
     public Order(User user, String orderNumber, Money totalPoint, OrderStatus status) {
         super();
         this.user = user;

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.order;
 
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.inventory.InventoryChecker;
@@ -11,12 +12,17 @@ import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -28,7 +34,13 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.junit.jupiter.api.Assertions.*;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureEmbeddedDatabase(
+        provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.DOCKER
+)
+@EnableAspectJAutoProxy
 @Import(OrderServiceConcurrencyTest.InventoryMockConfig.class)
 class OrderServiceConcurrencyTest {
 
@@ -41,7 +53,6 @@ class OrderServiceConcurrencyTest {
     @Autowired
     private UserRepository userRepository;
 
-    // TestConfiguration에서 등록한 mock이 주입됩니다
     @Autowired
     private InventoryChecker inventoryChecker;
 
@@ -94,7 +105,10 @@ class OrderServiceConcurrencyTest {
 
         for (Order o : saved) {
             assertEquals(OrderStatus.PAID, o.getStatus());
-            assertEquals(expectedTotal, o.getTotalPoint());
+            assertTrue(
+                    expectedTotal.amount().compareTo(o.getTotalPoint().amount()) == 0,
+                    "금액이 같아야 합니다"
+            );
         }
     }
 
