@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
@@ -7,8 +8,12 @@ import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,12 @@ import java.util.concurrent.Executors;
 import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
+@AutoConfigureEmbeddedDatabase(
+        provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.DOCKER
+)
+@EnableAspectJAutoProxy
 @SpringBootTest
 class PointServiceConcurrencyTest {
     @Autowired

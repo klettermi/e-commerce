@@ -1,8 +1,11 @@
 package kr.hhplus.be.server.application.point;
 
 import jakarta.persistence.EntityNotFoundException;
+import kr.hhplus.be.server.application.common.exception.BusinessExceptionHandler;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
+import kr.hhplus.be.server.domain.common.exception.ErrorCodes;
+import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.TransactionType;
@@ -10,6 +13,10 @@ import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +46,11 @@ public class PointService {
      * @param amount 충전 금액 (양수)
      * @return 갱신된 포인트 정보를 DTO로 반환
      */
+    @Retryable(
+            value = ObjectOptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 100, multiplier = 2)
+    )
     @Transactional
     public UserPoint chargePoint(long userId, Money amount) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
@@ -65,6 +77,12 @@ public class PointService {
      * @param amount 사용 금액
      * @return 사용 후 갱신된 포인트 정보를 DTO로 반환
      */
+    @Retryable(
+            value = ObjectOptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 100, multiplier = 2)
+    )
+    @Transactional
     public UserPoint usePoint(Long userId, Money amount) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found for id: " + userId));
@@ -82,5 +100,14 @@ public class PointService {
         pointRepository.save(history);
 
         return userPoint;
+    }
+
+    @Recover
+    public UserPoint recover(ObjectOptimisticLockingFailureException retryEx, Long userId, Money amount) {
+        throw new BusinessExceptionHandler(
+                ErrorCodes.CONCURRENCY_COMFLICT_NOT_RESOLVED,
+                "동시성 충돌로 충전/사용 실패 (result=" + userId + ", " + amount.amount() + ")",
+                retryEx.getStackTrace()
+        );
     }
 }

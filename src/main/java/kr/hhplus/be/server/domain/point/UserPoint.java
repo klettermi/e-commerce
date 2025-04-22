@@ -35,6 +35,9 @@ public class UserPoint extends BaseEntity {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     public static UserPoint fromDto(UserPointRequest userpointRequest, User user) {
         UserPoint userPoint = new UserPoint();
