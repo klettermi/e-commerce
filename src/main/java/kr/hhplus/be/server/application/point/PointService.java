@@ -48,7 +48,7 @@ public class PointService {
      */
     @Retryable(
             value = ObjectOptimisticLockingFailureException.class,
-            maxAttempts = 5,
+            maxAttempts = 10,
             backoff = @Backoff(delay = 100, multiplier = 2)
     )
     @Transactional
@@ -79,7 +79,7 @@ public class PointService {
      */
     @Retryable(
             value = ObjectOptimisticLockingFailureException.class,
-            maxAttempts = 5,
+            maxAttempts = 10,
             backoff = @Backoff(delay = 100, multiplier = 2)
     )
     @Transactional

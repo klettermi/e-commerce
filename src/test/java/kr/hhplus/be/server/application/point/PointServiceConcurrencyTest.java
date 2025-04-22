@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -90,7 +90,11 @@ class PointServiceConcurrencyTest {
 
         // 검증
         UserPoint updatedUserPoint = pointRepository.findById(user.getId()).get();
-        assertEquals(Money.of(defaultPoint).add(Money.of(chargePoint).multiply(threadCount)), updatedUserPoint.getPointBalance());
+        assertTrue(
+                Money.of(defaultPoint).add(Money.of(chargePoint).multiply(threadCount)).amount().compareTo(updatedUserPoint.getPointBalance().amount()) == 0,
+                "금액이 같아야 합니다"
+        );
+
     }
 
     @Test
@@ -135,6 +139,9 @@ class PointServiceConcurrencyTest {
 
         // 검증
         UserPoint updatedUserPoint = pointRepository.findById(user.getId()).get();
-        assertEquals(Money.of(defaultPoint).subtract(Money.of(usePoint).multiply(threadCount)), updatedUserPoint.getPointBalance());
+        assertTrue(
+                Money.of(defaultPoint).subtract(Money.of(usePoint).multiply(threadCount)).amount().compareTo(updatedUserPoint.getPointBalance().amount()) == 0,
+                "금액이 같아야 합니다"
+        );
     }
 }
