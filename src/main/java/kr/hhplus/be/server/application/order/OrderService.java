@@ -85,10 +85,10 @@ public class OrderService {
     }
 
     @Recover
-    public Order recover(ObjectOptimisticLockingFailureException retryEx, String couponCode) {
+    public Order recover(ObjectOptimisticLockingFailureException retryEx, Long orderId) {
         throw new BusinessExceptionHandler(
                 ErrorCodes.CONCURRENCY_COMFLICT_NOT_RESOLVED,
-                "동시성 충돌로 쿠폰 발급 실패 (code=" + couponCode + ")",
+                "동시성 충돌로 주문 실패 (orderId=" + orderId + ")",
                 retryEx.getStackTrace()
         );
     }
