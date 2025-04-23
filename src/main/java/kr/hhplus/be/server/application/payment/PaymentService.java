@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.application.payment;
 
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.coupon.Coupon;
+import kr.hhplus.be.server.domain.coupon.CouponRepository;
+import kr.hhplus.be.server.domain.coupon.IssuedCoupon;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.payment.Payment;
@@ -20,6 +23,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final PointRepository pointRepository;
     private final PaymentRepository paymentRepository;
+    private final CouponRepository couponRepository;
 
     @Transactional
     public Payment processPayment(Long orderId, Long userId, Long couponId) throws InvalidStateException {
@@ -30,12 +34,29 @@ public class PaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for user id: " + userId));
 
         Money requiredPoints = order.getTotalPoint();
-        if (userPoint.getPointBalance().compareTo(requiredPoints) < 0) {
-            throw new InvalidStateException("Insufficient points: required " + requiredPoints +
+
+        Money discount = Money.ZERO;
+        IssuedCoupon issuedCoupon = null;
+        if (couponId != null) {
+            issuedCoupon = couponRepository.findByCouponId(couponId).orElseThrow(
+                    () -> new EntityNotFoundException("찾을 수 없는 쿠폰입니다. couponId: " + couponId)
+            );
+            discount = issuedCoupon.getCoupon().calculateDiscount(requiredPoints);
+            issuedCoupon.markAsUsed();
+            couponRepository.save(issuedCoupon);
+        }
+
+        Money toUse = requiredPoints.subtract(discount);
+        if (toUse.compareTo(Money.ZERO) < 0) {
+            toUse = Money.ZERO;
+        }
+
+        if (userPoint.getPointBalance().compareTo(toUse) < 0) {
+            throw new InvalidStateException("올바르지 않은 포인트: required " + requiredPoints +
                     ", available " + userPoint.getPointBalance());
         }
 
-        userPoint.usePoints(requiredPoints);
+        userPoint.usePoints(toUse);
         pointRepository.save(userPoint);
 
         order.markAsPaid();
@@ -43,7 +64,7 @@ public class PaymentService {
 
 
         Payment payment = Payment.builder()
-                .paymentAmount(requiredPoints)
+                .paymentAmount(toUse)
                 .order(order)
                 .build();
         paymentRepository.save(payment);

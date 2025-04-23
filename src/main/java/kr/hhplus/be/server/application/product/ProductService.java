@@ -34,7 +34,6 @@ public class ProductService {
             return List.of();
         }
 
-        // productId 컬럼만 꺼내서 Product 엔티티로 다시 조회
         return rows.stream()
                 .map(row -> (Long) row[0])
                 .map(id -> productRepository.findById(id)
