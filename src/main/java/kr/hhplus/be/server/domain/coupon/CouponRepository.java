@@ -20,4 +20,6 @@ public interface CouponRepository {
     Optional<Coupon> findByCouponCodeForUpdate(@Param("id") Long couponId);
 
     List<IssuedCoupon> findAllByUserId(Long userId);
+
+    Optional<IssuedCoupon> findByCouponId(Long couponId);
 }

@@ -22,4 +22,10 @@ public class IssuedCoupon {
 
     @Column
     private Long userId;
+
+    @Column
+    private CouponStatus status = CouponStatus.AVAILABLE;
+
+    public void markAsUsed() {
+    }
 }

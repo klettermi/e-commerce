@@ -6,6 +6,8 @@ import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "coupon")
 @Getter
@@ -35,6 +37,9 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private Money discountAmount;
 
+    @Column(name = "discount_rate", precision = 5, scale = 4, nullable = true)
+    private BigDecimal discountRate;
+
     @Column(name = "total_quantity", nullable = false)
     private int totalQuantity;
 
@@ -49,5 +54,28 @@ public class Coupon extends BaseEntity {
             throw new DomainException.InvalidStateException("모든 쿠폰 발급이 완료되었습니다.");
         }
         remainingQuantity--;
+    }
+
+    /**
+     * 정액, 정률 할인
+     */
+    public Money calculateDiscount(Money orderTotal) {
+        return switch (couponType) {
+            case AMOUNT  -> {
+                if (discountAmount == null) {
+                    throw new DomainException.InvalidStateException("정액 쿠폰의 할인 금액이 없습니다.");
+                }
+                yield discountAmount;
+            }
+            case PERCENT -> {
+                if (discountRate == null) {
+                    throw new DomainException.InvalidStateException("정률 쿠폰의 할인율이 없습니다.");
+                }
+                BigDecimal discounted = orderTotal.amount()
+                        .multiply(discountRate)
+                        .setScale(0, BigDecimal.ROUND_DOWN);
+                yield new Money(discounted);
+            }
+        };
     }
 }
