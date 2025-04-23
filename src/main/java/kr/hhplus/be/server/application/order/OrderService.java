@@ -26,17 +26,16 @@ import static kr.hhplus.be.server.domain.common.exception.DomainException.Invali
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
 
     @Transactional
-    public Order placeOrder(User user, String orderNumber, List<OrderProduct> orderRequest) {
-        Money totalPointValue = orderRequest.stream()
+    public Order placeOrder(User user, String orderNumber, List<OrderProduct> orderProductList) {
+        Money totalPointValue = orderProductList.stream()
                 .map(req -> req.getUnitPoint().multiply(req.getQuantity()))
                 .reduce(Money.ZERO, Money::add);
 
         Order order = new Order(user.getId(), orderNumber, totalPointValue, OrderStatus.CREATED);
-        orderRequest.forEach(r ->
+        orderProductList.forEach(r ->
                 order.addOrderProduct(OrderProduct.builder()
                         .productId(r.getProductId())
                         .quantity(r.getQuantity())
