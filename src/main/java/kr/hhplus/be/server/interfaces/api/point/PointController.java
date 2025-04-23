@@ -37,12 +37,11 @@ public class PointController {
         return ApiResponse.success(pointResponse);
     }
 
-    @GetMapping("/pointhistory/{userId}")
+    @GetMapping("/{userId}/history")
     public List<PointHistoryResponse> getHistory(@PathVariable Long userId) {
         List<PointHistory> pointHistoryList =  pointService.getPointHistory(userId);
-        List<PointHistoryResponse> pointHistoryResponseList = pointHistoryList.stream()
+        return pointHistoryList.stream()
                 .map(PointHistoryResponse::fromEntity)
                 .toList();
-        return pointHistoryResponseList;
     }
 }
