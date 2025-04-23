@@ -67,14 +67,13 @@ dependencies {
 
 	runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 
-	implementation "org.instancio:instancio-core:2.0.0"
-
 	// 테스트용 Embedded DB (Zonky Embedded Postgres 등)
 	testImplementation 'io.zonky.test:embedded-database-spring-test:2.6.0'
 
 	// AOP
 	implementation "org.springframework.boot:spring-boot-starter-aop"
 
+	testImplementation 'org.instancio:instancio-core:4.8.0'
 }
 
 test {

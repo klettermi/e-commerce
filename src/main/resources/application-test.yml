@@ -9,12 +9,14 @@ spring:
       ddl-auto: update
     properties:
       hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+      hibernate.jdbc.batch_size: 500
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
     defer-datasource-initialization: true
 
 logging:
   level:
     root: INFO
     kr.hhplus.be.server: INFO
-    p6spy: info
-
-
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
