@@ -39,7 +39,6 @@ public class BulkDataLoaderAll {
     @Bean
     public CommandLineRunner loadAllDummyData(StatelessSession session) {
         return args -> {
-            System.out.println(">>> BulkDataLoaderAll 시작!");
             session.beginTransaction();
 
             // 1) Category
@@ -172,7 +171,6 @@ public class BulkDataLoaderAll {
         if (count > 0 && count % BATCH_SIZE == 0) {
             session.getTransaction().commit();
             session.beginTransaction();
-            System.out.println(">> flushed at " + count);
         }
     }
 
