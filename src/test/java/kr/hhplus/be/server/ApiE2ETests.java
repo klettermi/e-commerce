@@ -5,6 +5,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.category.CategoryRepository;
+import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.inventory.Inventory;
 import kr.hhplus.be.server.domain.inventory.InventoryRepository;
@@ -134,7 +135,7 @@ public class ApiE2ETests {
             itemRepository.save(item);
 
             // 옵션
-            Option option = Option.builder()
+            Option<BaseEntity> option = Option.builder()
                     .name("White240")
                     .additionalCost(Money.of(5_000))
                     .build();

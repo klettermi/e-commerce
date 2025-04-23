@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.product;
 
 import kr.hhplus.be.server.domain.category.Category;
+import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.item.SaleStatus;
@@ -32,10 +33,10 @@ class ProductServiceTest {
 
     private Category category;
     private Item item1;
-    private Option option1;
+    private Option<BaseEntity> option1;
     private Product product1;
     private Item item2;
-    private Option option2;
+    private Option<BaseEntity> option2;
     private Product product2;
 
     @BeforeEach

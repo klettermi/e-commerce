@@ -2,6 +2,8 @@ package kr.hhplus.be.server.application.coupon;
 
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
+import kr.hhplus.be.server.domain.coupon.IssuedCoupon;
+import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -26,6 +28,8 @@ class CouponServiceTest {
     @Test
     void issueCoupon_정상발급() {
         // given: 총 5개 중 3개 남은 쿠폰
+        User user = User.builder().id(1L).build();
+
         Coupon coupon = Coupon.builder()
                 .id(1L)
                 .couponCode("FIRST100")
@@ -37,20 +41,21 @@ class CouponServiceTest {
         when(CouponRepository.save(ArgumentMatchers.any(Coupon.class))).thenAnswer(i -> i.getArgument(0));
 
         // when: 쿠폰 발급 요청
-        Coupon issuedCoupon = couponService.issueCoupon("FIRST100");
+        IssuedCoupon issuedCoupon = couponService.issueCoupon(coupon.getId(), user.getId());
 
         // then: remainingQuantity가 1 감소되어 2가 되어야 합니다.
-        assertEquals(2, issuedCoupon.getRemainingQuantity(), "발급 후 남은 수량은 2여야 합니다.");
+        assertEquals(2, coupon.getRemainingQuantity(), "발급 후 남은 수량은 2여야 합니다.");
         verify(CouponRepository, times(1)).save(coupon);
     }
 
     @Test
     void issueCoupon_쿠폰없음_예외발생() {
         // given: 쿠폰 코드에 해당하는 쿠폰이 없는 경우
-        when(CouponRepository.findByCouponCode("NOCOUPON")).thenReturn(Optional.empty());
+        User user = User.builder().id(1L).username("test").build();
+        when(CouponRepository.findById(1L)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(InvalidStateException.class, () -> {
-            couponService.issueCoupon("NOCOUPON");
+            couponService.issueCoupon(1L, user.getId());
         });
         assertTrue(exception.getMessage().contains("Coupon not found"));
     }
@@ -64,11 +69,10 @@ class CouponServiceTest {
                 .totalQuantity(5)
                 .remainingQuantity(0)
                 .build();
-
-        when(CouponRepository.findByCouponCode("FIRST100")).thenReturn(Optional.of(coupon));
+        User user = User.builder().id(1L).username("test").build();
 
         Exception exception = assertThrows(InvalidStateException.class, () -> {
-            couponService.issueCoupon("FIRST100");
+            couponService.issueCoupon(coupon.getId(), user.getId());
         });
         assertTrue(exception.getMessage().contains("쿠폰 발급이 완료되었습니다"));
     }

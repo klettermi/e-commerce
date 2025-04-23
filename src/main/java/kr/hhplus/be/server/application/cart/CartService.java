@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
 import kr.hhplus.be.server.domain.cart.CartRepository;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
+import kr.hhplus.be.server.domain.item.Item;
+import kr.hhplus.be.server.domain.item.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

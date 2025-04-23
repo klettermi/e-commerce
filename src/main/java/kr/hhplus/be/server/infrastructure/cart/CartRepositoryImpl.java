@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.infrastructure.cart;
 
 import kr.hhplus.be.server.domain.cart.Cart;
+import kr.hhplus.be.server.domain.cart.CartItem;
 import kr.hhplus.be.server.domain.cart.CartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -29,7 +30,7 @@ public class CartRepositoryImpl implements CartRepository {
     }
 
     @Override
-    public void delete(Cart cart) {
-        cartRepo.delete(cart);
+    public Optional<CartItem> findCartItemId(Long id) {
+        return cartItemRepo.findById(id);
     }
 }

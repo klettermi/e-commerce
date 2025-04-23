@@ -24,11 +24,11 @@ public class Product extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "option_id")
-    private Option option;
+    private Option<BaseEntity> option;
 
 
     // 할인 없음으로 생성
-    public Product(Item item, Option option) {
+    public Product(Item item, Option<BaseEntity> option) {
         this.item = item;
         this.option = option;
     }

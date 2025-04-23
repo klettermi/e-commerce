@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.product;
 
+import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.item.Item;
@@ -24,7 +25,7 @@ class ProductTest {
                 .saleStatus(SaleStatus.ON_SALE)
                 .basePrice(Money.of(100_000))
                 .build();
-        Option option = Option.builder()
+        Option<BaseEntity> option = Option.builder()
                 .name("Black")
                 .additionalCost(Money.of(60_000))
                 .build();

@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.coupon;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import lombok.*;
 
@@ -17,8 +18,22 @@ public class Coupon extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
     @Column(nullable = false, unique = true)
     private String couponCode;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CouponType couponType;
+
+    @AttributeOverride(
+            name = "discountAmount",
+            column = @Column(name = "discount_amount", nullable = false)
+    )
+    @Column(nullable = false)
+    private Money discountAmount;
 
     @Column(name = "total_quantity", nullable = false)
     private int totalQuantity;

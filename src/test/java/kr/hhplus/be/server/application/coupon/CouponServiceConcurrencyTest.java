@@ -4,6 +4,7 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
+import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ class CouponServiceConcurrencyTest {
               .couponCode(code)
               .remainingQuantity(initialQuantity)
               .build();
+      User user = User.builder()
+              .username("test")
+              .build();
 
       couponRepository.save(coupon);
 
@@ -54,7 +58,7 @@ class CouponServiceConcurrencyTest {
       for (int i = 0; i < threadCount; i++) {
           executor.execute(() -> {
               try {
-                  couponService.issueCoupon(code);
+                  couponService.issueCoupon(coupon.getId(), user.getId());
               } catch (InvalidStateException e){
 
               } finally {

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.common;
 
+import jakarta.persistence.Embeddable;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 
 import java.math.BigDecimal;
@@ -7,6 +8,7 @@ import java.util.Objects;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 
+@Embeddable
 public record Money(BigDecimal amount) {
     public static final Money ZERO = new Money(BigDecimal.ZERO);
 

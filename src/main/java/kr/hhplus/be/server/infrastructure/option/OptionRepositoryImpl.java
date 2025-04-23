@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.infrastructure.option;
 
+import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.option.Option;
 import kr.hhplus.be.server.domain.option.OptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ public class OptionRepositoryImpl implements OptionRepository {
     private final OptionJpaRepository optionRepo;
 
     @Override
-    public void save(Option option) {
+    public void save(Option<BaseEntity> option) {
         optionRepo.save(option);
     }
 }
