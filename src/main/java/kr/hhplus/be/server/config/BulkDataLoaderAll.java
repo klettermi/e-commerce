@@ -24,8 +24,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-//@Configuration
-//@Profile({"local", "application-test"})
+@Configuration
+@Profile({"local", "application-test"})
 public class BulkDataLoaderAll {
 
     private static final int TOTAL_CATEGORIES = 100;
