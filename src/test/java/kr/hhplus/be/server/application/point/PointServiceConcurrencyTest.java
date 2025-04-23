@@ -130,6 +130,7 @@ class PointServiceConcurrencyTest {
             executor.execute(() -> {
                 try {
                     pointService.usePoint(user.getId(), Money.of(usePoint));
+                    successCount.incrementAndGet();
                 } catch (ObjectOptimisticLockingFailureException e) {
 
                 } finally {
