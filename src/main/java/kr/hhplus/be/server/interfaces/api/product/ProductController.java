@@ -4,6 +4,10 @@ import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.product.ProductService;
 import kr.hhplus.be.server.domain.product.Product;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,15 +24,17 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public ApiResponse<List<ProductResponse>> lookupProducts() {
-        List<Product> productList = productService.getProductList();
-        List<ProductResponse> productResponseList = productList.stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-        return ApiResponse.success(productResponseList);
+    public ApiResponse<Page<ProductResponse>> lookupProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Product> productPage = productService.getProductList(pageable);
+        Page<ProductResponse> responsePage = productPage.map(ProductResponse::fromEntity);
+        return ApiResponse.success(responsePage);
     }
 
-    @GetMapping("/top-selling-products")
+    @GetMapping("/popular")
     public ApiResponse<List<ProductResponse>> getTopSellingProducts(
             @RequestParam(defaultValue = "5") int limit
     ) {

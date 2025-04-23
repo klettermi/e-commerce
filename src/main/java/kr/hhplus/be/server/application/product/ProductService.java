@@ -4,7 +4,9 @@ import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +20,8 @@ import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 public class ProductService {
     private final ProductRepository productRepository;
 
-    public List<Product> getProductList() {
-        return productRepository.findAll();
+    public Page<Product> getProductList(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 
     /**

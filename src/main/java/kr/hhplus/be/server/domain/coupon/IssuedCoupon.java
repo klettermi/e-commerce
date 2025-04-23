@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "coupon")
+@Table(name = "issued_coupon")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +24,8 @@ public class IssuedCoupon {
     private Long userId;
 
     @Column
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
     private CouponStatus status = CouponStatus.AVAILABLE;
 
     public void markAsUsed() {

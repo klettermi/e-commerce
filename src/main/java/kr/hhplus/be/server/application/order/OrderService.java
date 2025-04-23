@@ -51,7 +51,6 @@ public class OrderService {
             inv.decreaseStock(p.getQuantity());
         }
 
-        order.markAsPaid();
         return orderRepository.save(order);
     }
 

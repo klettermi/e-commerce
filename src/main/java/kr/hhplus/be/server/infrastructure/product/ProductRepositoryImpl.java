@@ -4,6 +4,7 @@ import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -17,8 +18,8 @@ public class ProductRepositoryImpl implements ProductRepository {
     private final ProductJpaRepository productJpaRepository;
     private final OrderJpaRepository orderJpaRepository;
     @Override
-    public List<Product> findAll() {
-        return productJpaRepository.findAll();
+    public Page<Product> findAll(Pageable pageable) {
+        return productJpaRepository.findAll(pageable);
     }
 
     @Override

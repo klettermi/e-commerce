@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.item.Item;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "category")
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

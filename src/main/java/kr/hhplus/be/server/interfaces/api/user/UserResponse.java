@@ -1,3 +1,12 @@
 package kr.hhplus.be.server.interfaces.api.user;
 
-public record UserResponse(Long id, String email, String role) {}
+import kr.hhplus.be.server.domain.user.User;
+
+public record UserResponse(Long id, String username) {
+    public static UserResponse fromEntity(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getUsername()
+        );
+    }
+}

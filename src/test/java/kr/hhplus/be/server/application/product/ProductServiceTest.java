@@ -14,13 +14,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,32 +78,42 @@ class ProductServiceTest {
     }
 
     @Test
-    void testLookupProducts() {
+    void testLookupProducts_withPaging() {
         // given
-        List<Product> products = Arrays.asList(product1, product2);
-        when(productRepository.findAll()).thenReturn(products);
+        // (테스트용 fixture 로 product1, product2 는 미리 @BeforeEach 등에서 생성해두었다고 가정)
+        List<Product> products = List.of(product1, product2);
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("id").ascending());
+        PageImpl<Product> productPage = new PageImpl<>(products, pageable, products.size());
 
+        // repository.findAll(Pageable) 모킹
+        when(productRepository.findAll(any(Pageable.class)))
+                .thenReturn(productPage);
 
         // when
-        List<Product> productList = productService.getProductList();
-
+        Page<Product> page = productService.getProductList(pageable);
 
         // then
-        assertEquals(2, productList.size(), "상품 목록의 크기는 2여야 합니다.");
+        assertThat(page.getTotalElements()).isEqualTo(2);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getSize()).isEqualTo(2);
 
         // 첫 번째 상품 검증
-        Product responses1 = productList.get(0);
-        // 아직 영속화되지 않았으므로 id는 null이어야 합니다.
-        assertNull(responses1.getId(), "영속화되지 않은 상태면 첫 상품 id는 null이어야 합니다.");
-        assertEquals("AirForce", responses1.getItem().getName(), "첫 상품의 itemName은 'AirForce'여야 합니다.");
-        // 도메인에서 Option의 이름은 DTO 변환 시 optionName으로 노출됩니다.
-        assertEquals("White240", responses1.getOption().getName(), "첫 상품의 optionName은 'White240'이어야 합니다.");
-        assertEquals(new Money(BigDecimal.valueOf(105000)), responses1.getItem().getBasePrice().add(option1.getAdditionalCost()), "첫 상품의 최종 가격은 105000이어야 합니다.");
+        Product p1 = page.getContent().get(0);
+        assertThat(p1.getId()).isNull();  // 아직 영속화 전이므로 id 는 null
+        assertThat(p1.getItem().getName()).isEqualTo("AirForce");
+        assertThat(p1.getOption().getName()).isEqualTo("White240");
+        // basePrice + additionalCost = 105000
+        Money expectedPrice1 = new Money(BigDecimal.valueOf(105_000));
+        assertThat(p1.getItem().getBasePrice().add(p1.getOption().getAdditionalCost()))
+                .isEqualTo(expectedPrice1);
+
         // 두 번째 상품 검증
-        Product responses2 = productList.get(1);
-        assertNull(responses2.getId(), "영속화되지 않은 상태면 두 번째 상품 id는 null이어야 합니다.");
-        assertEquals("AirMax", responses2.getItem().getName(), "두 번째 상품의 itemName은 'AirMax'여야 합니다.");
-        assertEquals("Black", responses2.getOption().getName(), "두 번째 상품의 optionName은 'Black'이어야 합니다.");
-        assertEquals(new Money(BigDecimal.valueOf(160000)), responses2.getItem().getBasePrice().add(responses2.getOption().getAdditionalCost()), "두 번째 상품의 최종 가격은 160000이어야 합니다.");
+        Product p2 = page.getContent().get(1);
+        assertThat(p2.getId()).isNull();
+        assertThat(p2.getItem().getName()).isEqualTo("AirMax");
+        assertThat(p2.getOption().getName()).isEqualTo("Black");
+        Money expectedPrice2 = new Money(BigDecimal.valueOf(160_000));
+        assertThat(p2.getItem().getBasePrice().add(p2.getOption().getAdditionalCost()))
+                .isEqualTo(expectedPrice2);
     }
 }

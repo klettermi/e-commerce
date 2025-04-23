@@ -18,7 +18,7 @@ public class TopProductScheduler {
         var top5 = productService.getTopSellingProductsLast3Days(5);
         log.info("[TopProductScheduler] 최근 3일간 최다 판매 상위 5개:");
         top5.forEach(p ->
-                log.info("  - " + p.getId() + " / " + p.getItem().getName() + " (가격: " + p.getItem().getBasePrice() + ")")
+                log.info("  - {} / {} (가격: {})", p.getId(), p.getItem().getName(), p.getItem().getBasePrice())
         );
     }
 }
