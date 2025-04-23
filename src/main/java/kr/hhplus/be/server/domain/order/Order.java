@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
@@ -46,10 +47,10 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
-    public Order(Long userId, String orderNumber, Money totalPoint, OrderStatus status) {
+    public Order(Long userId, Money totalPoint, OrderStatus status) {
         super();
         this.userId = userId;
-        this.orderNumber = orderNumber;
+        this.orderNumber = generateOrderNumber();
         this.totalPoint = totalPoint;
         this.status = status;
     }
@@ -69,5 +70,9 @@ public class Order extends BaseEntity {
             throw new DomainException.InvalidStateException("결제 가능한 상태가 아닙니다.");
         }
         this.status = OrderStatus.PAID;
+    }
+
+    public String generateOrderNumber() {
+        return "ORD-" + UUID.randomUUID();
     }
 }

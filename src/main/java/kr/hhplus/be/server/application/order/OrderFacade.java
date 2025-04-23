@@ -1,9 +1,16 @@
 package kr.hhplus.be.server.application.order;
 
+import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
+import kr.hhplus.be.server.domain.inventory.Inventory;
+import kr.hhplus.be.server.domain.inventory.InventoryService;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderProduct;
+import kr.hhplus.be.server.domain.order.OrderService;
+import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,23 +25,35 @@ import static kr.hhplus.be.server.domain.common.exception.DomainException.Entity
 public class OrderFacade {
 
     private final OrderService orderService;
-    private final UserRepository userRepository;
-
-    public Order createOrder(Long userId, List<OrderProduct> orderProductList) {
-        // 사용자 조회: 존재하지 않으면 도메인 예외 발생
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-
-        String orderNumber = generateOrderNumber();
-        return orderService.placeOrder(user, orderNumber, orderProductList);
-    }
+    private final UserService userService;
+    private final InventoryService inventoryService;
 
     @Transactional
     public Order getOrder(Long orderId) {
         return orderService.getOrderById(orderId);
     }
 
-    private String generateOrderNumber() {
-        return "ORD-" + UUID.randomUUID();
+    /**
+     * 주문 전체 플로우: 트랜잭션 안에서 두 서비스를 조합
+     */
+    @Transactional
+    public Order placeOrder(Long userId, List<OrderProduct> orderProductList) {
+        // 1) 사용자 찾기
+        User user = userService.getUser(userId);
+
+        // 2) 총 포인트 계산
+        Money totalPointValue = orderService.calculateTotal(orderProductList);
+
+        // 3) Order 인스턴스 생성(Products 포함)
+        Order order = orderService.buildOrder(user, orderProductList, totalPointValue);
+
+        // 4) 재고 검증 및 차감
+        inventoryService.checkAndDecreaseStock(order.getOrderProducts());
+
+        // 5) DB 저장
+        return orderService.saveOrder(order);
     }
+
+
+
 }

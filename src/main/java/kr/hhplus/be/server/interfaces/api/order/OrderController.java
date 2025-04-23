@@ -24,7 +24,7 @@ public class OrderController {
             @RequestParam Long userId,
             @RequestBody List<OrderProductRequest> orderProductRequests) {
         List<OrderProduct> orderProducts = orderProductRequests.stream().map(OrderProductRequest::toOrderProduct).collect(Collectors.toList());
-        Order order = orderFacade.createOrder(userId, orderProducts);
+        Order order = orderFacade.placeOrder(userId, orderProducts);
         OrderResponse orderResponse = OrderResponse.fromEntity(order);
         return ApiResponse.success(orderResponse);
     }
