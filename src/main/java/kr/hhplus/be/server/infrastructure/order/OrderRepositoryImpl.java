@@ -15,6 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
     private final OrderJpaRepository orderRepo;
+    private final OrderProductJpaRepository orderProductRepo;
 
     @Override
     public Order save(Order order) {
@@ -42,4 +43,8 @@ public class OrderRepositoryImpl implements OrderRepository {
         return orderRepo.findAll();
     }
 
+    @Override
+    public OrderProduct saveOrderProduct(OrderProduct orderProduct) {
+        return orderProductRepo.save(orderProduct);
+    }
 }

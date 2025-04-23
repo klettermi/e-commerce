@@ -33,10 +33,10 @@ class ProductServiceTest {
 
     private Category category;
     private Item item1;
-    private Option<BaseEntity> option1;
+    private Option option1;
     private Product product1;
     private Item item2;
-    private Option<BaseEntity> option2;
+    private Option option2;
     private Product product2;
 
     @BeforeEach

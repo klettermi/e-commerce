@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.infrastructure.product;
 
-import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.infrastructure.order.OrderJpaRepository;
@@ -28,8 +27,8 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void save(Product product) {
-        productJpaRepository.save(product);
+    public Product save(Product product) {
+        return productJpaRepository.save(product);
     }
 
     @Override

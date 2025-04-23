@@ -4,7 +4,6 @@ import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.point.PointService;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.UserPoint;
-import kr.hhplus.be.server.interfaces.api.pointhistory.PointHistoryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

@@ -2,9 +2,12 @@ package kr.hhplus.be.server.interfaces.api.point;
 
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.point.PointService;
+import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/points")
@@ -32,5 +35,14 @@ public class PointController {
         UserPoint userPoint = pointService.usePoint(dto.userId(), dto.amount());
         PointResponse pointResponse = PointResponse.fromEntity(userPoint);
         return ApiResponse.success(pointResponse);
+    }
+
+    @GetMapping("/pointhistory/{userId}")
+    public List<PointHistoryResponse> getHistory(@PathVariable Long userId) {
+        List<PointHistory> pointHistoryList =  pointService.getPointHistory(userId);
+        List<PointHistoryResponse> pointHistoryResponseList = pointHistoryList.stream()
+                .map(PointHistoryResponse::fromEntity)
+                .toList();
+        return pointHistoryResponseList;
     }
 }

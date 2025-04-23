@@ -25,7 +25,7 @@ class ProductTest {
                 .saleStatus(SaleStatus.ON_SALE)
                 .basePrice(Money.of(100_000))
                 .build();
-        Option<BaseEntity> option = Option.builder()
+        Option option = Option.builder()
                 .name("Black")
                 .additionalCost(Money.of(60_000))
                 .build();

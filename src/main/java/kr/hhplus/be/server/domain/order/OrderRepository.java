@@ -19,5 +19,6 @@ public interface OrderRepository {
 
     List<Order> findAll();
 
+    OrderProduct saveOrderProduct(OrderProduct orderProduct);
 
 }

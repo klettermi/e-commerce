@@ -9,7 +9,7 @@ public record PointHistoryResponse(
         Money changeAmount,
         String transactionType
 ) {
-    public static PointHistoryResponse from(PointHistory pointHistory) {
+    public static PointHistoryResponse fromEntity(PointHistory pointHistory) {
         return new PointHistoryResponse(
                 pointHistory.getId(),
                 pointHistory.getUserId(),

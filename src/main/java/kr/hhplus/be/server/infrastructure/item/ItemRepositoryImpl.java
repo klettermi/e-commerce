@@ -14,8 +14,8 @@ public class ItemRepositoryImpl implements ItemRepository {
     private final ItemJpaRepository itemRepo;
 
     @Override
-    public void save(Item item) {
-        itemRepo.save(item);
+    public Item save(Item item) {
+        return itemRepo.save(item);
     }
 
     @Override
