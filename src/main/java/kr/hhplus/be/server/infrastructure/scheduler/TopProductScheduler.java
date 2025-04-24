@@ -3,7 +3,6 @@ package kr.hhplus.be.server.infrastructure.scheduler;
 import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductInput;
 import kr.hhplus.be.server.application.product.ProductOutput;
-import kr.hhplus.be.server.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

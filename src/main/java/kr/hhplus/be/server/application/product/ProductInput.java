@@ -8,6 +8,7 @@ import lombok.Setter;
 public class ProductInput {
 
     @Getter
+    @Setter
     @NoArgsConstructor
     public static class List {
         @Min(0) private int page;

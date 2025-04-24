@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.domain.product;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.option.Option;
 import lombok.AllArgsConstructor;

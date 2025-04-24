@@ -1,16 +1,12 @@
 package kr.hhplus.be.server.application.product;
 
-import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductCommand;
 import kr.hhplus.be.server.domain.product.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service

@@ -1,8 +1,7 @@
 package kr.hhplus.be.server.domain.product;
 
-import kr.hhplus.be.server.domain.common.BaseEntity;
-import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.category.Category;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.item.SaleStatus;
 import kr.hhplus.be.server.domain.option.Option;
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ProductTest {
     @Test
