@@ -1,13 +1,12 @@
 package kr.hhplus.be.server.domain.order;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
 

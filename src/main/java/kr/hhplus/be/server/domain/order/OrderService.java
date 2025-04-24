@@ -1,11 +1,9 @@
 package kr.hhplus.be.server.domain.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.EntityNotFoundException;

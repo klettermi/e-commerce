@@ -5,8 +5,6 @@ import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "order_products")
 @Builder
