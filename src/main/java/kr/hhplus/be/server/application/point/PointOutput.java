@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.point;
 import kr.hhplus.be.server.domain.common.Money;
 import lombok.Builder;
 import lombok.Getter;
+
 import java.util.List;
 public class PointOutput {
 

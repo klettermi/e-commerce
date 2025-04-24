@@ -3,7 +3,6 @@ package kr.hhplus.be.server.domain.point;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

@@ -1,14 +1,12 @@
 package kr.hhplus.be.server.interfaces.api.point;
 
+import jakarta.validation.Valid;
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.point.PointFacade;
-import kr.hhplus.be.server.domain.point.PointService;
-import kr.hhplus.be.server.domain.point.PointHistory;
-import kr.hhplus.be.server.domain.point.UserPoint;
+import kr.hhplus.be.server.application.point.PointInput;
+import kr.hhplus.be.server.application.point.PointOutput;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/points")
@@ -18,24 +16,34 @@ public class PointController {
     private final PointFacade pointFacade;
 
     @GetMapping("/{userId}")
-    public ApiResponse<PointResponse> getPoints(@PathVariable long userId) {
-        UserPoint userPoint = pointFacade.getPoint(userId);
-        PointResponse pointResponse = PointResponse.fromEntity(userPoint);
-        return ApiResponse.success(pointResponse);
-    }
-
-    @PostMapping("/charge")
-    public ApiResponse<PointResponse> chargePoints(@RequestBody ChargePointRequest dto) {
-        UserPoint userPoint = pointFacade.chargePoint(dto.userId(), dto.amount());
-        PointResponse pointResponse = PointResponse.fromEntity(userPoint);
-        return ApiResponse.success(pointResponse);
+    public ApiResponse<PointResponse.UserPoint> getPoint(@PathVariable Long userId) {
+        PointInput.GetPoint in = new PointInput.GetPoint();
+        in.setUserId(userId);
+        PointOutput.UserPoint out = pointFacade.getPoint(in);
+        return ApiResponse.success(PointResponse.UserPoint.fromOutput(out));
     }
 
     @GetMapping("/{userId}/history")
-    public List<PointHistoryResponse> getHistory(@PathVariable Long userId) {
-        List<PointHistory> pointHistoryList =  pointFacade.getPointHistory(userId);
-        return pointHistoryList.stream()
-                .map(PointHistoryResponse::fromEntity)
-                .toList();
+    public ApiResponse<PointResponse.HistoryList> getPointHistory(@PathVariable Long userId) {
+        PointInput.GetHistory in = new PointInput.GetHistory();
+        in.setUserId(userId);
+        PointOutput.HistoryList out = pointFacade.getPointHistory(in);
+        return ApiResponse.success(PointResponse.HistoryList.fromOutput(out));
+    }
+
+    @PostMapping("/charge")
+    public ApiResponse<PointResponse.UserPoint> chargePoint(
+            @Valid @RequestBody PointRequest.Charge request
+    ) {
+        PointOutput.UserPoint out = pointFacade.charge(request.toInput());
+        return ApiResponse.success(PointResponse.UserPoint.fromOutput(out));
+    }
+
+    @PostMapping("/use")
+    public ApiResponse<PointResponse.UserPoint> usePoint(
+            @Valid @RequestBody PointRequest.Use request
+    ) {
+        PointOutput.UserPoint out = pointFacade.use(request.toInput());
+        return ApiResponse.success(PointResponse.UserPoint.fromOutput(out));
     }
 }

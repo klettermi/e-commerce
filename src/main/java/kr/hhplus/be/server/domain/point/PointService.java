@@ -1,9 +1,7 @@
 package kr.hhplus.be.server.domain.point;
 
 import jakarta.persistence.EntityNotFoundException;
-import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
-import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
