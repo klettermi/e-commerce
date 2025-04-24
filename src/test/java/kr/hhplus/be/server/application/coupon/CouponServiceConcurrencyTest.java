@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.application.coupon;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
-import kr.hhplus.be.server.domain.common.exception.DomainException;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
+import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class CouponServiceConcurrencyTest {
   @Autowired
-  CouponService couponService;
+  CouponFacade couponFacade;
 
   @Autowired
   CouponRepository couponRepository;
@@ -39,10 +41,13 @@ class CouponServiceConcurrencyTest {
       // 준비
       String code = "TEST-CODE";
       int threadCount = 10;
-      int initialQuantity = threadCount;
       Coupon coupon = Coupon.builder()
+              .name("ConcurrencyTestCoupon")
               .couponCode(code)
-              .remainingQuantity(initialQuantity)
+              .couponType(CouponType.AMOUNT)
+              .discountAmount(Money.of(1000))
+              .totalQuantity(20)
+              .remainingQuantity(20)
               .build();
       User user = User.builder()
               .username("test")
@@ -58,7 +63,7 @@ class CouponServiceConcurrencyTest {
       for (int i = 0; i < threadCount; i++) {
           executor.execute(() -> {
               try {
-                  couponService.issueCoupon(coupon.getId(), user.getId());
+                  couponFacade.issueCoupon(coupon.getId(), user.getId());
               } catch (InvalidStateException e){
 
               } finally {
@@ -72,7 +77,9 @@ class CouponServiceConcurrencyTest {
 
       // 검증
       Coupon updatedCoupon = couponRepository.findByCouponCode(code).orElseThrow();
-      assertEquals(0, updatedCoupon.getRemainingQuantity());
+      int expectedRemaining = 20 - threadCount;
+      assertEquals(expectedRemaining, updatedCoupon.getRemainingQuantity(),
+              "remainingQuantity는 초깃값(20)에서 발급 횟수(10)만큼 차감되어야 합니다.");
 
       executor.shutdown();
 
