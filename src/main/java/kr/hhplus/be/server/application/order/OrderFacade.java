@@ -1,8 +1,10 @@
 package kr.hhplus.be.server.application.order;
 
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.inventory.InventoryCommand;
 import kr.hhplus.be.server.domain.inventory.InventoryService;
 import kr.hhplus.be.server.domain.order.*;
+import kr.hhplus.be.server.domain.product.ProductService;
 import kr.hhplus.be.server.domain.user.UserCommand;
 import kr.hhplus.be.server.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class OrderFacade {
     private final OrderService orderService;
     private final UserService  userService;
     private final InventoryService inventoryService;
+    private final ProductService productService;
 
     /**
      * 주문 조회
@@ -40,10 +43,13 @@ public class OrderFacade {
 
         // 2) DTO → OrderProduct 리스트
         List<OrderProduct> products = input.getItems().stream()
-                .map(i -> OrderProduct.builder()
-                        .productId(i.getProductId())
-                        .quantity(i.getQuantity())
-                        .build())
+                .map(i -> {
+                    return OrderProduct.builder()
+                            .productId(i.getProductId())
+                            .quantity(i.getQuantity())
+                            .unitPoint(i.getUnitPrice())
+                            .build();
+                })
                 .collect(Collectors.toList());
 
         // 3) 재고 차감

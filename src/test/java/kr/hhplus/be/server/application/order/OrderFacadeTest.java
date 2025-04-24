@@ -3,146 +3,153 @@ package kr.hhplus.be.server.application.order;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.inventory.InventoryCommand;
 import kr.hhplus.be.server.domain.inventory.InventoryService;
-import kr.hhplus.be.server.domain.order.*;
-import kr.hhplus.be.server.domain.user.UserCommand;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderCommand;
+import kr.hhplus.be.server.domain.order.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderService;
+import kr.hhplus.be.server.domain.user.UserInfo;
 import kr.hhplus.be.server.domain.user.UserService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderFacadeTest {
 
-    @Mock OrderService orderService;
-    @Mock UserService  userService;
-    @Mock InventoryService inventoryService;
-
-    @InjectMocks OrderFacade orderFacade;
-
-    private final Long userId    = 10L;
-    private final Long orderId   = 20L;
-    private final Long prodId    = 30L;
-    private final int  quantity  = 2;
-    private final Money totalPoints = Money.of(300);
-
-    private OrderInfo.OrderDetail detail;
-    private OrderInfo.Total       totalInfo;
-
-    @BeforeEach
-    void setUp() {
-        // 공통 stub 객체 준비
-        detail    = mock(OrderInfo.OrderDetail.class);
-        totalInfo = mock(OrderInfo.Total.class);
-
-        when(detail.getOrderId()).thenReturn(orderId);
-        when(detail.getUserId()).thenReturn(userId);
-        when(detail.getTotalPoint()).thenReturn(totalPoints);
-        when(detail.getStatus()).thenReturn(OrderStatus.CREATED.name());
-
-        // 하나의 상품 아이템
-        OrderInfo.OrderProductInfo infoItem = mock(OrderInfo.OrderProductInfo.class);
-        when(infoItem.getProductId()).thenReturn(prodId);
-        when(infoItem.getQuantity()).thenReturn(quantity);
-        when(infoItem.getUnitPoint()).thenReturn(Money.of(150));
-
-        when(detail.getItems()).thenReturn(List.of(infoItem));
-        when(totalInfo.getTotalPoint()).thenReturn(totalPoints);
-    }
+    @Mock private OrderService orderService;
+    @Mock private UserService userService;
+    @Mock private InventoryService inventoryService;
+    @InjectMocks private OrderFacade orderFacade;
 
     @Test
-    void getOrder_mapsToOrderOutput() {
+    void getOrder_delegatesAndMaps() {
         // given
-        OrderInput.Get input = new OrderInput.Get();
-        ReflectionTestUtils.setField(input, "orderId", orderId);
+        long orderId = 42L, userId = 7L;
+        Money total = Money.of(1234);
 
-        when(orderService.getOrderById(eq(OrderCommand.GetOrder.of(orderId))))
+        // 도메인 OrderInfo.OrderDetail을 실제 빌더로 생성
+        OrderInfo.OrderProductInfo pinfo = OrderInfo.OrderProductInfo.builder()
+                .productId(100L)
+                .quantity(2)
+                .unitPoint(Money.of(500))
+                .build();
+        OrderInfo.OrderDetail detail = OrderInfo.OrderDetail.builder()
+                .orderId(orderId)
+                .userId(userId)
+                .totalPoint(total)
+                .status("PAID")
+                .items(List.of(pinfo))
+                .build();
+
+        // stub
+        when(orderService.getOrderById(any(OrderCommand.GetOrder.class)))
                 .thenReturn(detail);
 
         // when
-        OrderOutput output = orderFacade.getOrder(input);
+        OrderOutput out = orderFacade.getOrder(new OrderInput.Get(orderId));
 
-        // then
-        assertThat(output.getOrderId()).isEqualTo(orderId);
-        assertThat(output.getUserId()).isEqualTo(userId);
-        assertThat(output.getTotalPoint()).isEqualTo(totalPoints);
-        assertThat(output.getStatus()).isEqualTo(OrderStatus.CREATED);
-
-        assertThat(output.getItems()).hasSize(1);
-        var item = output.getItems().get(0);
-        assertThat(item.getProductId()).isEqualTo(prodId);
-        assertThat(item.getQuantity()).isEqualTo(quantity);
-        assertThat(item.getUnitPoint()).isEqualTo(Money.of(150));
-
-        verify(orderService).getOrderById(eq(OrderCommand.GetOrder.of(orderId)));
+        // then: service 호출 검증
+        verify(orderService).getOrderById(argThat(cmd -> cmd.getOrderId().equals(orderId)));
         verifyNoInteractions(userService, inventoryService);
+
+        // then: 매핑 검증
+        assertThat(out.getOrderId()).isEqualTo(orderId);
+        assertThat(out.getUserId()).isEqualTo(userId);
+        assertThat(out.getTotalPoint()).isEqualTo(total);
+        assertThat(out.getStatus()).isEqualTo("PAID");
+        assertThat(out.getItems()).hasSize(1)
+                .first()
+                .satisfies(item -> {
+                    assertThat(item.getProductId()).isEqualTo(100L);
+                    assertThat(item.getQuantity()).isEqualTo(2);
+                    assertThat(item.getUnitPoint()).isEqualTo(Money.of(500));
+                });
     }
 
     @Test
-    void placeOrder_fullFlow_mapsToOrderOutput() {
-        // given: Place DTO 세팅
-        OrderInput.Place input = new OrderInput.Place();
-        ReflectionTestUtils.setField(input, "userId", userId);
+    void placeOrder_fullFlow_delegatesAndMaps() {
+        // given
+        final long userId = 7L;
+        List<OrderInput.Item> dtoItems = List.of(
+                new OrderInput.Item(1L, Money.of(10000), 2),
+                new OrderInput.Item(2L, Money.of(20000), 3)
+        );
+        OrderInput.Place input = new OrderInput.Place(userId, dtoItems);
 
-        OrderInput.Item dtoItem = new OrderInput.Item();
-        ReflectionTestUtils.setField(dtoItem, "productId", prodId);
-        ReflectionTestUtils.setField(dtoItem, "quantity", quantity);
+        // 1) 사용자 검증
+        UserInfo.UserDetail dummyUserDetail = UserInfo.UserDetail.builder()
+                .id(userId)
+                .username("tester")
+                .build();
+        when(userService.getUser(argThat(cmd -> cmd.getUserId().equals(userId))))
+                .thenReturn(dummyUserDetail);
 
-        ReflectionTestUtils.setField(input, "items", List.of(dtoItem));
-
-        // 1) userService 검증 호출 (void, exception 없으면 통과)
-        doNothing().when(userService).getUser(eq(UserCommand.GetUser.of(userId)));
-
-        // 2) inventoryService 호출
+        // 2) 재고 차감 (void 메서드)
         doNothing().when(inventoryService)
                 .checkAndDecreaseStock(any(InventoryCommand.DecreaseStock.class));
 
-        // 3) 총 포인트 계산 stub
-        when(orderService.calculateTotal(any(OrderCommand.CalculateTotal.class)))
-                .thenReturn(totalInfo);
+        // 3) 총 포인트 계산
+        Money expectedTotal = Money.of(2*500 + 3*200);
+        OrderInfo.Total totalInfo = OrderInfo.Total.builder()
+                .totalPoint(expectedTotal)
+                .build();
+        when(orderService.calculateTotal(argThat(cmd ->
+                cmd.getItems().size() == 2
+        ))).thenReturn(totalInfo);
 
-        // 4) 주문 엔티티 생성 stub
-        Order orderEntity = mock(Order.class);
+        // 4) 주문 엔티티 생성
+        Order fakeOrder = mock(Order.class);
         when(orderService.createOrderEntity(any(OrderCommand.BuildOrder.class)))
-                .thenReturn(orderEntity);
+                .thenReturn(fakeOrder);
 
-        // 5) 저장 후 OrderDetail stub 반환
+        // 5) 저장 및 detail 반환
+        OrderInfo.OrderProductInfo savedPinfo = OrderInfo.OrderProductInfo.builder()
+                .productId(1L)
+                .quantity(2)
+                .unitPoint(Money.of(500))
+                .build();
+        OrderInfo.OrderDetail savedDetail = OrderInfo.OrderDetail.builder()
+                .orderId(99L)
+                .userId(userId)
+                .totalPoint(expectedTotal)
+                .status("CREATED")
+                .items(List.of(savedPinfo))
+                .build();
         when(orderService.saveOrder(any(OrderCommand.SaveOrder.class)))
-                .thenReturn(detail);
+                .thenReturn(savedDetail);
 
         // when
-        OrderOutput output = orderFacade.placeOrder(input);
+        OrderOutput out = orderFacade.placeOrder(input);
 
-        // then: 필드 매핑 검증
-        assertThat(output.getOrderId()).isEqualTo(orderId);
-        assertThat(output.getUserId()).isEqualTo(userId);
-        assertThat(output.getTotalPoint()).isEqualTo(totalPoints);
-        assertThat(output.getStatus()).isEqualTo(OrderStatus.CREATED);
+        // then: 호출 순서 검증
+        InOrder ord = inOrder(userService, inventoryService, orderService);
+        ord.verify(userService).getUser(any());
+        ord.verify(inventoryService).checkAndDecreaseStock(any());
+        ord.verify(orderService).calculateTotal(any());
+        ord.verify(orderService).createOrderEntity(any());
+        ord.verify(orderService).saveOrder(any());
 
-        assertThat(output.getItems()).hasSize(1);
-        var item = output.getItems().get(0);
-        assertThat(item.getProductId()).isEqualTo(prodId);
-        assertThat(item.getQuantity()).isEqualTo(quantity);
-
-        // verify 호출 순서 및 파라미터
-        InOrder inOrder = inOrder(userService, inventoryService, orderService);
-        inOrder.verify(userService).getUser(eq(UserCommand.GetUser.of(userId)));
-        inOrder.verify(inventoryService)
-                .checkAndDecreaseStock(any(InventoryCommand.DecreaseStock.class));
-        inOrder.verify(orderService)
-                .calculateTotal(any(OrderCommand.CalculateTotal.class));
-        inOrder.verify(orderService)
-                .createOrderEntity(any(OrderCommand.BuildOrder.class));
-        inOrder.verify(orderService)
-                .saveOrder(any(OrderCommand.SaveOrder.class));
+        // then: 결과 매핑 검증
+        assertThat(out.getOrderId()).isEqualTo(99L);
+        assertThat(out.getUserId()).isEqualTo(userId);
+        assertThat(out.getTotalPoint()).isEqualTo(expectedTotal);
+        assertThat(out.getStatus()).isEqualTo("CREATED");
+        assertThat(out.getItems()).hasSize(1)
+                .first()
+                .satisfies(item -> {
+                    assertThat(item.getProductId()).isEqualTo(1L);
+                    assertThat(item.getQuantity()).isEqualTo(2);
+                    assertThat(item.getUnitPoint()).isEqualTo(Money.of(500));
+                });
     }
 }

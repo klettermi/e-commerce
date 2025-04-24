@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.order;
 
+import kr.hhplus.be.server.domain.common.Money;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,7 @@ public class OrderInput {
     @AllArgsConstructor
     public static class Item {
         private Long productId;
+        private Money unitPrice;
         private int quantity;
     }
 }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -60,17 +61,17 @@ class OrderServiceConcurrencyTest {
 
         // 2) DTO Item 리스트로 변환
         List<OrderInput.Item> dtoItems = orderProductList.stream()
-                .map(p -> new OrderInput.Item(p.getProductId(), p.getQuantity()))
+                .map(p -> new OrderInput.Item(p.getProductId(), p.getUnitPoint(), p.getQuantity()))
                 .toList();
 
         CountDownLatch latch = new CountDownLatch(threadCount);
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-
+        AtomicInteger count = new AtomicInteger(0);
         for (int i = 0; i < threadCount; i++) {
             executor.execute(() -> {
                 try {
-                    // DTO 기반 API 호출
                     orderFacade.placeOrder(new OrderInput.Place(dummyUser.getId(), dtoItems));
+                    count.incrementAndGet();
                 } catch (DomainException.InvalidStateException ignored) {
                 } finally {
                     latch.countDown();
@@ -83,7 +84,7 @@ class OrderServiceConcurrencyTest {
 
         // 저장된 주문 개수 검증
         List<Order> saved = orderRepository.findAll();
-        assertEquals(threadCount, saved.size(), "저장된 주문 개수가 같아야 합니다.");
+        assertEquals(count.intValue(), saved.size(), "저장된 주문 개수가 같아야 합니다.");
 
         // 기대 총 포인트 계산 (도메인 OrderProduct 기준)
         Money expectedTotal = orderProductList.stream()

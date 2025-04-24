@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import kr.hhplus.be.server.application.order.OrderInput;
+import kr.hhplus.be.server.domain.common.Money;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,15 +43,18 @@ public class OrderRequest {
             @Positive(message = "수량은 양수여야 합니다.")
             private int quantity;
 
-            public Item(Long productId, int quantity) {
+            private Money unitPrice;
+
+            public Item(Long productId, Money unitPrice, int quantity) {
                 this.productId = productId;
+                this.unitPrice = unitPrice;
                 this.quantity = quantity;
             }
         }
 
         public OrderInput.Place toInput() {
             List<OrderInput.Item> inputItems = items.stream()
-                    .map(i -> new OrderInput.Item(i.getProductId(), i.getQuantity()))
+                    .map(i -> new OrderInput.Item(i.getProductId(), i.getUnitPrice(), i.getQuantity()))
                     .collect(Collectors.toList());
             return new OrderInput.Place(userId, inputItems);
         }

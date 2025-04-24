@@ -19,7 +19,7 @@ public class InventoryService {
      * 재고 검증 후 차감
      */
     @Transactional
-    public InventoryInfo.StockCheckResult checkAndDecreaseStock(InventoryCommand.DecreaseStock command) {
+    public void checkAndDecreaseStock(InventoryCommand.DecreaseStock command) {
         List<OrderProduct> products = command.getOrderProducts();
 
         var updatedItems = products.stream().map(p -> {
@@ -42,7 +42,7 @@ public class InventoryService {
                     .build();
         }).collect(Collectors.toList());
 
-        return InventoryInfo.StockCheckResult.builder()
+        InventoryInfo.StockCheckResult.builder()
                 .success(true)
                 .inventories(updatedItems)
                 .build();
