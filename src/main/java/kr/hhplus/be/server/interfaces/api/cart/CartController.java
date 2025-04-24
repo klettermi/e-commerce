@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.interfaces.api.cart;
 
 
-import kr.hhplus.be.server.application.cart.CartService;
+import kr.hhplus.be.server.application.cart.CartFacade;
+import kr.hhplus.be.server.domain.cart.CartService;
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.domain.cart.Cart;
 import kr.hhplus.be.server.domain.cart.CartItem;
@@ -13,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CartController {
 
-    private final CartService cartService;
+    private final CartFacade cartFacade;
 
     // 사용자 장바구니 조회 (없으면 생성)
     @GetMapping("/{userId}")
     public ApiResponse<CartResponse> getCart(@PathVariable Long userId) {
-        Cart cart = cartService.getCart(userId);
+        Cart cart = cartFacade.getCart(userId);
         CartResponse response = CartResponse.fromEntity(cart);
         return ApiResponse.success(response);
     }
@@ -28,7 +29,7 @@ public class CartController {
     public ApiResponse<CartResponse> addItem(@PathVariable Long userId,
                                              @RequestBody CartItemRequest request) {
         CartItem newItem = CartItemRequest.toEntity(request);
-        Cart cart = cartService.addItem(userId, newItem);
+        Cart cart = cartFacade.addItem(userId, newItem);
         CartResponse cartResponse = CartResponse.fromEntity(cart);
         return ApiResponse.success(cartResponse);
     }
@@ -38,7 +39,7 @@ public class CartController {
     public ApiResponse<CartResponse> updateItem(@PathVariable Long userId,
                                                 @RequestBody CartItemRequest request) {
         CartItem updatedItem = CartItemRequest.toEntity(request);
-        Cart cart = cartService.updateItem(userId, updatedItem);
+        Cart cart = cartFacade.updateItem(userId, updatedItem);
         CartResponse cartResponse = CartResponse.fromEntity(cart);
         return ApiResponse.success(cartResponse);
     }
@@ -47,7 +48,7 @@ public class CartController {
     @DeleteMapping("/{userId}/items/{productId}")
     public ApiResponse<CartResponse> removeItem(@PathVariable Long userId,
                                                 @PathVariable Long productId) {
-        Cart cart = cartService.removeItem(userId, productId);
+        Cart cart = cartFacade.removeItem(userId, productId);
         CartResponse cartResponse = CartResponse.fromEntity(cart);
         return ApiResponse.success(cartResponse);
     }
@@ -55,7 +56,7 @@ public class CartController {
     // 장바구니 전체 비우기
     @DeleteMapping("/{userId}")
     public ApiResponse<CartResponse> clearCart(@PathVariable Long userId) {
-        Cart cart = cartService.clearCart(userId);
+        Cart cart = cartFacade.clearCart(userId);
         CartResponse cartResponse = CartResponse.fromEntity(cart);
         return ApiResponse.success(cartResponse);
     }
