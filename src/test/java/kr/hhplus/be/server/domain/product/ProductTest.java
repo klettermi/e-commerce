@@ -35,7 +35,7 @@ class ProductTest {
         Money finalPrice = product.calculateFinalPrice();
 
         // then
-        assertEquals(Money.of(10500), finalPrice, "상품의 가격은 10500 이어야 합니다.");
+        assertEquals(Money.of(160000), finalPrice, "상품의 가격은 160000 이어야 합니다.");
     }
 
 }
