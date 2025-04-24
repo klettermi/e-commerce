@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.interfaces.api.product;
 
 import kr.hhplus.be.server.application.common.ApiResponse;
-import kr.hhplus.be.server.application.product.ProductService;
+import kr.hhplus.be.server.application.product.ProductFacade;
+import kr.hhplus.be.server.domain.product.ProductService;
 import kr.hhplus.be.server.domain.product.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,14 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductService productService;
+    private final ProductFacade productFacade;
 
     @GetMapping
     public ApiResponse<Page<ProductResponse>> lookupProducts(
@@ -29,7 +29,7 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<Product> productPage = productService.getProductList(pageable);
+        Page<Product> productPage = productFacade.getProductList(pageable);
         Page<ProductResponse> responsePage = productPage.map(ProductResponse::fromEntity);
         return ApiResponse.success(responsePage);
     }
@@ -38,7 +38,7 @@ public class ProductController {
     public ApiResponse<List<ProductResponse>> getTopSellingProducts(
             @RequestParam(defaultValue = "5") int limit
     ) {
-        var products = productService.getTopSellingProductsLast3Days(limit);
+        var products = productFacade.getTopSellingProductsLast3Days(limit);
         var dtoList = products.stream()
                 .map(ProductResponse::fromEntity)
                 .toList();
