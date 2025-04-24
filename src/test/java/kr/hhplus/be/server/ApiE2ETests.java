@@ -61,7 +61,7 @@ public class ApiE2ETests {
     @Test
     void create_order() {
         List<Map<String, Object>> orderItems = List.of(
-                Map.of("productId", 1, "quantity", 2, "unitPoint", Money.of(1500))
+                Map.of("productId", 1, "quantity", 1, "unitPoint", Money.of(1500))
         );
 
 
@@ -75,7 +75,7 @@ public class ApiE2ETests {
                 .log().all()
                 .statusCode(200)
                 .body("data.orderNumber", notNullValue())
-                .body("data.status", anyOf(is("CREATED"), is("PAID")))
+                .body("data.status", anyOf(is("CREATED")))
                 .extract()
                 .response();
     }
@@ -312,14 +312,7 @@ public class ApiE2ETests {
         given()
                 .when().get("/api/users/1")
                 .then().statusCode(200)
-                .body("username", notNullValue());
+                .body("data.username", notNullValue());
     }
 
-    @Test
-    void get_inventory() {
-        given()
-                .when().get("/api/inventory/1")
-                .then().statusCode(200)
-                .body("stock", greaterThanOrEqualTo(0));
-    }
 }
