@@ -14,7 +14,7 @@ public record Money(BigDecimal amount) {
 
     public Money {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidStateException("금액은 0 이상이어야 합니다.");
+            throw new InvalidStateException("금액은 0 초과이어야 합니다.");
         }
     }
 
