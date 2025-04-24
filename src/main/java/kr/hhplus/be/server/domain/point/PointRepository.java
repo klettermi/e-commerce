@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PointRepository {
-    List<PointHistory> findByUserId(long userId);
+    List<PointHistory> findByUserIdHistory(long userId);
 
     Optional<UserPoint> findByUserId(@Param("userId") Long userId);;
 
@@ -14,7 +14,7 @@ public interface PointRepository {
 
     Optional<UserPoint> findById(long userId);
 
-    void save(PointHistory pointHistory);
+    PointHistory save(PointHistory pointHistory);
 
     void deleteAll();
 }

@@ -37,12 +37,12 @@ public class PointHistory extends BaseEntity {
      * @param amount 충전된 포인트 금액
      * @return 생성된 PointHistory 인스턴스
      */
-    public static PointHistory createChargeHistory(User user, Money amount) {
+    public static PointHistory createChargeHistory(Long userId, Money amount) {
         PointHistory history = new PointHistory();
         history.amount = amount;
         history.type = TransactionType.CHARGE;
         history.setUpdatedAt(LocalDateTime.now());
-        history.userId = user.id;
+        history.userId = userId;
         return history;
     }
 
@@ -53,12 +53,12 @@ public class PointHistory extends BaseEntity {
      * @param amount 사용된 포인트 금액
      * @return 생성된 PointHistory 인스턴스
      */
-    public static PointHistory createUseHistory(User user, Money amount) {
+    public static PointHistory createUseHistory(Long userId, Money amount) {
         PointHistory history = new PointHistory();
         history.amount = amount;
         history.type = TransactionType.USE;
         history.setUpdatedAt(LocalDateTime.now());
-        history.userId = user.id;
+        history.userId = userId;
         return history;
     }
 

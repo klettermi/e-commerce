@@ -1,14 +1,15 @@
 package kr.hhplus.be.server.application.point;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 class PointServiceConcurrencyTest {
     @Autowired
-    PointService pointService;
+    PointFacade pointFacade;
 
     @Autowired
     PointRepository pointRepository;
@@ -78,7 +78,7 @@ class PointServiceConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executor.execute(() -> {
                 try {
-                    pointService.chargePoint(user.getId(), Money.of(chargePoint));
+                    pointFacade.chargePoint(user.getId(), Money.of(chargePoint));
                     successCount.getAndIncrement();
                 } catch (ObjectOptimisticLockingFailureException e) {
 
@@ -92,7 +92,9 @@ class PointServiceConcurrencyTest {
         latch.await();
 
         // 검증
-        UserPoint updatedUserPoint = pointRepository.findByUserId(user.getId()).get();
+        UserPoint updatedUserPoint = pointRepository.findByUserId(user.getId()).orElseThrow(
+                () -> new EntityNotFoundException("없는 포인트입니다.")
+        );
 
         Money expected = Money.of(defaultPoint)
                 .add(Money.of(chargePoint).multiply(successCount.get()));
@@ -133,7 +135,7 @@ class PointServiceConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executor.execute(() -> {
                 try {
-                    pointService.usePoint(user.getId(), Money.of(usePoint));
+                    pointFacade.usePoint(user.getId(), Money.of(usePoint));
                     successCount.getAndIncrement();
                 } catch (ObjectOptimisticLockingFailureException e) {
 
@@ -147,7 +149,9 @@ class PointServiceConcurrencyTest {
         latch.await();
 
         // 검증
-        UserPoint updatedUserPoint = pointRepository.findByUserId(user.getId()).get();
+        UserPoint updatedUserPoint = pointRepository.findByUserId(user.getId()).orElseThrow(
+                () -> new DomainException.EntityNotFoundException("없는 포인트입니다.")
+        );
         Money expected = Money.of(defaultPoint)
                 .subtract(Money.of(usePoint).multiply(successCount.get()));
         Money actual   = updatedUserPoint.getPointBalance();

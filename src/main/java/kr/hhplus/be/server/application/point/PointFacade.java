@@ -25,4 +25,8 @@ public class PointFacade {
     public UserPoint getPoint(long userId) {
         return pointService.getPoint(userId);
     }
+
+    public UserPoint usePoint(long userId, Money amount) {
+        return pointService.usePoint(userId, amount);
+    }
 }

@@ -16,7 +16,7 @@ public class PointRepositoryImpl implements PointRepository {
     private final UserPointJpaRepository userPointRepo;
 
     @Override
-    public List<PointHistory> findByUserId(long userId) {
+    public List<PointHistory> findByUserIdHistory(long userId) {
         return pointHistoryRepo.findByUserId(userId);
     }
 
@@ -36,8 +36,8 @@ public class PointRepositoryImpl implements PointRepository {
     }
 
     @Override
-    public void save(PointHistory pointHistory) {
-        pointHistoryRepo.save(pointHistory);
+    public PointHistory save(PointHistory pointHistory) {
+        return pointHistoryRepo.save(pointHistory);
     }
 
     @Override
