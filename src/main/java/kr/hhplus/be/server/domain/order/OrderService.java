@@ -6,30 +6,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.EntityNotFoundException;
-
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
 
-    /**
-     * 주문 총 포인트 계산
-     */
-    public Money calculateTotal(List<OrderProduct> items) {
-        return items.stream()
-                .map(i -> i.getUnitPoint().multiply(i.getQuantity()))
-                .reduce(Money.ZERO, Money::add);
-    }
-
-    /**
-     * Order 엔티티 생성
-     */
-    public Order buildOrder(User user, List<OrderProduct> items, Money totalPoint) {
-        Order order = new Order(user.getId(), totalPoint, OrderStatus.CREATED);
-        items.forEach(r ->
+    /** ① 엔티티만 생성 */
+    public Order createOrderEntity(OrderCommand.BuildOrder command) {
+        Order order = new Order(command.getUserId(), command.getTotalPoint(), OrderStatus.CREATED);
+        command.getItems().forEach(r ->
                 order.addOrderProduct(
                         OrderProduct.builder()
                                 .productId(r.getProductId())
@@ -41,18 +30,59 @@ public class OrderService {
         return order;
     }
 
+    /** ② 저장 후 Info 매핑 */
+    public OrderInfo.OrderDetail saveOrder(OrderCommand.SaveOrder command) {
+        Order saved = orderRepository.save(command.getOrder());
+        return toOrderDetail(saved);
+    }
+
+    /** ③ 조회 후 Info 매핑 */
+    public OrderInfo.OrderDetail getOrderById(OrderCommand.GetOrder command) {
+        Order order = orderRepository.findById(command.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Order not found with id: " + command.getOrderId()
+                ));
+        return toOrderDetail(order);
+    }
+
+    /** ④ 상태 변경 후 Info 매핑 */
+    public OrderInfo.OrderDetail markAsPaid(OrderCommand.MarkPaid command) {
+        Order order = orderRepository.findById(command.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Order not found with id: " + command.getOrderId()
+                ));
+        order.markAsPaid();
+        Order saved = orderRepository.save(order);
+        return toOrderDetail(saved);
+    }
+
+    /* 공통: Info 변환 */
+    private OrderInfo.OrderDetail toOrderDetail(Order order) {
+        return OrderInfo.OrderDetail.builder()
+                .orderId(order.getId())
+                .userId(order.getUserId())
+                .totalPoint(order.getTotalPoint())
+                .status(order.getStatus().name())
+                .items(order.getOrderProducts().stream()
+                        .map(op -> OrderInfo.OrderProductInfo.builder()
+                                .productId(op.getProductId())
+                                .quantity(op.getQuantity())
+                                .unitPoint(op.getUnitPoint())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
     /**
-     * 실제 DB에 저장
+     * 주문 총 포인트 계산 (커맨드 → 인포)
      */
-    public Order saveOrder(Order order) {
-        return orderRepository.save(order);
+    public OrderInfo.Total calculateTotal(OrderCommand.CalculateTotal command) {
+        Money total = command.getItems().stream()
+                .map(item -> item.getUnitPoint().multiply(item.getQuantity()))
+                .reduce(Money.ZERO, Money::add);
+
+        return OrderInfo.Total.builder()
+                .totalPoint(total)
+                .build();
     }
-
-    public Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
-    }
-
-
-
 }

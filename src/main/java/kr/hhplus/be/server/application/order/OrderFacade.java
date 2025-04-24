@@ -1,59 +1,93 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainException;
-import kr.hhplus.be.server.domain.inventory.Inventory;
+import kr.hhplus.be.server.domain.inventory.InventoryCommand;
 import kr.hhplus.be.server.domain.inventory.InventoryService;
-import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.domain.order.OrderProduct;
-import kr.hhplus.be.server.domain.order.OrderService;
-import kr.hhplus.be.server.domain.order.OrderStatus;
-import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.domain.order.*;
+import kr.hhplus.be.server.domain.user.UserCommand;
 import kr.hhplus.be.server.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
-
-import static kr.hhplus.be.server.domain.common.exception.DomainException.EntityNotFoundException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class OrderFacade {
 
     private final OrderService orderService;
-    private final UserService userService;
+    private final UserService  userService;
     private final InventoryService inventoryService;
 
-    @Transactional
-    public Order getOrder(Long orderId) {
-        return orderService.getOrderById(orderId);
+    /**
+     * 주문 조회
+     */
+    public OrderOutput getOrder(OrderInput.Get input) {
+        OrderInfo.OrderDetail detail = orderService.getOrderById(
+                OrderCommand.GetOrder.of(input.getOrderId())
+        );
+        return toOutput(detail);
     }
 
     /**
-     * 주문 전체 플로우: 트랜잭션 안에서 두 서비스를 조합
+     * 주문 생성 플로우
      */
     @Transactional
-    public Order placeOrder(Long userId, List<OrderProduct> orderProductList) {
-        // 1) 사용자 찾기
-        User user = userService.getUser(userId);
+    public OrderOutput placeOrder(OrderInput.Place input) {
+        // 1) 사용자 검증
+        userService.getUser(UserCommand.GetUser.of(input.getUserId()));
 
-        // 2) 총 포인트 계산
-        Money totalPointValue = orderService.calculateTotal(orderProductList);
+        // 2) DTO → OrderProduct 리스트
+        List<OrderProduct> products = input.getItems().stream()
+                .map(i -> OrderProduct.builder()
+                        .productId(i.getProductId())
+                        .quantity(i.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
 
-        // 3) Order 인스턴스 생성(Products 포함)
-        Order order = orderService.buildOrder(user, orderProductList, totalPointValue);
+        // 3) 재고 차감
+        inventoryService.checkAndDecreaseStock(
+                InventoryCommand.DecreaseStock.of(products)
+        );
 
-        // 4) 재고 검증 및 차감
-        inventoryService.checkAndDecreaseStock(order.getOrderProducts());
+        // 4) 총 포인트 계산
+        OrderInfo.Total totalInfo = orderService.calculateTotal(
+                OrderCommand.CalculateTotal.of(products)
+        );
 
-        // 5) DB 저장
-        return orderService.saveOrder(order);
+        // 5) 도메인 엔티티 생성
+        Order orderEntity = orderService.createOrderEntity(
+                OrderCommand.BuildOrder.of(
+                        input.getUserId(),
+                        products,
+                        totalInfo.getTotalPoint()
+                )
+        );
+
+        // 6) 저장 및 Info 반환
+        OrderInfo.OrderDetail savedDetail = orderService.saveOrder(
+                OrderCommand.SaveOrder.of(orderEntity)
+        );
+
+        // 7) Output 매핑
+        return toOutput(savedDetail);
     }
 
-
-
+    private OrderOutput toOutput(OrderInfo.OrderDetail d) {
+        return OrderOutput.builder()
+                .orderId(d.getOrderId())
+                .userId(d.getUserId())
+                .totalPoint(d.getTotalPoint())
+                .status(d.getStatus())
+                .items(d.getItems().stream()
+                        .map(i -> OrderOutput.Item.builder()
+                                .productId(i.getProductId())
+                                .quantity(i.getQuantity())
+                                .unitPoint(i.getUnitPoint())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+    }
 }

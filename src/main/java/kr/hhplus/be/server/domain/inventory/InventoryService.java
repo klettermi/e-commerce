@@ -1,14 +1,14 @@
 package kr.hhplus.be.server.domain.inventory;
 
 import jakarta.persistence.EntityNotFoundException;
-import kr.hhplus.be.server.domain.common.exception.DomainException;
+import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 import kr.hhplus.be.server.domain.order.OrderProduct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,10 +18,13 @@ public class InventoryService {
     /**
      * 재고 검증 후 차감
      */
-    public void checkAndDecreaseStock(List<OrderProduct> orderProducts) {
-        for (OrderProduct p : orderProducts) {
+    @Transactional
+    public InventoryInfo.StockCheckResult checkAndDecreaseStock(InventoryCommand.DecreaseStock command) {
+        List<OrderProduct> products = command.getOrderProducts();
+
+        var updatedItems = products.stream().map(p -> {
             Inventory inv = inventoryRepository
-                    .findByProductIdForUpdate(p.getProductId())  // @Lock(PESSIMISTIC_WRITE)
+                    .findByProductIdForUpdate(p.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Inventory not found: productId=" + p.getProductId()
                     ));
@@ -32,6 +35,16 @@ public class InventoryService {
                 );
             }
             inv.decreaseStock(p.getQuantity());
-        }
+            // no explicit save required here; within @Transactional, changes flush automatically
+            return InventoryInfo.InventoryItem.builder()
+                    .productId(p.getProductId())
+                    .remainingQuantity(inv.getQuantity())
+                    .build();
+        }).collect(Collectors.toList());
+
+        return InventoryInfo.StockCheckResult.builder()
+                .success(true)
+                .inventories(updatedItems)
+                .build();
     }
 }

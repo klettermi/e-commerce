@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.infrastructure.scheduler;
 
 import kr.hhplus.be.server.application.product.ProductFacade;
+import kr.hhplus.be.server.application.product.ProductInput;
+import kr.hhplus.be.server.application.product.ProductOutput;
 import kr.hhplus.be.server.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +18,19 @@ public class TopProductScheduler {
 
     @Scheduled(cron = "0 0 0 */3 * *")
     public void logTopProductsEvery3Days() {
-        var top5 = productFacade.getTopSellingProductsLast3Days(5);
+        ProductInput.TopSelling input = new ProductInput.TopSelling();
+        input.setTopN(5);
+
+        ProductOutput.TopSellingList topList =
+                productFacade.getTopSellingProductsLast3Days(input);
+
         log.info("[TopProductScheduler] 최근 3일간 최다 판매 상위 5개:");
-        top5.forEach(p ->
-                log.info("  - {} / {} (가격: {})", p.getId(), p.getItem().getName(), p.getItem().getBasePrice())
-        );
+        for (ProductOutput.Item item : topList.getProducts()) {
+            log.info("  - {} / {} (가격: {})",
+                    item.getId(),
+                    item.getName(),
+                    item.getBasePrice()
+            );
+        }
     }
 }

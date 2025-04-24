@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 
@@ -17,36 +18,61 @@ public class CouponService {
     private final CouponRepository couponRepository;
 
     @Transactional
-    public IssuedCoupon issueCoupon(Long couponId, Long userId) {
+    public CouponInfo.IssuedCouponInfo issueCoupon(CouponCommand.IssueCoupon command) {
+        Long couponId = command.getCouponId();
+        Long userId = command.getUserId();
         Coupon coupon = couponRepository.findByCouponCodeForUpdate(couponId)
                 .orElseThrow(() -> new InvalidStateException("Coupon not found: " + couponId));
         coupon.issueCoupon();
-        IssuedCoupon issuedCoupon = IssuedCoupon.builder()
+        IssuedCoupon issued = IssuedCoupon.builder()
                 .coupon(coupon)
                 .userId(userId)
                 .build();
         couponRepository.save(coupon);
-        couponRepository.save(issuedCoupon);
-        return issuedCoupon;
+        IssuedCoupon saved = couponRepository.save(issued);
+
+        return CouponInfo.IssuedCouponInfo.builder()
+                .id(saved.getId())
+                .couponId(coupon.getId())
+                .userId(userId)
+                .status(saved.getStatus().name())
+                .build();
     }
 
-    public List<IssuedCoupon> getCouponsByUserId(Long userId) {
-        return couponRepository.findAllByUserId(userId);
+    public CouponInfo.IssuedCouponList getCouponsByUserId(CouponCommand.GetCouponsByUser command) {
+        Long userId = command.getUserId();
+        List<IssuedCoupon> list = couponRepository.findAllByUserId(userId);
+        List<CouponInfo.IssuedCouponInfo> infos = list.stream()
+                .map(ic -> CouponInfo.IssuedCouponInfo.builder()
+                        .id(ic.getId())
+                        .couponId(ic.getCoupon().getId())
+                        .userId(ic.getUserId())
+                        .status(ic.getStatus().name())
+                        .build())
+                .collect(Collectors.toList());
+        return CouponInfo.IssuedCouponList.builder()
+                .userId(userId)
+                .coupons(infos)
+                .build();
     }
 
     /**
      * 쿠폰을 조회하고, 할인액 계산 후 사용 표시
      */
-    public Money applyCoupon(Long couponId, Money requiredPoints) {
-        IssuedCoupon issuedCoupon = couponRepository.findByCouponId(couponId)
+    public CouponInfo.Discount applyCoupon(CouponCommand.ApplyCoupon command) {
+        Long couponId = command.getCouponId();
+        Money required = command.getRequiredPoints();
+        IssuedCoupon ic = couponRepository.findByCouponId(couponId)
                 .orElseThrow(() -> new DomainException.EntityNotFoundException(
                         "찾을 수 없는 쿠폰입니다. couponId: " + couponId
                 ));
 
-        Money discount = issuedCoupon.getCoupon().calculateDiscount(requiredPoints);
-        issuedCoupon.markAsUsed();
-        couponRepository.save(issuedCoupon);
+        Money discount = ic.getCoupon().calculateDiscount(required);
+        ic.markAsUsed();
+        couponRepository.save(ic);
 
-        return discount;
+        return CouponInfo.Discount.builder()
+                .amount(discount)
+                .build();
     }
 }

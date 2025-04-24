@@ -2,6 +2,8 @@ package kr.hhplus.be.server.domain.cart;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +13,9 @@ import java.util.List;
 @Entity
 @Table(name = "cart")
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Cart extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

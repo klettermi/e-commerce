@@ -4,23 +4,41 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CartService {
 
     private final CartRepository cartRepository;
 
-    // 사용자 장바구니 조회 (없으면 새로 생성) 
-    public Cart getCart(Long userId) {
-        return cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+    /**
+     * 사용자 장바구니 조회 (없으면 새로 생성)
+     */
+    public CartInfo.Cart getCart(CartCommand.GetCart command) {
+        Long userId = command.getUserId();
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> cartRepository.save(
+                        Cart.builder().userId(userId).build()
+                ));
+        return toCartInfo(cart);
     }
 
-    // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트)
+    /**
+     * 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트)
+     */
     @Transactional
-    public Cart addItem(Long userId, CartItem newItem) {
+    public CartInfo.Cart addItem(CartCommand.AddItem command) {
+        Long userId = command.getUserId();
+        CartItem newItem = CartItem.builder()
+                .productId(command.getProductId())
+                .quantity(command.getQuantity())
+                .build();
+
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+                .orElseGet(() -> cartRepository.save(
+                        Cart.builder().userId(userId).build()
+                ));
 
         boolean found = false;
         for (CartItem item : cart.getCartItems()) {
@@ -30,22 +48,29 @@ public class CartService {
                 break;
             }
         }
-        if (!found) {
-            cart.addItemInCart(newItem);
-        }
+        if (!found) cart.addItemInCart(newItem);
 
-        cart = cartRepository.save(cart);
-        return cart;
+        Cart updated = cartRepository.save(cart);
+        return toCartInfo(updated);
     }
 
+    /**
+     * 장바구니 아이템 수량 업데이트
+     */
     @Transactional
-    public Cart updateItem(Long userId, CartItem updatedItem) {
-        // 사용자 장바구니 조회 (없으면 새로 생성)
+    public CartInfo.Cart updateItem(CartCommand.UpdateItem command) {
+        Long userId = command.getUserId();
+        CartItem updatedItem = CartItem.builder()
+                .productId(command.getProductId())
+                .quantity(command.getQuantity())
+                .build();
+
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+                .orElseGet(() -> cartRepository.save(
+                        Cart.builder().userId(userId).build()
+                ));
 
         boolean found = false;
-        // 장바구니 아이템 업데이트
         for (CartItem item : cart.getCartItems()) {
             if (item.getProductId().equals(updatedItem.getProductId())) {
                 item.setQuantity(updatedItem.getQuantity());
@@ -53,34 +78,58 @@ public class CartService {
                 break;
             }
         }
-        if (!found) {
-             cart.addItemInCart(updatedItem);
-        }
+        if (!found) cart.addItemInCart(updatedItem);
 
-        cart = cartRepository.save(cart);
-        return cart;
+        Cart updated = cartRepository.save(cart);
+        return toCartInfo(updated);
     }
 
-
-    // 장바구니에서 아이템 제거
+    /**
+     * 장바구니에서 아이템 제거
+     */
     @Transactional
-    public Cart removeItem(Long userId, Long productId) {
+    public CartInfo.Cart removeItem(CartCommand.RemoveItem command) {
+        Long userId = command.getUserId();
+        Long productId = command.getProductId();
+
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+                .orElseGet(() -> cartRepository.save(
+                        Cart.builder().userId(userId).build()
+                ));
 
         cart.getCartItems().removeIf(item -> item.getProductId().equals(productId));
-        cart = cartRepository.save(cart);
-        return cart;
+        Cart updated = cartRepository.save(cart);
+        return toCartInfo(updated);
     }
 
-    // 장바구니 전체 비우기
+    /**
+     * 장바구니 전체 비우기
+     */
     @Transactional
-    public Cart clearCart(Long userId) {
+    public CartInfo.Cart clearCart(CartCommand.ClearCart command) {
+        Long userId = command.getUserId();
+
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> cartRepository.save(new Cart(userId)));
+                .orElseGet(() -> cartRepository.save(
+                        Cart.builder().userId(userId).build()
+                ));
 
         cart.getCartItems().clear();
-        cart = cartRepository.save(cart);
-        return cart;
+        Cart updated = cartRepository.save(cart);
+        return toCartInfo(updated);
+    }
+
+    private CartInfo.Cart toCartInfo(Cart cart) {
+        return CartInfo.Cart.builder()
+                .userId(cart.getUserId())
+                .items(cart.getCartItems().stream()
+                        .map(ci -> CartInfo.CartItem.builder()
+                                .productId(ci.getProductId())
+                                .productName(ci.getProductName())
+                                .price(ci.getPrice().amount())
+                                .quantity(ci.getQuantity())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
     }
 }
