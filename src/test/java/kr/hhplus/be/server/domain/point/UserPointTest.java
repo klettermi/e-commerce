@@ -3,6 +3,8 @@ package kr.hhplus.be.server.domain.point;
 import kr.hhplus.be.server.domain.common.Money;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -10,6 +12,7 @@ import java.math.BigDecimal;
 import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class UserPointTest {
 
     private Money getPointBalance(UserPoint userPoint) throws Exception {
@@ -49,10 +52,10 @@ class UserPointTest {
 
         // when & then: 0 또는 음수 금액 충전 시 예외 발생
         InvalidStateException ex1 = assertThrows(InvalidStateException.class, () -> userPoint.chargePoints(Money.ZERO));
-        Assertions.assertEquals("충전 포인트는 0 이상이어야 합니다.", ex1.getMessage());
+        Assertions.assertEquals("충전 포인트는 0 초과이어야 합니다.", ex1.getMessage());
 
         InvalidStateException ex2 = assertThrows(InvalidStateException.class, () -> userPoint.chargePoints(Money.of(-100)));
-        Assertions.assertEquals("금액은 0 이상이어야 합니다.", ex2.getMessage());
+        Assertions.assertEquals("금액은 0 초과이어야 합니다.", ex2.getMessage());
 
     }
 
@@ -75,6 +78,6 @@ class UserPointTest {
 
         // when & then: 사용 포인트가 잔액보다 많을 경우 예외 발생
         InvalidStateException ex = assertThrows(InvalidStateException.class, () -> userPoint.usePoints(Money.of(600)));
-        assertEquals("금액은 0 이상이어야 합니다.", ex.getMessage());
+        assertEquals("금액은 0 초과이어야 합니다.", ex.getMessage());
     }
 }
