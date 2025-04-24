@@ -29,5 +29,10 @@ public class IssuedCoupon {
     private CouponStatus status = CouponStatus.AVAILABLE;
 
     public void markAsUsed() {
+        this.status = CouponStatus.USED;
+    }
+
+    public boolean isUsed() {
+        return status == CouponStatus.USED;
     }
 }
