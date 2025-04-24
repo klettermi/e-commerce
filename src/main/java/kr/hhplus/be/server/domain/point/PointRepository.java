@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.domain.point;
 
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,7 @@ public interface PointRepository {
 
     Optional<UserPoint> findByUserId(@Param("userId") Long userId);;
 
-    void save(UserPoint userPoint);
+    UserPoint save(UserPoint userPoint);
 
     Optional<UserPoint> findById(long userId);
 

@@ -1,12 +1,8 @@
-package kr.hhplus.be.server.application.point;
+package kr.hhplus.be.server.domain.point;
 
 import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
-import kr.hhplus.be.server.domain.point.PointHistory;
-import kr.hhplus.be.server.domain.point.PointRepository;
-import kr.hhplus.be.server.domain.point.TransactionType;
-import kr.hhplus.be.server.domain.point.UserPoint;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +18,11 @@ public class PointService {
     private final PointRepository pointRepository;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
     public UserPoint getPoint(long userId) {
         return pointRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for id: " + userId));
     }
 
-    @Transactional(readOnly = true)
     public List<PointHistory> getPointHistory(long userId) {
         return pointRepository.findByUserId(userId);
     }
@@ -83,6 +77,15 @@ public class PointService {
         pointRepository.save(history);
 
         return userPoint;
+    }
+
+    public UserPoint findByUserId(Long userId) {
+        return pointRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("UserPoint not found for user id: " + userId));
+    }
+
+    public UserPoint save(UserPoint userPoint) {
+        return pointRepository.save(userPoint);
     }
 
 }

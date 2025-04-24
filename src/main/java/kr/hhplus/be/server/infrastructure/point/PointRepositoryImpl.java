@@ -26,8 +26,8 @@ public class PointRepositoryImpl implements PointRepository {
     }
 
     @Override
-    public void save(UserPoint userPoint) {
-        userPointRepo.save(userPoint);
+    public UserPoint save(UserPoint userPoint) {
+        return userPointRepo.save(userPoint);
     }
 
     @Override
