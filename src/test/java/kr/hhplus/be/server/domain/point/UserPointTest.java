@@ -9,8 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class UserPointTest {

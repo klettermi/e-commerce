@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.infrastructure.point.UserPointRequest;
 import lombok.*;
 
 import java.math.BigDecimal;
