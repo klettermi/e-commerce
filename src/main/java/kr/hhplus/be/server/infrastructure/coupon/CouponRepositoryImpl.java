@@ -3,7 +3,6 @@ package kr.hhplus.be.server.infrastructure.coupon;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
 import kr.hhplus.be.server.domain.coupon.IssuedCoupon;
-import kr.hhplus.be.server.domain.option.Option;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

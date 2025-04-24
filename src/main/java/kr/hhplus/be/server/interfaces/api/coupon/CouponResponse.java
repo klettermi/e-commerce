@@ -1,16 +1,23 @@
 package kr.hhplus.be.server.interfaces.api.coupon;
 
-import kr.hhplus.be.server.domain.coupon.IssuedCoupon;
+import kr.hhplus.be.server.application.coupon.CouponOutput;
+import lombok.Builder;
+import lombok.Getter;
 
-import java.math.BigDecimal;
+@Getter
+@Builder
+public class CouponResponse {
+    private Long id;
+    private Long couponId;
+    private Long userId;
+    private String status;
 
-public record CouponResponse(Long couponId, String name, String discountType, BigDecimal discountAmount) {
-    public static CouponResponse fromIssuedCoupon(IssuedCoupon issuedCoupon) {
-        return new CouponResponse(
-                issuedCoupon.getCoupon().getId(),
-                issuedCoupon.getCoupon().getName(),
-                issuedCoupon.getCoupon().getCouponType().name(),
-                issuedCoupon.getCoupon().getDiscountAmount().amount()
-        );
+    public static CouponResponse from(CouponOutput.IssuedCoupon output) {
+        return CouponResponse.builder()
+                .id(output.getId())
+                .couponId(output.getCouponId())
+                .userId(output.getUserId())
+                .status(output.getStatus())
+                .build();
     }
 }

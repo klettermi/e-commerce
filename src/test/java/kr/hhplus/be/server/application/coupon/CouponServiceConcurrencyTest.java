@@ -13,13 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static kr.hhplus.be.server.domain.common.exception.DomainException.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @RunWith(SpringRunner.class)
@@ -63,7 +62,10 @@ class CouponServiceConcurrencyTest {
       for (int i = 0; i < threadCount; i++) {
           executor.execute(() -> {
               try {
-                  couponFacade.issueCoupon(coupon.getId(), user.getId());
+                  couponFacade.issueCoupon(
+                          new CouponInput.Issue(
+                                  coupon.getId(), user.getId()
+                          ));
               } catch (InvalidStateException e){
 
               } finally {

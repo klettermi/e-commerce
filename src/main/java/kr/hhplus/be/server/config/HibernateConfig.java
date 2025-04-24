@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.config;
 
 import jakarta.persistence.EntityManagerFactory;
-import org.hibernate.StatelessSession;
 import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

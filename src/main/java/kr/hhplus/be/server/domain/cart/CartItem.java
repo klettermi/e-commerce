@@ -3,7 +3,6 @@ package kr.hhplus.be.server.domain.cart;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.product.Product;
 import lombok.*;
 
 @Entity

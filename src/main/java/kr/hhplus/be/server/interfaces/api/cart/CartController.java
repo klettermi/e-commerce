@@ -1,11 +1,10 @@
 package kr.hhplus.be.server.interfaces.api.cart;
 
 
+import jakarta.validation.Valid;
 import kr.hhplus.be.server.application.cart.CartFacade;
-import kr.hhplus.be.server.domain.cart.CartService;
+import kr.hhplus.be.server.application.cart.CartOutput;
 import kr.hhplus.be.server.application.common.ApiResponse;
-import kr.hhplus.be.server.domain.cart.Cart;
-import kr.hhplus.be.server.domain.cart.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,48 +15,48 @@ public class CartController {
 
     private final CartFacade cartFacade;
 
-    // 사용자 장바구니 조회 (없으면 생성)
     @GetMapping("/{userId}")
-    public ApiResponse<CartResponse> getCart(@PathVariable Long userId) {
-        Cart cart = cartFacade.getCart(userId);
-        CartResponse response = CartResponse.fromEntity(cart);
-        return ApiResponse.success(response);
+    public ApiResponse<CartResponse.Cart> getCart(@PathVariable Long userId) {
+        var req = CartRequest.Get.of(userId);
+        CartOutput out = cartFacade.getCart(req.toInput());
+        return ApiResponse.success(CartResponse.Cart.fromOutput(out));
     }
 
-    // 장바구니에 아이템 추가 (동일 productId가 있으면 수량 업데이트)
     @PostMapping("/{userId}/items")
-    public ApiResponse<CartResponse> addItem(@PathVariable Long userId,
-                                             @RequestBody CartItemRequest request) {
-        CartItem newItem = CartItemRequest.toEntity(request);
-        Cart cart = cartFacade.addItem(userId, newItem);
-        CartResponse cartResponse = CartResponse.fromEntity(cart);
-        return ApiResponse.success(cartResponse);
+    public ApiResponse<CartResponse.Cart> addItem(
+            @PathVariable Long userId,
+            @Valid @RequestBody CartRequest.AddItem request
+    ) {
+        // pathVariable 과 body.userId 가 충돌하지 않도록, request.userId를 덮어씌워주는 것도 가능합니다:
+        request = CartRequest.AddItem.of(userId, request.getProductId(), request.getQuantity());
+        CartOutput out = cartFacade.addItem(request.toInput());
+        return ApiResponse.success(CartResponse.Cart.fromOutput(out));
     }
 
-    // 장바구니 내 아이템 업데이트 (수량 수정)
     @PutMapping("/{userId}/items")
-    public ApiResponse<CartResponse> updateItem(@PathVariable Long userId,
-                                                @RequestBody CartItemRequest request) {
-        CartItem updatedItem = CartItemRequest.toEntity(request);
-        Cart cart = cartFacade.updateItem(userId, updatedItem);
-        CartResponse cartResponse = CartResponse.fromEntity(cart);
-        return ApiResponse.success(cartResponse);
+    public ApiResponse<CartResponse.Cart> updateItem(
+            @PathVariable Long userId,
+            @Valid @RequestBody CartRequest.UpdateItem request
+    ) {
+        request = CartRequest.UpdateItem.of(userId, request.getProductId(), request.getQuantity());
+        CartOutput out = cartFacade.updateItem(request.toInput());
+        return ApiResponse.success(CartResponse.Cart.fromOutput(out));
     }
 
-    // 장바구니에서 특정 아이템 제거
     @DeleteMapping("/{userId}/items/{productId}")
-    public ApiResponse<CartResponse> removeItem(@PathVariable Long userId,
-                                                @PathVariable Long productId) {
-        Cart cart = cartFacade.removeItem(userId, productId);
-        CartResponse cartResponse = CartResponse.fromEntity(cart);
-        return ApiResponse.success(cartResponse);
+    public ApiResponse<CartResponse.Cart> removeItem(
+            @PathVariable Long userId,
+            @PathVariable Long productId
+    ) {
+        var req = CartRequest.RemoveItem.of(userId, productId);
+        CartOutput out = cartFacade.removeItem(req.toInput());
+        return ApiResponse.success(CartResponse.Cart.fromOutput(out));
     }
 
-    // 장바구니 전체 비우기
     @DeleteMapping("/{userId}")
-    public ApiResponse<CartResponse> clearCart(@PathVariable Long userId) {
-        Cart cart = cartFacade.clearCart(userId);
-        CartResponse cartResponse = CartResponse.fromEntity(cart);
-        return ApiResponse.success(cartResponse);
+    public ApiResponse<CartResponse.Cart> clearCart(@PathVariable Long userId) {
+        var req = CartRequest.Clear.of(userId);
+        CartOutput out = cartFacade.clearCart(req.toInput());
+        return ApiResponse.success(CartResponse.Cart.fromOutput(out));
     }
 }

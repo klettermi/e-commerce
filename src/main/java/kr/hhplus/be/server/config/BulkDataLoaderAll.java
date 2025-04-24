@@ -16,16 +16,14 @@ import kr.hhplus.be.server.domain.user.User;
 import org.hibernate.StatelessSession;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Configuration
-@Profile({"local", "application-test"})
+//@Configuration
+//@Profile({"local", "application-test"})
 public class BulkDataLoaderAll {
 
     private static final int TOTAL_CATEGORIES = 100;

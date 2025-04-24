@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.domain.coupon;
 
+import kr.hhplus.be.server.domain.common.Money;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import kr.hhplus.be.server.domain.common.Money;
+
 import java.util.List;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)

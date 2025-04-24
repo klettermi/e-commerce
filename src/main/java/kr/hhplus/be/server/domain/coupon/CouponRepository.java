@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.coupon;
 
-import kr.hhplus.be.server.domain.option.Option;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
