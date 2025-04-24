@@ -1,13 +1,21 @@
 package kr.hhplus.be.server.interfaces.api.payment;
 
-import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.application.payment.PaymentOutput;
+import lombok.Builder;
+import lombok.Getter;
 
-public record PaymentResponse(Long orderId, Money paidAmount) {
-    public static PaymentResponse from(Payment payment) {
-        return new PaymentResponse(
-                payment.getOrder().getId(),
-                payment.getPaymentAmount()
-        );
+@Getter
+@Builder
+public class PaymentResponse {
+    private Long id;
+    private Long orderId;
+    private long paymentAmount;
+
+    public static PaymentResponse fromOutput(PaymentOutput.Result output) {
+        return PaymentResponse.builder()
+                .id(output.getId())
+                .orderId(output.getOrderId())
+                .paymentAmount(output.getPaymentAmount())
+                .build();
     }
 }

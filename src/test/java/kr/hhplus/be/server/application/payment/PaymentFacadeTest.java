@@ -1,150 +1,147 @@
 package kr.hhplus.be.server.application.payment;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
+import kr.hhplus.be.server.domain.coupon.CouponCommand;
 import kr.hhplus.be.server.domain.coupon.CouponService;
-import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderCommand;
+import kr.hhplus.be.server.domain.order.OrderInfo;
 import kr.hhplus.be.server.domain.order.OrderService;
-import kr.hhplus.be.server.domain.order.OrderStatus;
-import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentCommand;
+import kr.hhplus.be.server.domain.payment.PaymentInfo;
 import kr.hhplus.be.server.domain.payment.PaymentService;
+import kr.hhplus.be.server.domain.point.PointCommand;
 import kr.hhplus.be.server.domain.point.PointService;
-import kr.hhplus.be.server.domain.point.UserPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentFacadeTest {
 
-    @Mock
-    private OrderService orderService;
+    @Mock private OrderService orderService;
+    @Mock private PointService pointService;
+    @Mock private PaymentService paymentService;
+    @Mock private CouponService couponService;
 
-    @Mock
-    private PointService pointService;
+    @InjectMocks private PaymentFacade paymentFacade;
 
-    @Mock
-    private PaymentService paymentService;
+    private final Long orderId = 11L;
+    private final Long userId  = 22L;
+    private final Long couponId= 33L;
+    private final Money totalPoint = Money.of(1_000);
+    private final Money discount   = Money.of(200);
 
-    @Mock
-    private CouponService couponService;
-
-    @InjectMocks
-    private PaymentFacade paymentFacade;
-
-    private final Long orderId  = 1L;
-    private final Long userId   = 2L;
-    private final Long couponId = 3L;
-
-    private Order order;
-    private UserPoint userPoint;
+    private OrderInfo.OrderDetail paidDetail;
 
     @BeforeEach
     void setUp() {
-        // 주문 객체: 총 포인트 1000, 초기 상태 CREATED
-        order = new Order(userId, Money.of(1000), OrderStatus.CREATED);
+        // 공통 OrderDetail stub
+        OrderInfo.OrderDetail originalDetail = mock(OrderInfo.OrderDetail.class);
+        when(originalDetail.getTotalPoint()).thenReturn(totalPoint);
+        when(orderService.getOrderById(any(OrderCommand.GetOrder.class)))
+                .thenReturn(originalDetail);
 
-        // 유저 포인트: 충분히 보유(1000)
-        userPoint = new UserPoint();
-        userPoint.setPointBalance(Money.of(1000));
+        // paidDetail 은 할인·결제 후 상태 반환용
+        paidDetail = mock(OrderInfo.OrderDetail.class);
+        when(paidDetail.getOrderId()).thenReturn(orderId);
+        when(paidDetail.getTotalPoint()).thenReturn(totalPoint.subtract(discount)); // after discount
+        when(orderService.markAsPaid(any(OrderCommand.MarkPaid.class)))
+                .thenReturn(paidDetail);
+
+        // PaymentResult stub
+        PaymentInfo.PaymentResult paymentResult = mock(PaymentInfo.PaymentResult.class);
+        when(paymentResult.getId()).thenReturn(55L);
+        when(paymentResult.getOrderId()).thenReturn(orderId);
+        // 결제 금액은 paidDetail.totalPoint.minus(discount)
+        when(paymentResult.getPaymentAmount()).thenReturn(paidDetail.getTotalPoint());
+        when(paymentService.savePayment(any(PaymentCommand.SavePayment.class)))
+                .thenReturn(paymentResult);
     }
 
     @Test
-    void processPayment_withCoupon_appliesDiscountAndPays() {
-        // 할인 200을 적용
-        Money discount = Money.of(200);
+    void processPayment_withoutCoupon_appliesZeroDiscount() {
+        // 입력 DTO 준비 (couponId == null)
+        PaymentInput.Process input = new PaymentInput.Process();
+        ReflectionTestUtils.setField(input, "orderId", orderId);
+        ReflectionTestUtils.setField(input, "userId", userId);
+        ReflectionTestUtils.setField(input, "couponId", null);
 
-        when(orderService.getOrderById(orderId)).thenReturn(order);
-        when(couponService.applyCoupon(couponId, order.getTotalPoint())).thenReturn(discount);
-        when(pointService.findByUserId(userId)).thenReturn(userPoint);
-        when(pointService.save(userPoint)).thenReturn(userPoint);
-        // 최종 결제 금액 800
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        when(paymentService.savePayment(paymentCaptor.capture()))
-                .thenAnswer(inv -> inv.getArgument(0));
+        // 쿠폰 서비스는 호출되지 않아야 함
+        // 포인트 사용, 결제 플로우만 stub: pointService.usePoint 은 void
+        doNothing().when(pointService).usePoint(any(PointCommand.Use.class));
 
-        Payment result = paymentFacade.processPayment(orderId, userId, couponId);
+        // when
+        PaymentOutput.Result result = paymentFacade.processPayment(input);
 
-        // 포인트 차감: 1000 - 200 = 800
-        assertThat(result.getPaymentAmount()).isEqualTo(Money.of(800));
-        // 주문 상태 PAID
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
+        // then: discount = 0 이므로 markAsPaid 의 인자로 원금(totalPoint) 그대로 전달
+        verify(couponService, never()).applyCoupon(any(CouponCommand.ApplyCoupon.class));
+        verify(pointService).usePoint(argThat(cmd ->
+                cmd.getUserId().equals(userId)
+                        && cmd.getAmount().compareTo(totalPoint) == 0
+        ));
+        verify(orderService).markAsPaid(argThat(cmd ->
+                cmd.getOrderId().equals(orderId)
+        ));
+        verify(paymentService).savePayment(argThat(cmd ->
+                cmd.getOrderId().equals(orderId)
+                        && cmd.getPaymentAmount().compareTo(totalPoint) == 0
+        ));
 
-        verify(orderService).getOrderById(orderId);
-        verify(couponService).applyCoupon(couponId, order.getTotalPoint());
-        verify(pointService).findByUserId(userId);
-        verify(pointService).save(userPoint);
-
-        verify(paymentService).savePayment(any());
-        // 저장된 Payment 객체의 필드 검증
-        Payment saved = paymentCaptor.getValue();
-        assertThat(saved.getOrder()).isSameAs(order);
-        assertThat(saved.getPaymentAmount()).isEqualTo(Money.of(800));
+        // 결과 매핑 검증
+        assertThat(result.getId()).isEqualTo(55L);
+        assertThat(result.getOrderId()).isEqualTo(orderId);
+        assertThat(result.getPaymentAmount()).isEqualTo(totalPoint.amount().longValue());
     }
 
     @Test
-    void processPayment_withoutCoupon_paysFullAmount() {
-        when(orderService.getOrderById(orderId)).thenReturn(order);
-        when(pointService.findByUserId(userId)).thenReturn(userPoint);
-        when(pointService.save(userPoint)).thenReturn(userPoint);
-        when(paymentService.savePayment(any(Payment.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+    void processPayment_withCoupon_appliesDiscount() {
+        // 입력 DTO 준비 (couponId != null)
+        PaymentInput.Process input = new PaymentInput.Process();
+        ReflectionTestUtils.setField(input, "orderId", orderId);
+        ReflectionTestUtils.setField(input, "userId", userId);
+        ReflectionTestUtils.setField(input, "couponId", couponId);
 
-        Payment result = paymentFacade.processPayment(orderId, userId, null);
+        // 쿠폰 서비스 stub: 할인 금액 반환
+        var couponResult = mock(Object.class, withSettings().stubOnly());
+        // 동적 proxy 로 getAmount() 메서드 정의
+        when(couponService.applyCoupon(any(CouponCommand.ApplyCoupon.class)))
+                .thenAnswer(invocation -> new Object() {
+                    public Money getAmount() { return discount; }
+                });
 
-        // 할인 0 → 결제 금액 = 1000
-        assertThat(result.getPaymentAmount()).isEqualTo(order.getTotalPoint());
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
+        // pointService.usePoint stub
+        doNothing().when(pointService).usePoint(any(PointCommand.Use.class));
 
-        verify(couponService, never()).applyCoupon(anyLong(), any());
-        verify(pointService).findByUserId(userId);
-        verify(paymentService).savePayment(any());
-    }
+        // when
+        PaymentOutput.Result result = paymentFacade.processPayment(input);
 
-    @Test
-    void executePayment_insufficientPoints_throwsInvalidState() {
-        // 갖고 있는 포인트 500, 결제해야 할 금액 800
-        order = new Order(userId, Money.of(800), OrderStatus.CREATED);
-        userPoint.setPointBalance(Money.of(500));
+        // then
+        // 1) 쿠폰 서비스 호출
+        verify(couponService).applyCoupon(argThat(cmd ->
+                cmd.getCouponId().equals(couponId)
+                        && cmd.getRequiredPoints().compareTo(totalPoint) == 0
+        ));
+        // 2) 포인트 사용시 총액에서 discount 차감
+        verify(pointService).usePoint(argThat(cmd ->
+                cmd.getUserId().equals(userId)
+                        && cmd.getAmount().compareTo(totalPoint.subtract(discount)) == 0
+        ));
+        // 3) 결제 저장시에도 동일한 금액으로
+        verify(paymentService).savePayment(argThat(cmd ->
+                cmd.getPaymentAmount().compareTo(totalPoint.subtract(discount)) == 0
+        ));
 
-        when(pointService.findByUserId(userId)).thenReturn(userPoint);
-
-        assertThatThrownBy(() ->
-                paymentFacade.executePayment(order, userId, Money.ZERO)
-        )
-                .isInstanceOf(InvalidStateException.class)
-                .hasMessageContaining("available=");
-
-        verify(pointService).findByUserId(userId);
-        verify(pointService, never()).save(any());
-        verify(paymentService, never()).savePayment(any());
-    }
-
-    @Test
-    void executePayment_discountGreaterThanTotal_resultsInZeroPayment() {
-        order = new Order(userId, Money.of(300), OrderStatus.CREATED);
-        userPoint.setPointBalance(Money.of(100));
-
-        when(pointService.findByUserId(userId)).thenReturn(userPoint);
-        when(pointService.save(userPoint)).thenReturn(userPoint);
-        when(paymentService.savePayment(any(Payment.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        Payment result = paymentFacade.executePayment(order, userId, Money.of(300));
-
-        assertThat(result.getPaymentAmount()).isEqualTo(Money.ZERO);
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
-
-        verify(pointService).findByUserId(userId);
-        verify(pointService).save(userPoint);
-        verify(paymentService).savePayment(any());
+        // 결과 매핑 검증
+        assertThat(result.getId()).isEqualTo(55L);
+        assertThat(result.getOrderId()).isEqualTo(orderId);
+        assertThat(result.getPaymentAmount())
+                .isEqualTo(paidDetail.getTotalPoint().amount().longValue());
     }
 }

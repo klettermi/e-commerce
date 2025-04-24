@@ -1,5 +1,5 @@
 package kr.hhplus.be.server.application.payment;
-import kr.hhplus.be.server.domain.common.Money;
+
 import lombok.Builder;
 import lombok.Getter;
 
