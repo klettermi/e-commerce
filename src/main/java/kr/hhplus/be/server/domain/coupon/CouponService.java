@@ -1,10 +1,7 @@
-package kr.hhplus.be.server.application.coupon;
+package kr.hhplus.be.server.domain.coupon;
 
-import kr.hhplus.be.server.domain.coupon.Coupon;
-import kr.hhplus.be.server.domain.coupon.CouponRepository;
-import kr.hhplus.be.server.domain.coupon.IssuedCoupon;
-import kr.hhplus.be.server.infrastructure.coupon.IssuedCouponRepository;
-import kr.hhplus.be.server.interfaces.api.coupon.IssuedCouponRequest;
+import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +16,6 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
 
-    /**
-     * 선착순 쿠폰 발급: 주어진 couponCode에 해당하는 쿠폰을 찾고,
-     * 남은 쿠폰이 있으면 발급 처리(remainingQuantity 감소)
-     */
     @Transactional
     public IssuedCoupon issueCoupon(Long couponId, Long userId) {
         Coupon coupon = couponRepository.findByCouponCodeForUpdate(couponId)
@@ -39,5 +32,21 @@ public class CouponService {
 
     public List<IssuedCoupon> getCouponsByUserId(Long userId) {
         return couponRepository.findAllByUserId(userId);
+    }
+
+    /**
+     * 쿠폰을 조회하고, 할인액 계산 후 사용 표시
+     */
+    public Money applyCoupon(Long couponId, Money requiredPoints) {
+        IssuedCoupon issuedCoupon = couponRepository.findByCouponId(couponId)
+                .orElseThrow(() -> new DomainException.EntityNotFoundException(
+                        "찾을 수 없는 쿠폰입니다. couponId: " + couponId
+                ));
+
+        Money discount = issuedCoupon.getCoupon().calculateDiscount(requiredPoints);
+        issuedCoupon.markAsUsed();
+        couponRepository.save(issuedCoupon);
+
+        return discount;
     }
 }
