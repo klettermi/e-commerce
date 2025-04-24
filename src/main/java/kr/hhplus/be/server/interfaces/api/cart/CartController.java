@@ -6,10 +6,12 @@ import kr.hhplus.be.server.application.cart.CartFacade;
 import kr.hhplus.be.server.application.cart.CartOutput;
 import kr.hhplus.be.server.application.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/cart")
+@Validated
 @RequiredArgsConstructor
 public class CartController {
 

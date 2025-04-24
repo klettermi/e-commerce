@@ -6,12 +6,14 @@ import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.coupon.CouponFacade;
 import kr.hhplus.be.server.application.coupon.CouponOutput;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/coupons")
+@Validated
 @RequiredArgsConstructor
 public class CouponController {
 

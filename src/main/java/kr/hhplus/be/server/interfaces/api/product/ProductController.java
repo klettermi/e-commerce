@@ -6,6 +6,7 @@ import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductInput;
 import kr.hhplus.be.server.application.product.ProductOutput;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/api/products")
 public class ProductController {
 
@@ -20,7 +22,7 @@ public class ProductController {
 
     @GetMapping
     public ApiResponse<ProductResponse.Page> lookupProducts(
-            @RequestParam(defaultValue = "0") @Min(value = 0, message = "page는 0 이상이어야 합니다.") int page,
+            @RequestParam(defaultValue = "1") @Min(value = 0, message = "page는 0 이상이어야 합니다.") int page,
             @RequestParam(defaultValue = "10") @Min(value = 1, message = "size는 1 이상이어야 합니다.") int size
     ) {
         ProductInput.List input = new ProductInput.List();
@@ -31,7 +33,6 @@ public class ProductController {
 
         ProductResponse.Page response = ProductResponse.Page.fromOutput(output);
 
-        // 4) 감싸서 반환
         return ApiResponse.success(response);
     }
 

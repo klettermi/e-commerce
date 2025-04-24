@@ -7,11 +7,13 @@ import kr.hhplus.be.server.application.order.OrderFacade;
 import kr.hhplus.be.server.application.order.OrderInput;
 import kr.hhplus.be.server.application.order.OrderOutput;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/api/orders")
+@Validated
 @RequiredArgsConstructor
 public class OrderController {
 

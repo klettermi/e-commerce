@@ -6,10 +6,12 @@ import kr.hhplus.be.server.application.point.PointFacade;
 import kr.hhplus.be.server.application.point.PointInput;
 import kr.hhplus.be.server.application.point.PointOutput;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/points")
+@Validated
 @RequiredArgsConstructor
 public class PointController {
 
