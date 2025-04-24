@@ -1,17 +1,13 @@
 package kr.hhplus.be.server.domain.order;
 
 import kr.hhplus.be.server.domain.common.Money;
-import kr.hhplus.be.server.domain.inventory.Inventory;
-import kr.hhplus.be.server.domain.inventory.InventoryRepository;
 import kr.hhplus.be.server.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static kr.hhplus.be.server.domain.common.exception.DomainException.EntityNotFoundException;
-import static kr.hhplus.be.server.domain.common.exception.DomainException.InvalidStateException;
 
 
 @Service

@@ -14,16 +14,14 @@ class OrderTest {
     private Order order;
     private OrderProduct orderProduct;
 
-    private User dummyUser;
-
     @BeforeEach
     void setup() {
-        dummyUser = new User();
+        User dummyUser = new User();
 
         // 총 결제 금액을 2000으로 갖는 Money 객체 생성
         Money totalPoint = Money.of(2000);
         // 생성자에서 orderNumber, user, totalPoint, 초기 상태를 설정합니다.
-        order = new Order(dummyUser.getId(), "ORD-TEST", totalPoint, OrderStatus.CREATED);
+        order = new Order(dummyUser.getId(), totalPoint, OrderStatus.CREATED);
 
         // OrderProduct stub 생성: productId=1, quantity=2, unitPoint=500
         orderProduct = OrderProduct.builder()

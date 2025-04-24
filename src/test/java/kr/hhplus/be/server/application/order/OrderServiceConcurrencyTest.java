@@ -5,13 +5,9 @@ import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.inventory.Inventory;
 import kr.hhplus.be.server.domain.inventory.InventoryRepository;
-import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.domain.order.OrderProduct;
-import kr.hhplus.be.server.domain.order.OrderRepository;
-import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.domain.order.*;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.interfaces.api.order.OrderProductRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +30,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrderServiceConcurrencyTest {
 
     @Autowired
-    private OrderService orderService;
+    private OrderFacade orderFacade;
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
     private UserRepository userRepository;
-    // 진짜 JPA 레포지토리
     @Autowired
     private InventoryRepository inventoryRepository;
 
@@ -80,7 +75,7 @@ class OrderServiceConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executor.execute(() -> {
                 try {
-                    orderService.placeOrder(dummyUser, "ORD-" + UUID.randomUUID(), reqs);
+                    orderFacade.placeOrder(dummyUser.getId(), reqs);
                 } catch (DomainException.InvalidStateException ignored) {
                 } finally {
                     latch.countDown();
@@ -98,7 +93,7 @@ class OrderServiceConcurrencyTest {
                 .reduce(Money.ZERO, Money::add);
 
         for (Order o : saved) {
-            assertEquals(OrderStatus.PAID, o.getStatus());
+            assertEquals(OrderStatus.CREATED, o.getStatus());
             assertEquals(
                     0,
                     expectedTotal.amount().compareTo(o.getTotalPoint().amount()),
