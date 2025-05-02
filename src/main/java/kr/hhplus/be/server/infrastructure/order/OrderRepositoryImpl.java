@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.infrastructure.order;
 
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderProduct;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
     private final OrderJpaRepository orderRepo;
+    private final OrderProductJpaRepository orderProductRepo;
 
     @Override
     public Order save(Order order) {
@@ -37,5 +39,10 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> findAll() {
         return orderRepo.findAll();
+    }
+
+    @Override
+    public OrderProduct saveOrderProduct(OrderProduct orderProduct) {
+        return orderProductRepo.save(orderProduct);
     }
 }

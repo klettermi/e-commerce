@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.point;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.UserPoint;
@@ -8,16 +9,15 @@ import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -26,21 +26,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@AutoConfigureEmbeddedDatabase(
-        provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.DOCKER
-)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.DOCKER)
 class PointServiceConcurrencyTest {
-    @Autowired
-    PointService pointService;
 
-    @Autowired
-    PointRepository pointRepository;
-
-    @Autowired
-    UserRepository userRepository;
+    @Autowired private PointFacade pointFacade;
+    @Autowired private PointRepository pointRepository;
+    @Autowired private UserRepository userRepository;
 
     @AfterEach
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -51,52 +45,49 @@ class PointServiceConcurrencyTest {
 
     @Test
     void 동시에_포인트_충전_테스트() throws InterruptedException {
-        // 준비
-        int threadCount = 10;
-        int defaultPoint = 10000;
-        int chargePoint = 1000;
+        int threadCount   = 10;
+        int defaultPoint  = 10_000;
+        int chargeAmount  = 1_000;
 
-        User user = User.builder()
-                .username("test")
-                .build();
-
-        userRepository.save(user);
-
-        UserPoint userPoint = UserPoint.builder()
+        // --- 준비: 사용자 및 초기 포인트 저장 ---
+        User user = userRepository.save(User.builder().username("test").build());
+        UserPoint up = UserPoint.builder()
                 .user(user)
                 .pointBalance(Money.of(defaultPoint))
                 .build();
+        pointRepository.save(up);
 
-        pointRepository.save(userPoint);
-
-        // CountDownLatch 준비
         CountDownLatch latch = new CountDownLatch(threadCount);
         AtomicInteger successCount = new AtomicInteger();
 
-        // 스레드 풀 생성 후 즉시 실행
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        ExecutorService ex = Executors.newFixedThreadPool(threadCount);
         for (int i = 0; i < threadCount; i++) {
-            executor.execute(() -> {
+            ex.execute(() -> {
                 try {
-                    pointService.chargePoint(user.getId(), Money.of(chargePoint));
-                    successCount.getAndIncrement();
-                } catch (ObjectOptimisticLockingFailureException e) {
-
+                    // DTO 생성 및 필드 세팅
+                    PointInput.Charge input = new PointInput.Charge();
+                    ReflectionTestUtils.setField(input, "userId", user.getId());
+                    ReflectionTestUtils.setField(input, "amount", chargeAmount);
+                    // 호출
+                    pointFacade.charge(input);
+                    successCount.incrementAndGet();
+                } catch (ObjectOptimisticLockingFailureException ignored) {
                 } finally {
                     latch.countDown();
                 }
             });
         }
 
-        // 모든 워커가 countDown() 호출될 때 까지 대기
         latch.await();
+        ex.shutdown();
 
-        // 검증
-        UserPoint updatedUserPoint = pointRepository.findByUserId(user.getId()).get();
+        // 최종 조회
+        UserPoint updated = pointRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("없는 포인트입니다."));
 
         Money expected = Money.of(defaultPoint)
-                .add(Money.of(chargePoint).multiply(successCount.get()));
-        Money actual   = updatedUserPoint.getPointBalance();
+                .add(Money.of(chargeAmount).multiply(successCount.get()));
+        Money actual = updated.getPointBalance();
 
         assertEquals(0,
                 expected.amount().compareTo(actual.amount()),
@@ -106,51 +97,49 @@ class PointServiceConcurrencyTest {
 
     @Test
     void 동시에_포인트_사용_테스트() throws InterruptedException {
-        // 준비
-        int threadCount = 10;
-        int defaultPoint = 10000;
-        int usePoint = 1000;
+        int threadCount  = 10;
+        int defaultPoint = 10_000;
+        int useAmount    = 1_000;
 
-        User user = User.builder()
-                .username("test")
-                .build();
-
-        userRepository.save(user);
-
-        UserPoint userPoint = UserPoint.builder()
+        // --- 준비: 사용자 및 초기 포인트 저장 ---
+        User user = userRepository.save(User.builder().username("test").build());
+        UserPoint up = UserPoint.builder()
                 .user(user)
                 .pointBalance(Money.of(defaultPoint))
                 .build();
+        pointRepository.save(up);
 
-        pointRepository.save(userPoint);
-
-        // CountDownLatch 준비
         CountDownLatch latch = new CountDownLatch(threadCount);
         AtomicInteger successCount = new AtomicInteger();
 
-        // 스레드 풀 생성 후 즉시 실행
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        ExecutorService ex = Executors.newFixedThreadPool(threadCount);
         for (int i = 0; i < threadCount; i++) {
-            executor.execute(() -> {
+            ex.execute(() -> {
                 try {
-                    pointService.usePoint(user.getId(), Money.of(usePoint));
-                    successCount.getAndIncrement();
-                } catch (ObjectOptimisticLockingFailureException e) {
-
+                    // DTO 생성 및 필드 세팅
+                    PointInput.Use input = new PointInput.Use();
+                    ReflectionTestUtils.setField(input, "userId", user.getId());
+                    ReflectionTestUtils.setField(input, "amount", useAmount);
+                    // 호출
+                    pointFacade.use(input);
+                    successCount.incrementAndGet();
+                } catch (ObjectOptimisticLockingFailureException ignored) {
                 } finally {
                     latch.countDown();
                 }
             });
         }
 
-        // 모든 워커가 countDown() 호출될 때 까지 대기
         latch.await();
+        ex.shutdown();
 
-        // 검증
-        UserPoint updatedUserPoint = pointRepository.findByUserId(user.getId()).get();
+        // 최종 조회
+        UserPoint updated = pointRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("없는 포인트입니다."));
+
         Money expected = Money.of(defaultPoint)
-                .subtract(Money.of(usePoint).multiply(successCount.get()));
-        Money actual   = updatedUserPoint.getPointBalance();
+                .subtract(Money.of(useAmount).multiply(successCount.get()));
+        Money actual = updated.getPointBalance();
 
         assertEquals(0,
                 expected.amount().compareTo(actual.amount()),

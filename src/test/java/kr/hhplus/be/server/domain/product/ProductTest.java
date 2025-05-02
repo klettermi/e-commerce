@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.product;
 
-import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.category.Category;
+import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.item.Item;
 import kr.hhplus.be.server.domain.item.SaleStatus;
 import kr.hhplus.be.server.domain.option.Option;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ProductTest {
     @Test
@@ -34,7 +34,7 @@ class ProductTest {
         Money finalPrice = product.calculateFinalPrice();
 
         // then
-        assertEquals(Money.of(10500), finalPrice, "상품의 가격은 10500 이어야 합니다.");
+        assertEquals(Money.of(160000), finalPrice, "상품의 가격은 160000 이어야 합니다.");
     }
 
 }

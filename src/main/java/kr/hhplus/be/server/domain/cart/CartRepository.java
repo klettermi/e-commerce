@@ -9,5 +9,5 @@ public interface CartRepository{
 
     void deleteAll();
 
-    void delete(Cart cart);
+    Optional<CartItem> findCartItemId(Long id);
 }

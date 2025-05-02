@@ -12,7 +12,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     private final CategoryJpaRepository categoryRepo;
 
     @Override
-    public void save(Category category) {
-        categoryRepo.save(category);
+    public Category save(Category category) {
+        return categoryRepo.save(category);
     }
 }

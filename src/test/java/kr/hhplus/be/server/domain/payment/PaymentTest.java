@@ -1,13 +1,13 @@
 package kr.hhplus.be.server.domain.payment;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.order.Order;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentTest {
 

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.common.BaseEntity;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.infrastructure.point.UserPointRequest;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -70,7 +69,7 @@ public class UserPoint extends BaseEntity {
 
     public void chargePoints(Money amount) {
         if (amount.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidStateException("충전 포인트는 0 이상이어야 합니다.");
+            throw new InvalidStateException("충전 포인트는 0 초과이어야 합니다.");
         }
         this.pointBalance = this.pointBalance.add(amount);
     }

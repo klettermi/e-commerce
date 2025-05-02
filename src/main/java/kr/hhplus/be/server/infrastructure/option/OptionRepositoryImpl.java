@@ -11,7 +11,7 @@ public class OptionRepositoryImpl implements OptionRepository {
     private final OptionJpaRepository optionRepo;
 
     @Override
-    public void save(Option option) {
-        optionRepo.save(option);
+    public Option save(Option option) {
+        return optionRepo.save(option);
     }
 }
