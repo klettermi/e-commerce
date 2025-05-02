@@ -1,17 +1,22 @@
 package kr.hhplus.be.server.application.point;
 
+import kr.hhplus.be.server.application.redis.SimpleLockService;
 import kr.hhplus.be.server.domain.common.Money;
+import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.point.PointCommand;
 import kr.hhplus.be.server.domain.point.PointInfo;
 import kr.hhplus.be.server.domain.point.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PointFacade {
+    private static final long DEFAULT_TTL_MS = 5_000;  // 5초
+    private final SimpleLockService lockService;
     private final PointService pointService;
 
     public PointOutput.UserPoint getPoint(PointInput.GetPoint input) {
@@ -42,25 +47,50 @@ public class PointFacade {
     }
 
     public PointOutput.UserPoint charge(PointInput.Charge input) {
-        // Money.of(long) 오버로드 사용
-        Money amt = Money.of(input.getAmount());
-        PointInfo.UserPointInfo info = pointService.chargePoint(
-                PointCommand.Charge.of(input.getUserId(), amt)
-        );
-        return PointOutput.UserPoint.builder()
-                .userId(info.getUserId())
-                .balance(info.getBalance())
-                .build();
+        String lockKey = "chargePoint:" + input.getUserId();
+        String uuid = UUID.randomUUID().toString();
+
+        boolean locked = lockService.tryLock(lockKey, uuid, DEFAULT_TTL_MS);
+
+        if (!locked) {
+            throw new DomainException.InvalidStateException("포인트 충전 락 획득 실패");
+        }
+
+        try {
+            Money amt = Money.of(input.getAmount());
+            PointInfo.UserPointInfo info = pointService.chargePoint(
+                    PointCommand.Charge.of(input.getUserId(), amt)
+            );
+            return PointOutput.UserPoint.builder()
+                    .userId(info.getUserId())
+                    .balance(info.getBalance())
+                    .build();
+        } finally {
+            lockService.unlock(lockKey, uuid);
+        }
     }
 
     public PointOutput.UserPoint use(PointInput.Use input) {
-        Money amt = Money.of(input.getAmount());
-        PointInfo.UserPointInfo info = pointService.usePoint(
-                PointCommand.Use.of(input.getUserId(), amt)
-        );
-        return PointOutput.UserPoint.builder()
-                .userId(info.getUserId())
-                .balance(info.getBalance())
-                .build();
+        String lockKey = "usePoint:" + input.getUserId();
+        String uuid = UUID.randomUUID().toString();
+
+        boolean locked = lockService.tryLock(lockKey, uuid, DEFAULT_TTL_MS);
+
+        if (!locked) {
+            throw new DomainException.InvalidStateException("포인트 사용 락 획득 실패");
+        }
+
+        try {
+            Money amt = Money.of(input.getAmount());
+            PointInfo.UserPointInfo info = pointService.usePoint(
+                    PointCommand.Use.of(input.getUserId(), amt)
+            );
+            return PointOutput.UserPoint.builder()
+                    .userId(info.getUserId())
+                    .balance(info.getBalance())
+                    .build();
+        } finally {
+            lockService.unlock(lockKey, uuid);
+        }
     }
 }
