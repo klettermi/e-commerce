@@ -74,6 +74,11 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter-aop"
 
 	testImplementation 'org.instancio:instancio-core:4.8.0'
+
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+
 }
 
 test {

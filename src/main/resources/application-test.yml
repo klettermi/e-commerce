@@ -13,10 +13,3 @@ spring:
       hibernate.order_inserts: true
       hibernate.order_updates: true
     defer-datasource-initialization: true
-
-logging:
-  level:
-    root: INFO
-    kr.hhplus.be.server: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
