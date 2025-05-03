@@ -81,8 +81,8 @@ class OrderFacadeTest {
         // given
         final long userId = 7L;
         List<OrderInput.Item> dtoItems = List.of(
-                new OrderInput.Item(1L, Money.of(10000), 2),
-                new OrderInput.Item(2L, Money.of(20000), 3)
+                new OrderInput.Item(1L, 10000, 2),
+                new OrderInput.Item(2L, 20000, 3)
         );
         OrderInput.Place input = new OrderInput.Place(userId, dtoItems);
 

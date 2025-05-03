@@ -31,7 +31,7 @@ public class OrderInput {
     @AllArgsConstructor
     public static class Item {
         private Long productId;
-        private Money unitPrice;
+        private Integer unitPrice;
         private int quantity;
     }
 }

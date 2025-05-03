@@ -47,7 +47,7 @@ public class OrderFacade {
                     return OrderProduct.builder()
                             .productId(i.getProductId())
                             .quantity(i.getQuantity())
-                            .unitPoint(i.getUnitPrice())
+                            .unitPoint(Money.of(i.getUnitPrice()))
                             .build();
                 })
                 .collect(Collectors.toList());
