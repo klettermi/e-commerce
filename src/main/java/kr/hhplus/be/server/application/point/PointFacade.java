@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
-import kr.hhplus.be.server.application.redis.SimpleLockService;
+import kr.hhplus.be.server.application.redis.RedissonLockService;
 import kr.hhplus.be.server.domain.common.Money;
 import kr.hhplus.be.server.domain.common.exception.DomainException;
 import kr.hhplus.be.server.domain.point.PointCommand;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PointFacade {
     private static final long DEFAULT_TTL_MS = 5_000;  // 5초
-    private final SimpleLockService lockService;
+    private final RedissonLockService lockService;
     private final PointService pointService;
 
     public PointOutput.UserPoint getPoint(PointInput.GetPoint input) {
@@ -50,7 +50,7 @@ public class PointFacade {
         String lockKey = "chargePoint:" + input.getUserId();
         String uuid = UUID.randomUUID().toString();
 
-        boolean locked = lockService.tryLock(lockKey, uuid, DEFAULT_TTL_MS);
+        boolean locked = lockService.tryLock(lockKey, DEFAULT_TTL_MS);
 
         if (!locked) {
             throw new DomainException.InvalidStateException("포인트 충전 락 획득 실패");
@@ -66,7 +66,7 @@ public class PointFacade {
                     .balance(info.getBalance())
                     .build();
         } finally {
-            lockService.unlock(lockKey, uuid);
+            lockService.unlock(lockKey);
         }
     }
 
@@ -74,7 +74,7 @@ public class PointFacade {
         String lockKey = "usePoint:" + input.getUserId();
         String uuid = UUID.randomUUID().toString();
 
-        boolean locked = lockService.tryLock(lockKey, uuid, DEFAULT_TTL_MS);
+        boolean locked = lockService.tryLock(lockKey, DEFAULT_TTL_MS);
 
         if (!locked) {
             throw new DomainException.InvalidStateException("포인트 사용 락 획득 실패");
@@ -90,7 +90,7 @@ public class PointFacade {
                     .balance(info.getBalance())
                     .build();
         } finally {
-            lockService.unlock(lockKey, uuid);
+            lockService.unlock(lockKey);
         }
     }
 }
