@@ -13,3 +13,23 @@ spring:
       hibernate.order_inserts: true
       hibernate.order_updates: true
     defer-datasource-initialization: true
+  redis:
+    # Spring Data Redis 용 (캐시, RedisTemplate 등)
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+
+    # Redisson 전용 설정
+    redis:
+      redisson:
+        config: |
+          singleServerConfig:
+            address: "redis://${SPRING_REDIS_HOST:localhost}:${SPRING_REDIS_PORT:6379}"
+            password: ${SPRING_REDIS_PASSWORD:}
+            connectionPoolSize: 64
+            idleConnectionTimeout: 10000
+            connectTimeout: 10000
+            timeout: 3000
+            retryAttempts: 3
+            retryInterval: 1500
+
+
