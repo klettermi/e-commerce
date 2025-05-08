@@ -61,7 +61,7 @@ class OrderServiceConcurrencyTest {
 
         // 2) DTO Item 리스트로 변환
         List<OrderInput.Item> dtoItems = orderProductList.stream()
-                .map(p -> new OrderInput.Item(p.getProductId(), p.getUnitPoint(), p.getQuantity()))
+                .map(p -> new OrderInput.Item(p.getProductId(), p.getUnitPoint().amount().intValue(), p.getQuantity()))
                 .toList();
 
         CountDownLatch latch = new CountDownLatch(threadCount);

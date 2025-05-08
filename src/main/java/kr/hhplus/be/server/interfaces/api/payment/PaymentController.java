@@ -4,6 +4,7 @@ package kr.hhplus.be.server.interfaces.api.payment;
 import jakarta.validation.Valid;
 import kr.hhplus.be.server.application.common.ApiResponse;
 import kr.hhplus.be.server.application.payment.PaymentFacade;
+import kr.hhplus.be.server.application.payment.PaymentTxnService;
 import kr.hhplus.be.server.application.payment.PaymentInput;
 import kr.hhplus.be.server.application.payment.PaymentOutput;
 import lombok.RequiredArgsConstructor;

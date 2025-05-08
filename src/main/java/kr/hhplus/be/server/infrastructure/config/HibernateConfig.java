@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config;
+package kr.hhplus.be.server.infrastructure.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;

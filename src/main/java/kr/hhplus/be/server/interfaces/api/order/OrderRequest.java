@@ -43,9 +43,9 @@ public class OrderRequest {
             @Positive(message = "수량은 양수여야 합니다.")
             private int quantity;
 
-            private Money unitPrice;
+            private Integer unitPrice;
 
-            public Item(Long productId, Money unitPrice, int quantity) {
+            public Item(Long productId, Integer unitPrice, int quantity) {
                 this.productId = productId;
                 this.unitPrice = unitPrice;
                 this.quantity = quantity;
