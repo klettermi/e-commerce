@@ -27,13 +27,13 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentFacadeTest {
+class PaymentTxnServiceTest {
 
     @Mock private OrderService orderService;
     @Mock private PointService pointService;
     @Mock private PaymentService paymentService;
     @Mock private CouponService couponService;
-    @InjectMocks private PaymentFacade paymentFacade;
+    @InjectMocks private PaymentTxnService paymentFacade;
 
     @Test
     void processPayment_withoutCoupon_usesFullAmount() {

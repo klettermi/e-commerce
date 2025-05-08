@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config;
+package kr.hhplus.be.server.infrastructure.config;
 
 import kr.hhplus.be.server.domain.category.Category;
 import kr.hhplus.be.server.domain.common.BaseEntity;
